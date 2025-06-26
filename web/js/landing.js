@@ -50,19 +50,15 @@ function initializeStripePayments() {
 function selectPlan(planType) {
     console.log('🎯 Plan selected:', planType);
     
+    // Direct payment links - no domain authorization needed!
+    const paymentLinks = {
+        weekly: 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01',
+        monthly: 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02'
+    };
+    
     // Get the button that was clicked
     const button = event.target;
     const originalText = button.textContent;
-    
-    // Check if user is authenticated (optional - you can remove this check if you want)
-    if (!window.firebaseAuth?.currentUser) {
-        console.log('🔐 User not authenticated, showing auth modal...');
-        // Store the selected plan for after authentication
-        sessionStorage.setItem('selectedPlan', planType);
-        sessionStorage.setItem('pendingPaymentLink', STRIPE_PAYMENT_LINKS[planType]);
-        showAuthModal();
-        return;
-    }
     
     // Show loading state
     button.textContent = 'Redirecting to payment...';
@@ -74,24 +70,26 @@ function selectPlan(planType) {
         'user_id': window.firebaseAuth?.currentUser?.uid || 'anonymous'
     });
     
-    // Direct redirect to Stripe Payment Link
-    if (STRIPE_PAYMENT_LINKS[planType]) {
+    // ✅ DIRECT REDIRECT - No auth check, no popups
+    if (paymentLinks[planType]) {
         console.log('💳 Redirecting to Stripe Payment Link...');
         
         // Add a small delay for better UX
         setTimeout(() => {
-            window.location.href = STRIPE_PAYMENT_LINKS[planType];
+            window.location.href = paymentLinks[planType];
         }, 1000);
         
     } else {
         console.error('❌ Payment link not found for plan:', planType);
-        showMessage('Payment option not available. Please try again.', 'error');
+        // Only log error, don't show popup to user
+        console.log('Available plans:', Object.keys(paymentLinks));
         
         // Restore button
         button.textContent = originalText;
         button.disabled = false;
     }
 }
+
 
 // ==============================================
 // AUTH MODAL INITIALIZATION
@@ -201,14 +199,16 @@ function updateUIBasedOnAuthState(user) {
     // Update UI elements based on authentication state
     const navElements = {
         loginBtn: document.getElementById('nav-login-btn'),
-        appBtn: document.getElementById('nav-app-btn'),
+        // ❌ REMOVED: Dashboard button
+        // appBtn: document.getElementById('nav-app-btn'),
         userStatus: document.getElementById('user-status-bar')
     };
 
     if (user) {
         // User is authenticated
         if (navElements.loginBtn) navElements.loginBtn.style.display = 'none';
-        if (navElements.appBtn) navElements.appBtn.style.display = 'inline-block';
+        // ❌ REMOVED: Dashboard button logic
+        // if (navElements.appBtn) navElements.appBtn.style.display = 'inline-block';
         if (navElements.userStatus) navElements.userStatus.style.display = 'block';
 
         // Update user info if elements exist
@@ -226,10 +226,12 @@ function updateUIBasedOnAuthState(user) {
     } else {
         // User is not authenticated
         if (navElements.loginBtn) navElements.loginBtn.style.display = 'inline-block';
-        if (navElements.appBtn) navElements.appBtn.style.display = 'none';
+        // ❌ REMOVED: Dashboard button logic
+        // if (navElements.appBtn) navElements.appBtn.style.display = 'none';
         if (navElements.userStatus) navElements.userStatus.style.display = 'none';
     }
 }
+
 
 // ==============================================
 // UPDATED AUTH HANDLERS (with payment link support)
@@ -3153,7 +3155,7 @@ class ErrorHandler {
         this.maxErrors = 50;
         this.setupGlobalHandlers();
     }
-    
+
     setupGlobalHandlers() {
         // JavaScript errors
         window.addEventListener('error', (event) => {
@@ -3167,7 +3169,7 @@ class ErrorHandler {
                 timestamp: Date.now()
             });
         });
-        
+
         // Promise rejections
         window.addEventListener('unhandledrejection', (event) => {
             this.handleError({
@@ -3177,7 +3179,7 @@ class ErrorHandler {
                 timestamp: Date.now()
             });
         });
-        
+
         // Resource loading errors
         window.addEventListener('error', (event) => {
             if (event.target !== window) {
@@ -3191,20 +3193,20 @@ class ErrorHandler {
             }
         }, true);
     }
-    
+
     handleError(error) {
         // Add to error log
         this.errors.push(error);
-        
+
         // Keep only recent errors
         if (this.errors.length > this.maxErrors) {
             this.errors = this.errors.slice(-this.maxErrors);
         }
-        
-        // Log to console
+
+        // Log to console (keep for debugging)
         console.error('Error captured:', error);
-        
-        // Track in analytics
+
+        // Track in analytics (keep for monitoring)
         trackEvent('error_occurred', {
             'error_type': error.type,
             'error_message': error.message,
@@ -3213,16 +3215,20 @@ class ErrorHandler {
             'user_agent': navigator.userAgent,
             'url': window.location.href
         });
-        
-        // Show user-friendly message for critical errors
+
+        // ❌ REMOVED: No more user-facing error messages
+        // The following lines are commented out to prevent error popups:
+        /*
         if (this.isCriticalError(error)) {
             this.showErrorMessage(error);
         }
-        
-        // Send to error reporting service (if configured)
+        */
+
+        // Send to error reporting service (keep for monitoring)
         this.reportError(error);
     }
-    
+
+    // Keep this method for potential future use, but don't call it
     isCriticalError(error) {
         const criticalPatterns = [
             /firebase/i,
@@ -3231,17 +3237,21 @@ class ErrorHandler {
             /authentication/i,
             /network/i
         ];
-        
-        return criticalPatterns.some(pattern => 
+
+        return criticalPatterns.some(pattern =>
             pattern.test(error.message) || pattern.test(error.filename || '')
         );
     }
-    
+
+    // ❌ DISABLED: No more user-facing error messages
     showErrorMessage(error) {
-        const message = this.getUserFriendlyMessage(error);
-        showMessage(message, 'error');
+        // This method is disabled to prevent error popups
+        console.log('Error message suppressed:', error);
+        // const message = this.getUserFriendlyMessage(error);
+        // showMessage(message, 'error');
     }
-    
+
+    // Keep for potential future use
     getUserFriendlyMessage(error) {
         if (error.message.includes('firebase')) {
             return 'We\'re having trouble connecting to our servers. Please try again in a moment.';
@@ -3253,7 +3263,7 @@ class ErrorHandler {
             return 'Something went wrong. Please refresh the page and try again.';
         }
     }
-    
+
     reportError(error) {
         // Send to external error reporting service
         // This would typically be Sentry, LogRocket, or similar
@@ -3263,7 +3273,7 @@ class ErrorHandler {
             });
         }
     }
-    
+
     getErrorReport() {
         return {
             errors: this.errors,
@@ -3273,7 +3283,7 @@ class ErrorHandler {
             sessionId: sessionStorage.getItem('session_id')
         };
     }
-    
+
     clearErrors() {
         this.errors = [];
     }
@@ -3281,6 +3291,7 @@ class ErrorHandler {
 
 // Initialize error handler
 window.errorHandler = new ErrorHandler();
+
 
 // ==============================================
 // ADVANCED LOADING STATES

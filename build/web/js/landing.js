@@ -326,40 +326,36 @@ async function handleGoogleSignin() {
 function handleAuthSuccess(user) {
     console.log('✅ User authenticated:', user.email);
     
-    // Check for pending payment
-    const pendingPaymentLink = sessionStorage.getItem('pendingPaymentLink');
+    // Close auth modal
+    closeModal('auth-modal');
+    
+    // Check if user was trying to select a plan
     const selectedPlan = sessionStorage.getItem('selectedPlan');
     
-    if (pendingPaymentLink) {
-        console.log('💳 Processing pending payment for plan:', selectedPlan);
+    if (selectedPlan) {
+        console.log('🎯 Redirecting to payment for plan:', selectedPlan);
         
-        // Clear pending data
-        sessionStorage.removeItem('pendingPaymentLink');
+        // Clear stored plan
         sessionStorage.removeItem('selectedPlan');
         
-        // Close auth modal
-        closeModal('auth-modal');
-        
-        // Show loading message
-        showMessage('Redirecting to payment...', 'info');
-        
-        // Track the conversion
-        trackEvent('auth_to_payment_conversion', {
-            'plan_type': selectedPlan,
-            'user_id': user.uid
-        });
-        
         // Redirect to payment
-        setTimeout(() => {
-            window.location.href = pendingPaymentLink;
-        }, 1500);
+        const paymentLinks = {
+            weekly: 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01',
+            monthly: 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02'
+        };
         
+        if (paymentLinks[selectedPlan]) {
+            // Small delay to ensure modal closes
+            setTimeout(() => {
+                window.location.href = paymentLinks[selectedPlan];
+            }, 500);
+        }
     } else {
-        // Normal auth success flow
-        closeModal('auth-modal');
+        // Just show subscription modal if no specific plan was selected
         showSubscriptionModal();
     }
 }
+
 
 async function createOrUpdateUserProfile(user) {
     try {
@@ -533,52 +529,44 @@ function closeAllModals() {
 function selectPlan(planType) {
     console.log('🎯 Plan selected:', planType);
     
-    // Direct payment links - no domain authorization needed!
+    // Payment links
     const paymentLinks = {
         weekly: 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01',
         monthly: 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02'
     };
     
-    // Check if user is authenticated (optional - you can remove this if you want)
-    if (!window.firebaseAuth?.currentUser) {
-        console.log('🔐 User not authenticated, showing auth modal...');
-        sessionStorage.setItem('selectedPlan', planType);
-        sessionStorage.setItem('pendingPaymentLink', paymentLinks[planType]);
-        showAuthModal();
-        return;
-    }
+    // Check if user is authenticated
+    const currentUser = window.firebaseAuth?.currentUser;
     
-    const button = event.target;
-    const originalText = button.textContent;
-    
-    // Show loading state
-    button.textContent = 'Redirecting to payment...';
-    button.disabled = true;
-    
-    // Track plan selection
-    trackEvent('plan_selected', {
-        'plan_type': planType,
-        'user_id': window.firebaseAuth?.currentUser?.uid || 'anonymous'
-    });
-    
-    // Simple redirect to Stripe Payment Link
-    if (paymentLinks[planType]) {
-        console.log('💳 Redirecting to Stripe Payment Link...');
+    if (currentUser) {
+        // User is authenticated - direct redirect to payment
+        console.log('✅ User authenticated, redirecting to payment...');
         
-        // Add a small delay for better UX
-        setTimeout(() => {
+        // Track plan selection
+        trackEvent('plan_selected', {
+            'plan_type': planType,
+            'user_id': currentUser.uid,
+            'user_email': currentUser.email
+        });
+        
+        // Direct redirect to Stripe
+        if (paymentLinks[planType]) {
             window.location.href = paymentLinks[planType];
-        }, 1000);
-        
+        } else {
+            console.error('❌ Payment link not found for plan:', planType);
+        }
     } else {
-        console.error('❌ Payment link not found for plan:', planType);
-        showMessage('Payment option not available. Please try again.', 'error');
+        // User not authenticated - show auth modal first
+        console.log('❌ User not authenticated, showing auth modal...');
         
-        // Restore button
-        button.textContent = originalText;
-        button.disabled = false;
+        // Store selected plan for after authentication
+        sessionStorage.setItem('selectedPlan', planType);
+        
+        // Show auth modal
+        showAuthModal();
     }
 }
+
 
 
 

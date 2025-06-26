@@ -862,29 +862,33 @@
   });
   
   // Helper functions for UI updates
-  function updateUIForSignedInUser(user) {
-    // Update nav buttons
-    const navLoginBtn = document.getElementById('nav-login-btn');
-    const navAppBtn = document.getElementById('nav-app-btn');
-    const userStatusBar = document.getElementById('user-status-bar');
-    const userName = document.getElementById('user-name');
-    
-    if (navLoginBtn) navLoginBtn.style.display = 'none';
-    if (navAppBtn) navAppBtn.style.display = 'inline-block';
-    if (userStatusBar) userStatusBar.style.display = 'flex';
-    if (userName) userName.textContent = user.displayName || user.email.split('@')[0];
-  }
+ function updateUIForSignedInUser(user) {
+  // Update nav buttons
+  const navLoginBtn = document.getElementById('nav-login-btn');
+  const userStatusBar = document.getElementById('user-status-bar');
+  const userName = document.getElementById('user-name');
   
-  function updateUIForSignedOutUser() {
-    // Reset nav buttons
-    const navLoginBtn = document.getElementById('nav-login-btn');
-    const navAppBtn = document.getElementById('nav-app-btn');
-    const userStatusBar = document.getElementById('user-status-bar');
-    
-    if (navLoginBtn) navLoginBtn.style.display = 'inline-block';
-    if (navAppBtn) navAppBtn.style.display = 'none';
-    if (userStatusBar) userStatusBar.style.display = 'none';
-  }
+  if (navLoginBtn) navLoginBtn.style.display = 'none';
+  // ❌ REMOVED: Dashboard button logic
+  if (userStatusBar) userStatusBar.style.display = 'flex';
+  if (userName) userName.textContent = user.displayName || user.email.split('@')[0];
+  
+  console.log('✅ UI updated for signed-in user:', user.email);
+}
+
+  
+ function updateUIForSignedOutUser() {
+  // Reset nav buttons
+  const navLoginBtn = document.getElementById('nav-login-btn');
+  const userStatusBar = document.getElementById('user-status-bar');
+  
+  if (navLoginBtn) navLoginBtn.style.display = 'inline-block';
+  // ❌ REMOVED: Dashboard button logic
+  if (userStatusBar) userStatusBar.style.display = 'none';
+  
+  console.log('✅ UI updated for signed-out user');
+}
+
   
   // Global auth modal function
   window.showAuthModal = function() {

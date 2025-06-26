@@ -461,47 +461,16 @@ function selectPlan(planType) {
     initializeStripeCheckout(planType, button, originalText);
 }
 
+// Update your Stripe checkout configuration
 async function initializeStripeCheckout(planType, button, originalText) {
     try {
-        // Load Stripe if not already loaded
-        if (!stripe) {
-            if (typeof Stripe === 'undefined') {
-                await loadStripeScript();
-            }
-            stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-        }
-        
         const priceId = STRIPE_PRICE_IDS[planType];
-        const user = window.firebaseAuth?.currentUser;
         
-        if (!user) {
-            showMessage('Please sign in first to continue with payment.', 'error');
-            window.showAuthModal();
-            return;
-        }
+        // Use your actual domain for success/cancel URLs
+        const successUrl = 'https://thesisgenerator.tech/success.html?session_id={CHECKOUT_SESSION_ID}';
+        const cancelUrl = 'https://thesisgenerator.tech/cancel.html';
         
-        if (!priceId) {
-            throw new Error('Invalid plan type');
-        }
-        
-        // Determine the correct URLs based on environment
-        let successUrl, cancelUrl;
-        
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // Local development
-            successUrl = 'http://localhost:5000/success.html?session_id={CHECKOUT_SESSION_ID}';
-            cancelUrl = 'http://localhost:5000/cancel.html';
-        } else {
-            // Production - use your main domain for success/cancel pages
-            successUrl = 'https://thesisgenerator.tech/success.html?session_id={CHECKOUT_SESSION_ID}';
-            cancelUrl = 'https://thesisgenerator.tech/cancel.html';
-        }
-        
-        console.log('🔗 Success URL:', successUrl);
-        console.log('🔗 Cancel URL:', cancelUrl);
-        console.log('🔗 Current origin:', window.location.origin);
-        
-        // Create checkout session
+        // Create checkout session - Stripe will use checkout.stripe.com
         const { error } = await stripe.redirectToCheckout({
             lineItems: [{
                 price: priceId,
@@ -515,38 +484,15 @@ async function initializeStripeCheckout(planType, button, originalText) {
         });
         
         if (error) {
-            console.error('Stripe redirect error:', error);
             throw error;
         }
         
     } catch (error) {
         console.error('Stripe checkout error:', error);
-        
-        let errorMessage = 'Payment setup failed. Please try again.';
-        
-        if (error.message.includes('domain')) {
-            errorMessage = `Domain configuration issue. Please ensure ${window.location.origin} is added to Stripe dashboard.`;
-        }
-        
-        showMessage(errorMessage, 'error');
-        
-        // Reset button
-        if (button) {
-            button.textContent = originalText;
-            button.disabled = false;
-        }
-        
-        // Track error
-        if (window.firebaseAnalytics) {
-            window.firebaseAnalytics.logEvent('payment_error', {
-                'error_message': error.message,
-                'plan_type': planType,
-                'error_type': 'stripe_checkout',
-                'current_origin': window.location.origin
-            });
-        }
+        // Handle error
     }
 }
+
 
 
 

@@ -329,7 +329,7 @@ function handleAuthSuccess(user) {
     // Close auth modal
     closeModal('auth-modal');
     
-    // Check if user was trying to select a plan
+    // Check if user was trying to select a specific plan
     const selectedPlan = sessionStorage.getItem('selectedPlan');
     
     if (selectedPlan) {
@@ -351,10 +351,46 @@ function handleAuthSuccess(user) {
             }, 500);
         }
     } else {
-        // Just show subscription modal if no specific plan was selected
-        showSubscriptionModal();
+        // Check if user was trying to generate thesis
+        const pendingAction = sessionStorage.getItem('pendingAction');
+        
+        if (pendingAction === 'generate_thesis') {
+            // Clear pending action
+            sessionStorage.removeItem('pendingAction');
+            
+            // Redirect to app
+            console.log('✅ Redirecting to app after authentication...');
+            setTimeout(() => {
+                window.location.href = 'app.html';
+            }, 500);
+        } else {
+            // User just signed in via main CTA - show pricing section
+            console.log('📍 Showing pricing section after authentication');
+            
+            setTimeout(() => {
+                const pricingSection = document.getElementById('pricing');
+                if (pricingSection) {
+                    pricingSection.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // Add highlight effect
+                    setTimeout(() => {
+                        const pricingCards = document.querySelectorAll('.pricing-card');
+                        pricingCards.forEach(card => {
+                            card.classList.add('highlight-pulse');
+                            setTimeout(() => {
+                                card.classList.remove('highlight-pulse');
+                            }, 2000);
+                        });
+                    }, 500);
+                }
+            }, 600);
+        }
     }
 }
+
 
 
 async function createOrUpdateUserProfile(user) {
@@ -449,16 +485,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function handleGenerateThesisClick(e) {
     e.preventDefault();
-    
     const button = e.target.closest('button');
     console.log('🎯 Generate thesis button clicked');
-    
+
     // Track CTA click
     trackEvent('generate_thesis_clicked', {
         'button_location': button.id,
         'user_authenticated': !!window.firebaseAuth?.currentUser
     });
-    
+
     // Check authentication status
     if (!window.firebaseAuth?.currentUser) {
         console.log('🔐 User not authenticated, showing auth modal...');
@@ -466,11 +501,131 @@ function handleGenerateThesisClick(e) {
         showAuthModal();
         return;
     }
-    
+
     // User is authenticated - redirect to app
     console.log('✅ User authenticated, redirecting to app...');
     showLoadingAndRedirect(button, 'Launching your thesis generator...', 'app.html');
 }
+
+// Interactive Demo Function
+function generatePreview() {
+    const input = document.getElementById('demo-topic');
+    const output = document.getElementById('demo-output');
+    const button = document.querySelector('.demo-button');
+    
+    const topic = input.value.trim();
+    
+    if (!topic) {
+        input.focus();
+        input.style.borderColor = '#ff4757';
+        setTimeout(() => {
+            input.style.borderColor = '#e8f0ff';
+        }, 2000);
+        return;
+    }
+    
+    // Show loading state
+    button.textContent = 'Generating...';
+    button.classList.add('loading');
+    button.disabled = true;
+    
+    // Track demo usage
+    trackEvent('demo_preview_generated', {
+        'topic': topic.substring(0, 50), // First 50 chars only for privacy
+        'topic_length': topic.length
+    });
+    
+    // Simulate AI processing
+    setTimeout(() => {
+        // Update outline items based on topic
+        const outlineItems = document.querySelectorAll('.outline-item');
+        const topics = generateTopicSpecificOutline(topic);
+        
+        outlineItems.forEach((item, index) => {
+            if (topics[index]) {
+                item.textContent = topics[index];
+            }
+        });
+        
+        // Show output
+        output.style.display = 'block';
+        
+        // Reset button
+        button.textContent = 'Generate Preview';
+        button.classList.remove('loading');
+        button.disabled = false;
+        
+        // Scroll to output
+        output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+    }, 2000); // 2 second delay for realism
+}
+
+// Generate topic-specific outline
+function generateTopicSpecificOutline(topic) {
+    const lowerTopic = topic.toLowerCase();
+    
+    // AI/Technology topics
+    if (lowerTopic.includes('ai') || lowerTopic.includes('artificial intelligence') || 
+        lowerTopic.includes('machine learning') || lowerTopic.includes('technology')) {
+        return [
+            '🤖 Introduction to AI Applications',
+            '📚 Current Research & Literature',
+            '🔬 Methodology & Data Analysis',
+            '📊 Results & AI Impact Assessment',
+            '🚀 Future Implications & Conclusions'
+        ];
+    }
+    
+    // Education topics
+    if (lowerTopic.includes('education') || lowerTopic.includes('learning') || 
+        lowerTopic.includes('student') || lowerTopic.includes('teaching')) {
+        return [
+            '🎓 Educational Background & Context',
+            '📖 Literature Review & Theory',
+            '👥 Research Methods & Participants',
+            '📈 Learning Outcomes & Analysis',
+            '💡 Educational Recommendations'
+        ];
+    }
+    
+    // Business topics
+    if (lowerTopic.includes('business') || lowerTopic.includes('marketing') || 
+        lowerTopic.includes('management') || lowerTopic.includes('economy')) {
+        return [
+            '💼 Business Context & Problem',
+            '📊 Market Research & Analysis',
+            '🔍 Research Methodology',
+            '📈 Business Impact & Results',
+            '🎯 Strategic Recommendations'
+        ];
+    }
+    
+    // Health/Medical topics
+    if (lowerTopic.includes('health') || lowerTopic.includes('medical') || 
+        lowerTopic.includes('patient') || lowerTopic.includes('treatment')) {
+        return [
+            '🏥 Medical Background & Significance',
+            '📚 Clinical Literature Review',
+            '🔬 Research Design & Methods',
+            '📊 Clinical Results & Analysis',
+            '💊 Medical Implications & Future'
+        ];
+    }
+    
+    // Default academic outline
+    return [
+        '📖 Introduction & Background',
+        '🔍 Literature Review & Theory',
+        '📊 Research Methodology',
+        '📈 Results & Analysis',
+        '💡 Conclusions & Future Work'
+    ];
+}
+
+// Make function available globally
+window.generatePreview = generatePreview;
+
 
 // ==============================================
 // MODAL FUNCTIONS
@@ -541,6 +696,15 @@ function selectPlan(planType) {
     if (currentUser) {
         // User is authenticated - direct redirect to payment
         console.log('✅ User authenticated, redirecting to payment...');
+        console.log('👤 User:', currentUser.email);
+        
+        // Get the button that was clicked
+        const button = event.target;
+        const originalText = button.textContent;
+        
+        // Show loading state
+        button.textContent = 'Redirecting to payment...';
+        button.disabled = true;
         
         // Track plan selection
         trackEvent('plan_selected', {
@@ -551,9 +715,14 @@ function selectPlan(planType) {
         
         // Direct redirect to Stripe
         if (paymentLinks[planType]) {
-            window.location.href = paymentLinks[planType];
+            console.log('💳 Redirecting to:', paymentLinks[planType]);
+            setTimeout(() => {
+                window.location.href = paymentLinks[planType];
+            }, 1000);
         } else {
             console.error('❌ Payment link not found for plan:', planType);
+            button.textContent = originalText;
+            button.disabled = false;
         }
     } else {
         // User not authenticated - show auth modal first
@@ -562,10 +731,16 @@ function selectPlan(planType) {
         // Store selected plan for after authentication
         sessionStorage.setItem('selectedPlan', planType);
         
+        // Track unauthenticated plan selection
+        trackEvent('plan_selected_unauthenticated', {
+            'plan_type': planType
+        });
+        
         // Show auth modal
         showAuthModal();
     }
 }
+
 
 
 
@@ -847,6 +1022,343 @@ function initializeAnimations() {
         observer.observe(el);
     });
 }
+
+// ==============================================
+// ANIMATED CARDS DEMO
+// ==============================================
+
+class AnimatedCardsDemo {
+    constructor() {
+        this.topics = [
+            {
+                text: "The Impact of AI on Modern Education Systems",
+                chapters: [
+                    "📖 Introduction to AI in Education",
+                    "🔍 Current Educational Technology Review", 
+                    "📊 AI Implementation Methodology",
+                    "📈 Learning Outcome Analysis",
+                    "💡 Future Educational Implications"
+                ]
+            },
+            {
+                text: "Sustainable Business Practices in the Digital Age",
+                chapters: [
+                    "📖 Digital Sustainability Overview",
+                    "🔍 Corporate Environmental Strategies",
+                    "📊 Digital Transformation Methods",
+                    "📈 Sustainability Impact Metrics",
+                    "💡 Business Future Recommendations"
+                ]
+            },
+            {
+                text: "Mental Health Support in Remote Work Environments",
+                chapters: [
+                    "📖 Remote Work Mental Health Context",
+                    "🔍 Psychological Support Literature",
+                    "📊 Employee Wellness Research Methods",
+                    "📈 Mental Health Intervention Results",
+                    "💡 Workplace Wellness Conclusions"
+                ]
+            },
+            {
+                text: "Blockchain Technology in Supply Chain Management",
+                chapters: [
+                    "📖 Blockchain Supply Chain Introduction",
+                    "🔍 Current Supply Chain Challenges",
+                    "📊 Blockchain Implementation Strategy",
+                    "📈 Supply Chain Efficiency Results",
+                    "💡 Future Blockchain Applications"
+                ]
+            }
+        ];
+        
+        this.currentTopicIndex = 0;
+        this.isTyping = false;
+        this.typewriterSpeed = 80;
+        this.pauseBetweenTopics = 3000;
+        
+        this.init();
+    }
+    
+    init() {
+        // Start the demo when the page loads
+        setTimeout(() => {
+            this.startDemo();
+        }, 1000);
+        
+        // Track demo interactions
+        this.trackDemoView();
+    }
+    
+    async startDemo() {
+        if (this.isTyping) return;
+        
+        const topic = this.topics[this.currentTopicIndex];
+        
+        // Clear previous content
+        this.clearContent();
+        
+        // Type the topic
+        await this.typeText(topic.text);
+        
+        // Show AI processing
+        await this.showProcessing();
+        
+         // Generate chapters
+        await this.generateChapters(topic.chapters);
+        
+        // Wait before next topic
+        setTimeout(() => {
+            this.nextTopic();
+        }, this.pauseBetweenTopics);
+    }
+    
+    async typeText(text) {
+        this.isTyping = true;
+        const inputElement = document.getElementById('input-text');
+        if (!inputElement) return;
+        
+        inputElement.textContent = '';
+        
+        for (let i = 0; i < text.length; i++) {
+            inputElement.textContent += text[i];
+            await this.delay(this.typewriterSpeed);
+        }
+        
+        this.isTyping = false;
+    }
+    
+    async showProcessing() {
+        const arrow = document.querySelector('.arrow');
+        const aiBadge = document.querySelector('.ai-badge');
+        
+        if (arrow) {
+            arrow.style.animation = 'bounce-horizontal 0.5s ease-in-out infinite';
+        }
+        
+        if (aiBadge) {
+            aiBadge.style.animation = 'pulse-glow 0.8s ease-in-out infinite';
+            aiBadge.textContent = 'PROCESSING...';
+        }
+        
+        await this.delay(1500);
+        
+        if (aiBadge) {
+            aiBadge.textContent = 'AI';
+            aiBadge.style.animation = 'pulse-glow 2s ease-in-out infinite';
+        }
+    }
+    
+    async generateChapters(chapters) {
+        const outputContainer = document.getElementById('output-structure');
+        if (!outputContainer) return;
+        
+        const structureItems = outputContainer.querySelectorAll('.structure-item');
+        
+        // Reset all items
+        structureItems.forEach(item => {
+            item.classList.remove('animate-in');
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(-20px)';
+        });
+        
+        // Animate each chapter in
+        for (let i = 0; i < Math.min(chapters.length, structureItems.length); i++) {
+            const item = structureItems[i];
+            const chapter = chapters[i];
+            
+            if (item && chapter) {
+                item.textContent = chapter;
+                
+                setTimeout(() => {
+                    item.classList.add('animate-in');
+                }, i * 300);
+            }
+        }
+        
+        // Update stats with random realistic values
+        this.updateStats();
+    }
+    
+    updateStats() {
+        const stats = document.querySelectorAll('.stat');
+        const randomTime = (Math.random() * 2 + 1.5).toFixed(1);
+        
+        if (stats[0]) {
+            stats[0].textContent = `⚡ Generated in ${randomTime}s`;
+        }
+    }
+    
+    clearContent() {
+        const inputElement = document.getElementById('input-text');
+        const structureItems = document.querySelectorAll('.structure-item');
+        
+        if (inputElement) {
+            inputElement.textContent = '';
+        }
+        
+        structureItems.forEach(item => {
+            item.classList.remove('animate-in');
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(-20px)';
+        });
+    }
+    
+    nextTopic() {
+        this.currentTopicIndex = (this.currentTopicIndex + 1) % this.topics.length;
+        this.startDemo();
+    }
+    
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    trackDemoView() {
+        // Track when users view the demo
+        if (typeof trackEvent === 'function') {
+            trackEvent('animated_demo_viewed', {
+                'demo_type': 'animated_cards',
+                'topics_count': this.topics.length
+            });
+        }
+        
+        // Track when users interact with the CTA
+        const ctaButton = document.querySelector('.cards-cta');
+        if (ctaButton) {
+            ctaButton.addEventListener('click', () => {
+                if (typeof trackEvent === 'function') {
+                    trackEvent('demo_cta_clicked', {
+                        'demo_type': 'animated_cards',
+                        'current_topic': this.currentTopicIndex
+                    });
+                }
+            });
+        }
+    }
+    
+    // Public method to restart demo
+    restart() {
+        this.currentTopicIndex = 0;
+        this.startDemo();
+    }
+    
+    // Public method to pause demo
+    pause() {
+        this.isTyping = false;
+    }
+    
+    // Public method to add new topic
+    addTopic(text, chapters) {
+        this.topics.push({ text, chapters });
+    }
+}
+
+// Initialize the demo when DOM is loaded
+let animatedDemo;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize animated cards demo
+    animatedDemo = new AnimatedCardsDemo();
+    
+    // Add intersection observer to restart demo when it comes into view
+    const demoElement = document.querySelector('.animated-cards');
+    if (demoElement && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Restart demo when it comes into view
+                    setTimeout(() => {
+                        if (animatedDemo) {
+                            animatedDemo.restart();
+                        }
+                    }, 500);
+                }
+            });
+        }, {
+            threshold: 0.5
+        });
+        
+        observer.observe(demoElement);
+    }
+});
+
+// Add hover effects
+document.addEventListener('DOMContentLoaded', function() {
+    const demoCards = document.querySelectorAll('.demo-card');
+    
+    demoCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            // Pause typing when user hovers
+            if (animatedDemo) {
+                animatedDemo.pause();
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            // Resume after a short delay
+            setTimeout(() => {
+                if (animatedDemo && !animatedDemo.isTyping) {
+                    animatedDemo.startDemo();
+                }
+            }, 1000);
+        });
+    });
+});
+
+// Add keyboard controls (optional)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'r' && e.ctrlKey) {
+        e.preventDefault();
+        if (animatedDemo) {
+            animatedDemo.restart();
+        }
+    }
+});
+
+// Export for global access
+window.animatedDemo = animatedDemo;
+
+// ==============================================
+// DEMO UTILITY FUNCTIONS
+// ==============================================
+
+// Function to manually restart demo (can be called from anywhere)
+function restartAnimatedDemo() {
+    if (window.animatedDemo) {
+        window.animatedDemo.restart();
+    }
+}
+
+// Function to add custom topic to demo
+function addDemoTopic(topicText, chapters) {
+    if (window.animatedDemo) {
+        window.animatedDemo.addTopic(topicText, chapters);
+    }
+}
+
+// Performance monitoring for demo
+function monitorDemoPerformance() {
+    const demoElement = document.querySelector('.animated-cards');
+    if (!demoElement) return;
+    
+    const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+            if (entry.name.includes('animated-cards')) {
+                console.log('Demo performance:', entry.duration + 'ms');
+            }
+        }
+    });
+    
+    if ('PerformanceObserver' in window) {
+        observer.observe({ entryTypes: ['measure'] });
+    }
+}
+
+// Initialize performance monitoring
+document.addEventListener('DOMContentLoaded', monitorDemoPerformance);
+
+console.log('🎯 Animated Cards Demo loaded successfully');
+
 
 // ==============================================
 // COOKIE CONSENT

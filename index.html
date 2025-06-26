@@ -94,7 +94,7 @@
         <a href="#pricing" class="nav-link">Pricing</a>
         <a href="#testimonials" class="nav-link">Reviews</a>
         <a href="#faq" class="nav-link">FAQ</a>
-        <button id="nav-login-btn" class="nav-link nav-cta">Get Started</button>
+        <button id="nav-login-btn" class="nav-link nav-cta" onclick="handleMainCTA()">Get Started</button>
         <button id="nav-app-btn" class="nav-link nav-cta" style="display: none;">Open App</button>
       </div>
       <div class="nav-toggle" id="nav-toggle">
@@ -125,104 +125,82 @@
   <main>
     <!-- Hero Section -->
     <section class="hero" id="hero">
-      <div class="hero-content">
-        <div class="app-badge">
-          <span>🎓 AI-Powered</span>
-        </div>
-        <h1>Generate Your Thesis with AI</h1>
-        <p class="hero-subtitle">
-          Create professional academic thesis chapters in minutes, not months.
-          Our advanced AI helps you structure, write, and format your thesis with ease.
-        </p>
-        <div class="features-preview">
-          <div class="feature-item">
-            <span class="feature-icon">🤖</span>
-            <span>AI Chapter Generation</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">📚</span>
-            <span>APA, MLA, Chicago</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">✏️</span>
-            <span>Fully Editable</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">⚡</span>
-            <span>Instant Results</span>
-          </div>
-        </div>
-        <div class="cta-section">
-          <button id="start-generating" class="cta-primary" aria-label="Start writing thesis with AI">
-            <span class="button-text">Start Writing My Thesis</span>
-            <span class="button-arrow">→</span>
-          </button>
-          <p class="cta-subtitle">Professional AI writing • Secure & Private</p>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="app-mockup">
-          <div class="mockup-screen" role="img" aria-label="Thesis Generator app interface preview">
-            <div class="mockup-header">
-              <div class="mockup-title">Create Thesis</div>
+        <div class="hero-content-centered">
+            <div class="app-badge">
+                <span>🎓 AI-Powered</span>
             </div>
-            <div class="mockup-content">
-              <div class="mockup-field">
-                <div class="field-label">Thesis Topic</div>
-                <div class="field-input animated-text" id="animated-topic">The Impact of AI on Education...</div>
-              </div>
-              <div class="mockup-chapters" id="animated-chapters">
-                <div class="chapter-item">📖 Introduction</div>
-                <div class="chapter-item">🔍 Literature Review</div>
-                <div class="chapter-item">📊 Methodology</div>
-                <div class="chapter-item">📈 Results & Analysis</div>
-                <div class="chapter-item">💡 Conclusion</div>
-              </div>
-              <div class="mockup-button">Generate Thesis</div>
+            <h1>Generate Your Thesis with AI</h1>
+            <p class="hero-subtitle">
+                Transform your research into a professional thesis in minutes with our AI-powered writing assistant.
+            </p>
+            <div class="features-preview">
+                <div class="feature-item">
+                    <span class="feature-icon">🤖</span>
+                    <span>AI Chapter Generation</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📚</span>
+                    <span>APA, MLA, Chicago</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✏️</span>
+                    <span>Fully Editable</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">⚡</span>
+                    <span>Instant Results</span>
+                </div>
             </div>
-          </div>
+            <div class="cta-section">
+                <button id="start-generating" class="cta-primary" aria-label="Start writing thesis with AI">
+                    <span class="button-text">Start Writing My Thesis</span>
+                    <span class="button-arrow">→</span>
+                </button>
+                <p class="cta-subtitle">Professional AI writing • Secure & Private</p>
+            </div>
         </div>
-      </div>
     </section>
 
     <!-- Benefits Section -->
     <section class="benefits" id="benefits">
-      <div class="benefits-container">
-        <h2>Why Choose Thesis Generator?</h2>
-        <div class="benefits-grid">
-          <div class="benefit-card">
-            <div class="benefit-icon">🎯</div>
-            <h3>Smart Chapter Structure</h3>
-            <p>AI automatically generates logical chapter outlines based on your topic and academic field.</p>
-          </div>
-          <div class="benefit-card">
-            <div class="benefit-icon">📝</div>
-            <h3>Multiple Writing Styles</h3>
-            <p>Choose from Academic, Technical, or Analytical writing styles to match your requirements.</p>
-          </div>
-          <div class="benefit-card">
-            <div class="benefit-icon">📋</div>
-            <h3>Citation Formats</h3>
-            <p>Supports APA, MLA, and Chicago citation styles for proper academic formatting.</p>
-          </div>
-          <div class="benefit-card">
-            <div class="benefit-icon">⚡</div>
-            <h3>Instant Generation</h3>
-            <p>Generate complete thesis chapters in minutes with our advanced AI technology.</p>
-          </div>
-          <div class="benefit-card">
-            <div class="benefit-icon">🔒</div>
-            <h3>Privacy Focused</h3>
-            <p>Your thesis content is processed securely and never stored or shared with third parties.</p>
-          </div>
-          <div class="benefit-card">
-            <div class="benefit-icon">💾</div>
-            <h3>Export Options</h3>
-            <p>Download your thesis in multiple formats including PDF, Word, and plain text.</p>
-          </div>
+        <div class="benefits-container">
+            <h2>Why Choose Thesis Generator?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎯</div>
+                    <h3>Smart Chapter Structure</h3>
+                    <p>AI automatically generates logical chapter outlines based on your topic and academic field.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📝</div>
+                    <h3>Multiple Writing Styles</h3>
+                    <p>Choose from Academic, Technical, or Analytical writing styles to match your requirements.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📋</div>
+                    <h3>Citation Formats</h3>
+                    <p>Supports APA, MLA, and Chicago citation styles for proper academic formatting.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Instant Generation</h3>
+                    <p>Generate complete thesis chapters in minutes with our advanced AI technology.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔒</div>
+                    <h3>Privacy Focused</h3>
+                    <p>Your thesis content is processed securely and never stored or shared with third parties.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">💾</div>
+                    <h3>Export Options</h3>
+                    <p>Download your thesis in multiple formats including PDF, Word, and plain text.</p>
+                </div>
+            </div>
         </div>
-      </div>
     </section>
+
+
 
     <!-- How It Works Section -->
     <section class="how-it-works" id="how-it-works">
@@ -524,10 +502,11 @@
       <div class="cta-container">
         <h2>Ready to Write Your Thesis?</h2>
         <p>Join thousands of students and researchers who trust AI to help with their academic writing.</p>
-        <button id="start-generating-bottom" class="cta-primary large" aria-label="Generate thesis with AI now">
-          <span class="button-text">Start Your Subscription</span>
-          <span class="button-arrow">→</span>
-        </button>
+       <button id="start-generating-bottom" class="cta-primary large" onclick="handleMainCTA()" aria-label="Generate thesis with AI now">
+  <span class="button-text">Start Your Subscription</span>
+  <span class="button-arrow">→</span>
+</button>
+
         <div class="trust-indicators">
           <div class="trust-item">Secure Payments</div>
           <div class="trust-item">Instant Access</div>

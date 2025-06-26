@@ -1,0 +1,82 @@
+{
+  "welcome": "पेशेवर शैक्षणिक थीसिस",
+  "onboardDescription1": "AI सहायता से पेशेवर शैक्षणिक थीसिस बनाएं",
+  "smartContent": "स्मार्ट सामग्री निर्माण",
+  "onboardDescription2": "स्वचालित रूप से सुव्यवस्थित अध्याय और सामग्री तैयार करें",
+  "onboardDescription3": "अपनी थीसिस को पेशेवर PDF प्रारूप में निर्यात करें",
+  "easyExport": "PDF में आसान निर्यात",
+  "next": "अगला",
+  "getStarted": "शुरू करें",
+  "startWritingHere": "यहाँ लिखना शुरू करें...",
+  "reportContent": "सामग्री रिपोर्ट करें",
+  "unsavedChanges": "असुरक्षित परिवर्तन",
+  "saveChangesQuestion": "क्या आप अपने परिवर्तनों को सहेजना चाहते हैं?",
+  "discard": "छोड़ें",
+  "save": "सहेजें",
+  "reportContentIssue": "कृपया इस सामग्री की समस्या का वर्णन करें:",
+  "enterConcern": "अपनी चिंता दर्ज करें...",
+  "cancel": "रद्द करें",
+  "submit": "जमा करें",
+  "reportSubmitted": "रिपोर्ट सफलतापूर्वक जमा की गई",
+  "changesSaved": "परिवर्तन सहेजे गए",
+  "initializationError": "प्रारंभिक त्रुटि",
+  "retry": "पुनः प्रयास करें",
+  "exportThesis": "थीसिस निर्यात करें",
+  "exportAsPdf": "PDF के रूप में निर्यात करें",
+  "exportDescription": "आपकी थीसिस PDF फ़ाइल के रूप में निर्यात की जाएगी और डाउनलोड फ़ोल्डर में सहेजी जाएगी।",
+  "pdfSavedToDownloads": "PDF डाउनलोड में सहेजी गई: {path}",
+  "@pdfSavedToDownloads": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "ok": "ठीक है",
+  "error": "त्रुटि: {message}",
+  "@error": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "thesis": "थीसिस",
+  "generateAll": "सभी उत्पन्न करें",
+  "pleaseCompleteAllSections": "निर्यात करने से पहले कृपया सभी खंड पूरे करें",
+  "generatedSuccessfully": "सफलतापूर्वक उत्पन्न! निर्यात करने के लिए PDF पर क्लिक करें",
+  "errorGeneratingContent": "सामग्री उत्पन्न करने में त्रुटि: {error}",
+  "failedToGenerateContent": "सामग्री उत्पन्न करने में विफल: {error}",
+  "loadingMessage1": "हम आपकी थीसिस संरचना तैयार कर रहे हैं...",
+  "loadingMessage2": "इस प्रक्रिया में लगभग 4-7 मिनट लगते हैं...",
+  "loadingMessage3": "आपकी शैक्षणिक यात्रा को आकार दे रहे हैं...",
+  "loadingMessage4": "आपके शोध ढांचे को व्यवस्थित कर रहे हैं...",
+  "loadingMessage5": "आपकी थीसिस के लिए एक मजबूत आधार बना रहे हैं...",
+  "loadingMessage6": "बस थोड़ी देर और, आपकी रूपरेखा को अंतिम रूप दे रहे हैं...",
+  "createThesis": "थीसिस बनाएं",
+  "thesisTopic": "थीसिस विषय",
+  "enterThesisTopic": "अपना थीसिस विषय दर्ज करें",
+  "pleaseEnterTopic": "कृपया एक विषय दर्ज करें",
+  "generateChapters": "अध्याय उत्पन्न करें",
+  "generatedChapters": "उत्पन्न अध्याय",
+  "chapter": "अध्याय {number}",
+  "pleaseEnterChapterTitle": "कृपया अध्याय का शीर्षक दर्ज करें",
+  "writingStyle": "लेखन शैली",
+  "format": "प्रारूप",
+  "generateThesis": "थीसिस उत्पन्न करें",
+  "pleaseEnterThesisTopicFirst": "कृपया पहले थीसिस विषय दर्ज करें",
+  "failedToGenerateChapters": "अध्याय उत्पन्न करने में विफल: {error}",
+  "errorGeneratingThesis": "थीसिस उत्पन्न करने में त्रुटि: {error}",
+  "generatingContent": "सामग्री उत्पन्न हो रही है...",
+  "pleaseCompleteAllChapters": "कृपया सभी अध्यायों के शीर्षक पूरे करें",
+  "requiredChaptersMissing": "परिचय और निष्कर्ष अध्याय आवश्यक हैं",
+  "openFile": "फ़ाइल खोलें",
+  "errorGeneratingOutlines": "रूपरेखा उत्पन्न करने में त्रुटि",
+  "edit": "संपादित करें",
+  "addText": "टेक्स्ट जोड़ें",
+  "highlight": "हाइलाइट करें",
+  "delete": "हटाएं",
+  "savePdf": "PDF सहेजें",
+  "share": "साझा करें",
+  "thesisOutline": "थीसिस रूपरेखा"
+}

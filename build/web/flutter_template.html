@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Thesis Generator">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="thesis_generator">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Thesis Generator</title>
+
+  <style>
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #ffffff;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #2196F3;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrwRYgtoLrEagqb2m-E1VOocxNr-9By30",
+      projectId: "thesis-generator-2024",
+      storageBucket: "thesis-generator-2024.firebasestorage.app",
+      messagingSenderId: "153965444638",
+      appId: "1:153965444638:android:7f3a717c504bb5f471780f",
+      authDomain: "thesis-generator-2024.firebaseapp.com"
+    };
+  </script>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const app = initializeApp(firebaseConfig);
+    window.fbApp = app;
+  </script>
+</head>
+<body>
+<div class="loading">
+  <div class="spinner"></div>
+</div>
+
+<script src="flutter.js" defer></script>
+<script>
+  window.addEventListener('load', async function() {
+    var loading = document.querySelector('.loading');
+
+    _flutter = {
+      loader: {
+        serviceWorker: {
+          serviceWorkerVersion: null
+        }
+      }
+    };
+
+    var scriptLoaderPromise = new Promise((resolve) => {
+      var scriptElement = document.createElement('script');
+      scriptElement.src = 'main.dart.js';
+      scriptElement.type = 'application/javascript';
+      document.body.append(scriptElement);
+
+      scriptElement.addEventListener('load', () => {
+        loading.style.display = 'none';
+        resolve();
+      });
+    });
+
+    await scriptLoaderPromise;
+  });
+</script>
+
+</body>
+</html>

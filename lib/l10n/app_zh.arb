@@ -1,0 +1,82 @@
+{
+  "welcome": "专业学术论文",
+  "onboardDescription1": "使用AI辅助创建专业学术论文",
+  "smartContent": "智能内容生成",
+  "onboardDescription2": "自动生成结构完善的章节和内容",
+  "onboardDescription3": "以专业PDF格式导出论文",
+  "easyExport": "轻松PDF导出",
+  "next": "下一步",
+  "getStarted": "开始使用",
+  "startWritingHere": "在此开始写作...",
+  "reportContent": "报告内容",
+  "unsavedChanges": "未保存的更改",
+  "saveChangesQuestion": "是否要保存更改？",
+  "discard": "放弃",
+  "save": "保存",
+  "reportContentIssue": "请描述此内容的问题：",
+  "enterConcern": "输入您的问题...",
+  "cancel": "取消",
+  "submit": "提交",
+  "reportSubmitted": "报告提交成功",
+  "changesSaved": "更改已保存",
+  "initializationError": "初始化错误",
+  "retry": "重试",
+  "exportThesis": "导出论文",
+  "exportAsPdf": "导出为PDF",
+  "exportDescription": "您的论文将以PDF格式导出并保存到下载文件夹。",
+  "pdfSavedToDownloads": "PDF已保存到下载文件夹：{path}",
+  "@pdfSavedToDownloads": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "ok": "确定",
+  "error": "错误：{message}",
+  "@error": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "thesis": "论文",
+  "generateAll": "生成全部",
+  "pleaseCompleteAllSections": "导出前请完成所有部分",
+  "generatedSuccessfully": "生成成功！点击PDF进行导出",
+  "errorGeneratingContent": "生成内容时出错：{error}",
+  "failedToGenerateContent": "内容生成失败：{error}",
+  "loadingMessage1": "正在生成论文结构...",
+  "loadingMessage2": "此过程需要约4-7分钟...",
+  "loadingMessage3": "正在规划您的学术旅程...",
+  "loadingMessage4": "正在组织研究框架...",
+  "loadingMessage5": "正在为您的论文建立坚实基础...",
+  "loadingMessage6": "即将完成，正在最终确定大纲...",
+  "createThesis": "创建论文",
+  "thesisTopic": "论文主题",
+  "enterThesisTopic": "输入论文主题",
+  "pleaseEnterTopic": "请输入主题",
+  "generateChapters": "生成章节",
+  "generatedChapters": "已生成的章节",
+  "chapter": "第{number}章",
+  "pleaseEnterChapterTitle": "请输入章节标题",
+  "writingStyle": "写作风格",
+  "format": "格式",
+  "generateThesis": "生成论文",
+  "pleaseEnterThesisTopicFirst": "请先输入论文主题",
+  "failedToGenerateChapters": "生成章节失败：{error}",
+  "errorGeneratingThesis": "生成论文时出错：{error}",
+  "generatingContent": "正在生成内容...",
+  "pleaseCompleteAllChapters": "请完成所有章节标题",
+  "requiredChaptersMissing": "引言和结论章节为必需章节",
+  "openFile": "打开文件",
+  "errorGeneratingOutlines": "生成大纲时出错",
+  "edit": "编辑",
+  "addText": "添加文本",
+  "highlight": "高亮",
+  "delete": "删除",
+  "savePdf": "保存PDF",
+  "share": "分享",
+  "thesisOutline": "论文大纲"
+}

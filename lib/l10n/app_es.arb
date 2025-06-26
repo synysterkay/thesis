@@ -1,0 +1,82 @@
+{
+  "welcome": "Tesis Académica Profesional",
+  "onboardDescription1": "Crea tesis académicas profesionales con asistencia de IA",
+  "smartContent": "Generación Inteligente de Contenido",
+  "onboardDescription2": "Genera capítulos y contenido bien estructurados automáticamente",
+  "onboardDescription3": "Exporta tu tesis en formato PDF profesional",
+  "easyExport": "Exportación Fácil en PDF",
+  "next": "Siguiente",
+  "getStarted": "Comenzar",
+  "startWritingHere": "Empieza a escribir aquí...",
+  "reportContent": "Reportar Contenido",
+  "unsavedChanges": "Cambios sin guardar",
+  "saveChangesQuestion": "¿Deseas guardar tus cambios?",
+  "discard": "Descartar",
+  "save": "Guardar",
+  "reportContentIssue": "Por favor describe el problema con este contenido:",
+  "enterConcern": "Ingresa tu preocupación...",
+  "cancel": "Cancelar",
+  "submit": "Enviar",
+  "reportSubmitted": "Reporte enviado exitosamente",
+  "changesSaved": "Cambios guardados",
+  "initializationError": "Error de inicialización",
+  "retry": "Reintentar",
+  "exportThesis": "Exportar Tesis",
+  "exportAsPdf": "Exportar como PDF",
+  "exportDescription": "Tu tesis será exportada como archivo PDF y guardada en tu carpeta de Descargas.",
+  "pdfSavedToDownloads": "PDF guardado en Descargas: {path}",
+  "@pdfSavedToDownloads": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "ok": "OK",
+  "error": "Error: {message}",
+  "@error": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "thesis": "Tesis",
+  "generateAll": "Generar Todo",
+  "pleaseCompleteAllSections": "Por favor completa todas las secciones antes de exportar",
+  "generatedSuccessfully": "¡Generado exitosamente! Haz clic en PDF para exportar",
+  "errorGeneratingContent": "Error generando contenido: {error}",
+  "failedToGenerateContent": "Error al generar contenido: {error}",
+  "loadingMessage1": "Estamos generando la estructura de tu tesis...",
+  "loadingMessage2": "Este proceso toma entre 4-7 minutos...",
+  "loadingMessage3": "Creando tu viaje académico...",
+  "loadingMessage4": "Organizando tu marco de investigación...",
+  "loadingMessage5": "Construyendo una base sólida para tu tesis...",
+  "loadingMessage6": "Casi listo, finalizando tu esquema...",
+  "createThesis": "Crear Tesis",
+  "thesisTopic": "Tema de Tesis",
+  "enterThesisTopic": "Ingresa el tema de tu tesis",
+  "pleaseEnterTopic": "Por favor ingresa un tema",
+  "generateChapters": "Generar Capítulos",
+  "generatedChapters": "Capítulos Generados",
+  "chapter": "Capítulo {number}",
+  "pleaseEnterChapterTitle": "Por favor ingresa el título del capítulo",
+  "writingStyle": "Estilo de Escritura",
+  "format": "Formato",
+  "generateThesis": "Generar Tesis",
+  "pleaseEnterThesisTopicFirst": "Por favor ingresa primero el tema de la tesis",
+  "failedToGenerateChapters": "Error al generar capítulos: {error}",
+  "errorGeneratingThesis": "Error al generar tesis: {error}",
+  "generatingContent": "Generando contenido...",
+  "pleaseCompleteAllChapters": "Por favor completa todos los títulos de los capítulos",
+  "requiredChaptersMissing": "Los capítulos de Introducción y Conclusión son requeridos",
+  "openFile": "Abrir Archivo",
+  "errorGeneratingOutlines": "Error al Generar Esquemas",
+  "edit": "Editar",
+  "addText": "Agregar Texto",
+  "highlight": "Resaltar",
+  "delete": "Eliminar",
+  "savePdf": "Guardar PDF",
+  "share": "Compartir",
+  "thesisOutline": "Esquema de Tesis"
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDzUnNezUdzqCDVQ32Nl15b_osug350jU4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>153965444638</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.thesis.generator.ai</string>
+	<key>PROJECT_ID</key>
+	<string>thesis-generator-2024</string>
+	<key>STORAGE_BUCKET</key>
+	<string>thesis-generator-2024.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:153965444638:ios:dab9894438d1527771780f</string>
+	<key>DATABASE_URL</key>
+	<string>https://thesis-generator-2024-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

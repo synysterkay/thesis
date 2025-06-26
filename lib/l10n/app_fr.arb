@@ -1,0 +1,82 @@
+{
+  "welcome": "Thèse Académique Professionnelle",
+  "onboardDescription1": "Créez des thèses académiques professionnelles avec l'assistance de l'IA",
+  "smartContent": "Génération Intelligente de Contenu",
+  "onboardDescription2": "Générez automatiquement des chapitres et du contenu bien structurés",
+  "onboardDescription3": "Exportez votre thèse au format PDF professionnel",
+  "easyExport": "Exportation Facile en PDF",
+  "next": "Suivant",
+  "getStarted": "Commencer",
+  "startWritingHere": "Commencez à écrire ici...",
+  "reportContent": "Signaler le Contenu",
+  "unsavedChanges": "Modifications non enregistrées",
+  "saveChangesQuestion": "Voulez-vous enregistrer vos modifications ?",
+  "discard": "Abandonner",
+  "save": "Enregistrer",
+  "reportContentIssue": "Veuillez décrire le problème avec ce contenu :",
+  "enterConcern": "Entrez votre préoccupation...",
+  "cancel": "Annuler",
+  "submit": "Soumettre",
+  "reportSubmitted": "Rapport soumis avec succès",
+  "changesSaved": "Modifications enregistrées",
+  "initializationError": "Erreur d'initialisation",
+  "retry": "Réessayer",
+  "exportThesis": "Exporter la Thèse",
+  "exportAsPdf": "Exporter en PDF",
+  "exportDescription": "Votre thèse sera exportée au format PDF et enregistrée dans votre dossier Téléchargements.",
+  "pdfSavedToDownloads": "PDF enregistré dans Téléchargements : {path}",
+  "@pdfSavedToDownloads": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "ok": "OK",
+  "error": "Erreur : {message}",
+  "@error": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "thesis": "Thèse",
+  "generateAll": "Tout Générer",
+  "pleaseCompleteAllSections": "Veuillez compléter toutes les sections avant d'exporter",
+  "generatedSuccessfully": "Génération réussie ! Cliquez sur PDF pour exporter",
+  "errorGeneratingContent": "Erreur lors de la génération du contenu : {error}",
+  "failedToGenerateContent": "Échec de la génération du contenu : {error}",
+  "loadingMessage1": "Nous générons la structure de votre thèse...",
+  "loadingMessage2": "Ce processus prend environ 4-7 minutes...",
+  "loadingMessage3": "Création de votre parcours académique...",
+  "loadingMessage4": "Organisation de votre cadre de recherche...",
+  "loadingMessage5": "Construction d'une base solide pour votre thèse...",
+  "loadingMessage6": "Presque terminé, finalisation de votre plan...",
+  "createThesis": "Créer une Thèse",
+  "thesisTopic": "Sujet de Thèse",
+  "enterThesisTopic": "Entrez votre sujet de thèse",
+  "pleaseEnterTopic": "Veuillez entrer un sujet",
+  "generateChapters": "Générer les Chapitres",
+  "generatedChapters": "Chapitres Générés",
+  "chapter": "Chapitre {number}",
+  "pleaseEnterChapterTitle": "Veuillez entrer le titre du chapitre",
+  "writingStyle": "Style d'Écriture",
+  "format": "Format",
+  "generateThesis": "Générer la Thèse",
+  "pleaseEnterThesisTopicFirst": "Veuillez d'abord entrer un sujet de thèse",
+  "failedToGenerateChapters": "Échec de la génération des chapitres : {error}",
+  "errorGeneratingThesis": "Erreur lors de la génération de la thèse : {error}",
+  "generatingContent": "Génération du contenu...",
+  "pleaseCompleteAllChapters": "Veuillez compléter tous les titres des chapitres",
+  "requiredChaptersMissing": "Les chapitres Introduction et Conclusion sont requis",
+  "openFile": "Ouvrir le Fichier",
+  "errorGeneratingOutlines": "Erreur lors de la Génération des Plans",
+  "edit": "Modifier",
+  "addText": "Ajouter du Texte",
+  "highlight": "Surligner",
+  "delete": "Supprimer",
+  "savePdf": "Enregistrer le PDF",
+  "share": "Partager",
+  "thesisOutline": "Plan de Thèse"
+}

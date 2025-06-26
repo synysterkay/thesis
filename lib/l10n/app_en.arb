@@ -1,0 +1,82 @@
+{
+  "welcome": "Academic Writing Assistant",
+  "onboardDescription1": "Learn to develop professional academic thesis structure",
+  "smartContent": "Smart Learning Framework",
+  "onboardDescription2": "Practice organizing chapters and content effectively",
+  "onboardDescription3": "Export your learning materials in professional PDF format",
+  "easyExport": "Easy Export In PDF",
+  "next": "Next",
+  "getStarted": "Start Learning",
+  "startWritingHere": "Begin your practice here...",
+  "reportContent": "Report Content",
+  "unsavedChanges": "Unsaved Changes",
+  "saveChangesQuestion": "Do you want to save your progress?",
+  "discard": "Discard",
+  "save": "Save",
+  "reportContentIssue": "Please describe the issue with this content:",
+  "enterConcern": "Enter your concern...",
+  "cancel": "Cancel",
+  "submit": "Submit",
+  "reportSubmitted": "Report submitted successfully",
+  "changesSaved": "Progress saved",
+  "initializationError": "Initialization Error",
+  "retry": "Retry",
+  "exportThesis": "Export Document",
+  "exportAsPdf": "Export as PDF",
+  "exportDescription": "Your academic work will be exported as a PDF file and saved to your Downloads folder.",
+  "pdfSavedToDownloads": "PDF saved to Downloads: {path}",
+  "@pdfSavedToDownloads": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "ok": "OK",
+  "error": "Error: {message}",
+  "@error": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "thesis": "Academic Structure",
+  "generateAll": "Generate All",
+  "pleaseCompleteAllSections": "Please complete all sections before exporting",
+  "generatedSuccessfully": "Structure created successfully! Click On PDF to export",
+  "errorGeneratingContent": "Error creating content: {error}",
+  "failedToGenerateContent": "Failed to create content: {error}",
+  "loadingMessage1": "Preparing your academic structure...",
+  "loadingMessage2": "Organizing your learning materials...",
+  "loadingMessage3": "Building your academic framework...",
+  "loadingMessage4": "Structuring your research outline...",
+  "loadingMessage5": "Creating your learning foundation...",
+  "loadingMessage6": "Almost there, finalizing your structure...",
+  "createThesis": "Create Structure",
+  "thesisTopic": "Research Topic",
+  "enterThesisTopic": "Enter your research topic",
+  "pleaseEnterTopic": "Please enter a topic",
+  "generateChapters": "Create Sections",
+  "generatedChapters": "Created Sections",
+  "chapter": "Section {number}",
+  "pleaseEnterChapterTitle": "Please enter section title",
+  "writingStyle": "Academic Style",
+  "format": "Format",
+  "generateThesis": "Create Structure",
+  "pleaseEnterThesisTopicFirst": "Please enter a research topic first",
+  "failedToGenerateChapters": "Failed to create sections: {error}",
+  "errorGeneratingThesis": "Error creating structure: {error}",
+  "generatingContent": "Creating content...",
+  "pleaseCompleteAllChapters": "Please complete all section titles",
+  "requiredChaptersMissing": "Introduction and Conclusion sections are required",
+  "openFile": "Open File",
+  "errorGeneratingOutlines": "Error Creating Outline",
+  "edit": "Edit",
+  "addText": "Add Text",
+  "highlight": "Highlight",
+  "delete": "Delete",
+  "savePdf": "Save PDF",
+  "share": "Share",
+  "thesisOutline": "Academic Outline"
+}

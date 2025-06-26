@@ -19,23 +19,77 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ==============================================
-// STRIPE PAYMENT INTEGRATION
+// STRIPE PAYMENT INTEGRATION (SIMPLIFIED)
 // ==============================================
 
+// Keep your Stripe key for potential future use, but we won't need it for Payment Links
 const STRIPE_PUBLISHABLE_KEY = 'pk_live_51IwsyLEHyyRHgrPiQTfkXDJVqQbdIS1RGqOEyRdsMFBbxnx8G8Qoid4iGZxpLv5lX43YA0X2qzdYoWJRZHGexYaB00Xan2xYkh';
-const STRIPE_PRICE_IDS = {
-    weekly: 'price_1RbhGMEHyyRHgrPiSXQFnnrT',
-    monthly: 'price_1RbhH1EHyyRHgrPiijEs1rTB'
+
+// Replace the old price IDs with direct Payment Links
+const STRIPE_PAYMENT_LINKS = {
+    weekly: 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01',
+    monthly: 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02'
 };
 
 let stripe;
 
 function initializeStripePayments() {
+    // Optional: Still initialize Stripe for potential future features
     if (typeof Stripe !== 'undefined') {
         stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
         console.log('✅ Stripe initialized');
     } else {
-        console.warn('⚠️ Stripe not loaded, will load dynamically when needed');
+        console.log('ℹ️ Using Stripe Payment Links - no client initialization needed');
+    }
+}
+
+// ==============================================
+// SIMPLIFIED PLAN SELECTION
+// ==============================================
+
+function selectPlan(planType) {
+    console.log('🎯 Plan selected:', planType);
+    
+    // Get the button that was clicked
+    const button = event.target;
+    const originalText = button.textContent;
+    
+    // Check if user is authenticated (optional - you can remove this check if you want)
+    if (!window.firebaseAuth?.currentUser) {
+        console.log('🔐 User not authenticated, showing auth modal...');
+        // Store the selected plan for after authentication
+        sessionStorage.setItem('selectedPlan', planType);
+        sessionStorage.setItem('pendingPaymentLink', STRIPE_PAYMENT_LINKS[planType]);
+        showAuthModal();
+        return;
+    }
+    
+    // Show loading state
+    button.textContent = 'Redirecting to payment...';
+    button.disabled = true;
+    
+    // Track plan selection
+    trackEvent('plan_selected', {
+        'plan_type': planType,
+        'user_id': window.firebaseAuth?.currentUser?.uid || 'anonymous'
+    });
+    
+    // Direct redirect to Stripe Payment Link
+    if (STRIPE_PAYMENT_LINKS[planType]) {
+        console.log('💳 Redirecting to Stripe Payment Link...');
+        
+        // Add a small delay for better UX
+        setTimeout(() => {
+            window.location.href = STRIPE_PAYMENT_LINKS[planType];
+        }, 1000);
+        
+    } else {
+        console.error('❌ Payment link not found for plan:', planType);
+        showMessage('Payment option not available. Please try again.', 'error');
+        
+        // Restore button
+        button.textContent = originalText;
+        button.disabled = false;
     }
 }
 
@@ -50,47 +104,47 @@ function initializeAuthModals() {
     const authTabs = document.querySelectorAll('.auth-tab');
     const authForm = document.getElementById('auth-form');
     const googleSigninBtn = document.getElementById('google-signin');
-    
+
     // Subscription modal elements
     const subscriptionModal = document.getElementById('subscription-modal');
     const closeSubscriptionModal = document.getElementById('close-subscription-modal');
-    
+
     // Close modal handlers
     closeAuthModal?.addEventListener('click', () => {
         closeModal('auth-modal');
     });
-    
+
     closeSubscriptionModal?.addEventListener('click', () => {
         closeModal('subscription-modal');
     });
-    
+
     // Close modal when clicking outside
     authModal?.addEventListener('click', (e) => {
         if (e.target === authModal) {
             closeModal('auth-modal');
         }
     });
-    
+
     subscriptionModal?.addEventListener('click', (e) => {
         if (e.target === subscriptionModal) {
             closeModal('subscription-modal');
         }
     });
-    
+
     // Auth tab switching
     authTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabType = tab.dataset.tab;
-            
+
             // Update active tab
             authTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
+
             // Update form
             const title = document.getElementById('auth-title');
             const submitBtn = document.querySelector('.auth-submit-btn');
             const confirmPasswordGroup = document.getElementById('confirm-password-group');
-            
+
             if (tabType === 'signup') {
                 title.textContent = 'Sign Up';
                 submitBtn.textContent = 'Sign Up';
@@ -104,13 +158,13 @@ function initializeAuthModals() {
             }
         });
     });
-    
+
     // Auth form submission
     authForm?.addEventListener('submit', handleAuthSubmit);
-    
+
     // Google signin
     googleSigninBtn?.addEventListener('click', handleGoogleSignin);
-    
+
     // Forgot password
     document.getElementById('forgot-password')?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -134,7 +188,7 @@ function initializeAuthIntegration() {
 
 function setupAuthIntegration() {
     console.log('🔐 Setting up auth integration...');
-    
+
     // Listen for auth state changes
     if (window.firebaseAuth) {
         window.firebaseAuth.onAuthStateChanged((user) => {
@@ -150,21 +204,21 @@ function updateUIBasedOnAuthState(user) {
         appBtn: document.getElementById('nav-app-btn'),
         userStatus: document.getElementById('user-status-bar')
     };
-    
+
     if (user) {
         // User is authenticated
         if (navElements.loginBtn) navElements.loginBtn.style.display = 'none';
         if (navElements.appBtn) navElements.appBtn.style.display = 'inline-block';
         if (navElements.userStatus) navElements.userStatus.style.display = 'block';
-        
+
         // Update user info if elements exist
         const userName = document.getElementById('user-name');
         const subscriptionStatus = document.getElementById('subscription-status');
-        
+
         if (userName) {
             userName.textContent = user.displayName || user.email.split('@')[0];
         }
-        
+
         if (subscriptionStatus) {
             subscriptionStatus.textContent = 'No Active Subscription';
             subscriptionStatus.className = 'subscription-status inactive';
@@ -178,51 +232,54 @@ function updateUIBasedOnAuthState(user) {
 }
 
 // ==============================================
-// AUTH HANDLERS
+// UPDATED AUTH HANDLERS (with payment link support)
 // ==============================================
 
 async function handleAuthSubmit(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
     const isSignUp = document.querySelector('.auth-tab.active').dataset.tab === 'signup';
     const submitBtn = document.querySelector('.auth-submit-btn');
-    
+
     // Validation
     if (!validateEmail(email)) {
         showMessage('Please enter a valid email address.', 'error');
         return;
     }
-    
+
     if (password.length < 6) {
         showMessage('Password must be at least 6 characters long.', 'error');
         return;
     }
-    
+
     if (isSignUp && password !== confirmPassword) {
         showMessage('Passwords do not match.', 'error');
         return;
     }
-    
+
     // Show loading state
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Processing...';
     submitBtn.disabled = true;
-    
+
     try {
         if (window.firebaseAuth) {
+            let result;
             if (isSignUp) {
-                const result = await window.firebaseAuth.createUserWithEmailAndPassword(email, password);
+                result = await window.firebaseAuth.createUserWithEmailAndPassword(email, password);
                 await createOrUpdateUserProfile(result.user);
                 showMessage('Account created successfully!', 'success');
             } else {
-                const result = await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+                result = await window.firebaseAuth.signInWithEmailAndPassword(email, password);
                 showMessage('Signed in successfully!', 'success');
             }
-            closeModal('auth-modal');
-            showSubscriptionModal();
+
+            // Handle pending payment after successful auth
+            handleAuthSuccess(result.user);
+
         } else {
             throw new Error('Firebase Auth not available');
         }
@@ -238,28 +295,67 @@ async function handleAuthSubmit(e) {
 async function handleGoogleSignin() {
     try {
         console.log('🔍 Attempting Google sign-in...');
-        
+
         if (!window.firebaseAuth || !window.googleProvider) {
             throw new Error('Firebase not properly initialized');
         }
 
         const result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
         const user = result.user;
-        
+
         console.log('✅ Google sign-in successful:', user.email);
-        
+
         // Create or update user profile with retry logic
         await createOrUpdateUserProfileWithRetry(user);
+
+        // Handle pending payment after successful auth
+        handleAuthSuccess(user);
+
+    } catch (error) {
+        console.error('Google sign-in error:', error);
+        showAuthError(error.message || 'Google sign-in failed. Please try again.');
+    }
+}
+
+// ==============================================
+// NEW: HANDLE AUTH SUCCESS WITH PENDING PAYMENTS
+// ==============================================
+
+function handleAuthSuccess(user) {
+    console.log('✅ User authenticated:', user.email);
+    
+    // Check for pending payment
+    const pendingPaymentLink = sessionStorage.getItem('pendingPaymentLink');
+    const selectedPlan = sessionStorage.getItem('selectedPlan');
+    
+    if (pendingPaymentLink) {
+        console.log('💳 Processing pending payment for plan:', selectedPlan);
+        
+        // Clear pending data
+        sessionStorage.removeItem('pendingPaymentLink');
+        sessionStorage.removeItem('selectedPlan');
         
         // Close auth modal
         closeModal('auth-modal');
         
-        // Show subscription modal
-        showSubscriptionModal();
+        // Show loading message
+        showMessage('Redirecting to payment...', 'info');
         
-    } catch (error) {
-        console.error('Google sign-in error:', error);
-        showAuthError(error.message || 'Google sign-in failed. Please try again.');
+        // Track the conversion
+        trackEvent('auth_to_payment_conversion', {
+            'plan_type': selectedPlan,
+            'user_id': user.uid
+        });
+        
+        // Redirect to payment
+        setTimeout(() => {
+            window.location.href = pendingPaymentLink;
+        }, 1500);
+        
+    } else {
+        // Normal auth success flow
+        closeModal('auth-modal');
+        showSubscriptionModal();
     }
 }
 
@@ -271,7 +367,7 @@ async function createOrUpdateUserProfile(user) {
 
         const userRef = window.firebaseDb.collection('users').doc(user.uid);
         const userDoc = await userRef.get();
-        
+
         const userData = {
             uid: user.uid,
             email: user.email,
@@ -280,7 +376,7 @@ async function createOrUpdateUserProfile(user) {
             lastLogin: window.firebase.firestore.FieldValue.serverTimestamp(),
             lastUpdated: window.firebase.firestore.FieldValue.serverTimestamp()
         };
-        
+
         if (userDoc.exists) {
             await userRef.update(userData);
             console.log('✅ User profile updated');
@@ -296,6 +392,7 @@ async function createOrUpdateUserProfile(user) {
         throw error;
     }
 }
+
 
 async function createOrUpdateUserProfileWithRetry(user, maxRetries = 3) {
     for (let i = 0; i < maxRetries; i++) {
@@ -434,64 +531,53 @@ function closeAllModals() {
 function selectPlan(planType) {
     console.log('🎯 Plan selected:', planType);
     
-    // Check if user is authenticated
+    // Direct payment links - no domain authorization needed!
+    const paymentLinks = {
+        weekly: 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01',
+        monthly: 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02'
+    };
+    
+    // Check if user is authenticated (optional - you can remove this if you want)
     if (!window.firebaseAuth?.currentUser) {
-        showMessage('Please sign in first to subscribe.', 'warning');
+        console.log('🔐 User not authenticated, showing auth modal...');
         sessionStorage.setItem('selectedPlan', planType);
-        closeAllModals();
+        sessionStorage.setItem('pendingPaymentLink', paymentLinks[planType]);
         showAuthModal();
         return;
     }
     
     const button = event.target;
     const originalText = button.textContent;
-
-        
+    
     // Show loading state
-    button.textContent = 'Processing...';
+    button.textContent = 'Redirecting to payment...';
     button.disabled = true;
     
     // Track plan selection
     trackEvent('plan_selected', {
         'plan_type': planType,
-        'user_id': window.firebaseAuth.currentUser.uid
+        'user_id': window.firebaseAuth?.currentUser?.uid || 'anonymous'
     });
     
-    // Initialize Stripe checkout
-    initializeStripeCheckout(planType, button, originalText);
-}
-
-// Update your Stripe checkout configuration
-async function initializeStripeCheckout(planType, button, originalText) {
-    try {
-        const priceId = STRIPE_PRICE_IDS[planType];
+    // Simple redirect to Stripe Payment Link
+    if (paymentLinks[planType]) {
+        console.log('💳 Redirecting to Stripe Payment Link...');
         
-        // Use your actual domain for success/cancel URLs
-        const successUrl = 'https://thesisgenerator.tech/success.html?session_id={CHECKOUT_SESSION_ID}';
-        const cancelUrl = 'https://thesisgenerator.tech/cancel.html';
+        // Add a small delay for better UX
+        setTimeout(() => {
+            window.location.href = paymentLinks[planType];
+        }, 1000);
         
-        // Create checkout session - Stripe will use checkout.stripe.com
-        const { error } = await stripe.redirectToCheckout({
-            lineItems: [{
-                price: priceId,
-                quantity: 1,
-            }],
-            mode: 'subscription',
-            successUrl: successUrl,
-            cancelUrl: cancelUrl,
-            customerEmail: user.email,
-            clientReferenceId: user.uid,
-        });
+    } else {
+        console.error('❌ Payment link not found for plan:', planType);
+        showMessage('Payment option not available. Please try again.', 'error');
         
-        if (error) {
-            throw error;
-        }
-        
-    } catch (error) {
-        console.error('Stripe checkout error:', error);
-        // Handle error
+        // Restore button
+        button.textContent = originalText;
+        button.disabled = false;
     }
 }
+
 
 
 

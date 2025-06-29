@@ -19,7 +19,6 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
   late AnimationController _fadeController;
   
   late Animation<double> _logoScale;
-  late Animation<double> _logoRotation;
   late Animation<double> _progressValue;
   late Animation<double> _fadeOpacity;
 
@@ -76,14 +75,6 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
       curve: Curves.elasticOut,
     ));
 
-    _logoRotation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _logoController,
-      curve: Curves.easeInOut,
-    ));
-
     _progressValue = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -105,9 +96,6 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
   }
 
   void _startInitialization() async {
-    // Start message rotation
-    _rotateMessages();
-    
     try {
       // Simulate initialization steps with proper timing
       await Future.delayed(const Duration(milliseconds: 500));
@@ -166,19 +154,6 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     }
   }
 
-  void _rotateMessages() {
-    Future.delayed(const Duration(milliseconds: 2000), () {
-      if (mounted && !_hasNavigated) {
-        setState(() {
-          _messageIndex = (_messageIndex + 1) % _loadingMessages.length;
-          _currentMessage = _loadingMessages[_messageIndex];
-          _currentTip = _loadingTips[_messageIndex];
-        });
-        _rotateMessages();
-      }
-    });
-  }
-
   Future<void> _navigateToScreen(String route) async {
     await _fadeController.forward();
     
@@ -198,23 +173,15 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: AnimatedBuilder(
         animation: _fadeOpacity,
         builder: (context, child) {
           return Opacity(
             opacity: _fadeOpacity.value,
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF667eea),
-                    Color(0xFF764ba2),
-                  ],
-                ),
-              ),
-              child: SafeArea(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -224,41 +191,48 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                       builder: (context, child) {
                         return Transform.scale(
                           scale: _logoScale.value,
-                          child: Transform.rotate(
-                            angle: _logoRotation.value * 0.1,
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              margin: const EdgeInsets.only(bottom: 40),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xFF9D4EDD),
-                                    Color(0xFFFF48B0),
-                                  ],
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            margin: const EdgeInsets.only(bottom: 40),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF667eea).withOpacity(0.3),
+                                  blurRadius: 20,
+                                  spreadRadius: 0,
+                                  offset: const Offset(0, 10),
                                 ),
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 20,
-                                    spreadRadius: 0,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                  BoxShadow(
-                                    color: const Color(0xFF9D4EDD).withOpacity(0.3),
-                                    blurRadius: 20,
-                                    spreadRadius: 0,
-                                    offset: const Offset(0, 0),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.school,
-                                size: 60,
-                                color: Colors.white,
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30),
+                              child: Image.asset(
+                                'assets/logo.png',
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  // Fallback to gradient container with icon if image fails
+                                  return Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: const Icon(
+                                      Icons.school_rounded,
+                                      size: 60,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -272,7 +246,7 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: Color(0xFF1a1a1a),
                         letterSpacing: -0.5,
                       ),
                       textAlign: TextAlign.center,
@@ -281,60 +255,48 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                     const SizedBox(height: 12),
 
                     // Brand subtitle
-                    const Text(
+                    Text(
                       'AI-Powered Academic Writing',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white70,
+                        color: Colors.grey[600],
                       ),
                       textAlign: TextAlign.center,
                     ),
 
                     const SizedBox(height: 60),
 
-                    // Animated spinner
+                    // Professional loading indicator
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 80,
+                      height: 80,
                       margin: const EdgeInsets.only(bottom: 30),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFE9ECEF)),
+                      ),
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Outer ring
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
-                                width: 4,
-                              ),
-                            ),
-                          ),
                           // Spinning indicator
                           const SizedBox(
-                            width: 60,
-                            height: 60,
+                            width: 40,
+                            height: 40,
                             child: CircularProgressIndicator(
-                              strokeWidth: 4,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              strokeWidth: 3,
+                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
                             ),
                           ),
-                          // Pulsing center dot
-                          AnimatedBuilder(
-                            animation: _logoController,
-                            builder: (context, child) {
-                              return Container(
-                                width: 8 + (4 * _logoRotation.value),
-                                height: 8 + (4 * _logoRotation.value),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
-                              );
-                            },
+                          // Center icon
+                          Container(
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF667eea),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ],
                       ),
@@ -349,7 +311,7 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Color(0xFF1a1a1a),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -359,12 +321,13 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
 
                     // Progress bar
                     Container(
-                      width: 250,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 30),
+                      width: 280,
+                      height: 6,
+                      margin: const EdgeInsets.only(bottom: 20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(2),
+                        color: const Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(3),
+                        border: Border.all(color: const Color(0xFFE9ECEF)),
                       ),
                       child: AnimatedBuilder(
                         animation: _progressValue,
@@ -375,9 +338,9 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                             child: Container(
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Colors.white, Color(0xFFF0F0F0)],
+                                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
                                 ),
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(3),
                               ),
                             ),
                           );
@@ -391,10 +354,10 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                       child: Text(
                         _currentTip,
                         key: ValueKey(_currentTip),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white70,
+                          color: Colors.grey[600],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -403,18 +366,27 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                     const SizedBox(height: 40),
 
                     // Feature chips
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        _buildFeatureChip('🤖 AI Powered', 0),
-                        _buildFeatureChip('📚 Citations', 1),
-                        _buildFeatureChip('⚡ Fast', 2),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE9ECEF)),
+                      ),
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _buildFeatureChip('🤖 AI Powered', 0),
+                          _buildFeatureChip('📚 Citations', 1),
+                          _buildFeatureChip('⚡ Fast', 2),
+                          _buildFeatureChip('🔒 Secure', 3),
+                        ],
+                      ),
                     ),
 
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
 
                     // Loading dots indicator
                     Row(
@@ -424,9 +396,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                           animation: _logoController,
                           builder: (context, child) {
                             final delay = index * 0.2;
-                            final animationValue = (_logoRotation.value + delay) % 1.0;
-                            final opacity = 0.5 + (0.5 * (1 - (animationValue - 0.5).abs() * 2));
-                            final scale = 1.0 + (0.2 * (1 - (animationValue - 0.5).abs() * 2));
+                            final animationValue = (_logoController.value + delay) % 1.0;
+                            final opacity = 0.3 + (0.7 * (1 - (animationValue - 0.5).abs() * 2));
                             
                             return Container(
                               width: 8,
@@ -434,9 +405,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                               margin: const EdgeInsets.symmetric(horizontal: 4),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(opacity.clamp(0.0, 1.0)),
+                                color: const Color(0xFF667eea).withOpacity(opacity.clamp(0.0, 1.0)),
                               ),
-                              transform: Matrix4.identity()..scale(scale),
                             );
                           },
                         );
@@ -457,23 +427,20 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
       animation: _logoController,
       builder: (context, child) {
         final delay = index * 0.3;
-        final animationValue = (_logoRotation.value + delay) % 1.0;
-        final translateY = 5 * (1 - (animationValue - 0.5).abs() * 2);
+        final animationValue = (_logoController.value + delay) % 1.0;
+        final translateY = 3 * (1 - (animationValue - 0.5).abs() * 2);
         
         return Transform.translate(
           offset: Offset(0, -translateY),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1,
-              ),
+              color: Colors.white,
+              border: Border.all(color: const Color(0xFFE9ECEF)),
               borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
+              boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withOpacity(0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -481,10 +448,10 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
             ),
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.white,
+                color: Colors.grey[700],
               ),
             ),
           ),
@@ -493,108 +460,3 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     );
   }
 }
-
-// Initialization state management
-class InitializationState {
-  final String message;
-  final String tip;
-  final double progress;
-  final bool isComplete;
-  final String? error;
-  
-  const InitializationState({
-    required this.message,
-    required this.tip,
-    required this.progress,
-    this.isComplete = false,
-    this.error,
-  });
-  
-  InitializationState copyWith({
-    String? message,
-    String? tip,
-    double? progress,
-    bool? isComplete,
-    String? error,
-  }) {
-    return InitializationState(
-      message: message ?? this.message,
-      tip: tip ?? this.tip,
-      progress: progress ?? this.progress,
-      isComplete: isComplete ?? this.isComplete,
-      error: error ?? this.error,
-    );
-  }
-}
-
-// Initialization steps enum
-enum InitializationStep {
-  starting,
-  checkingAuth,
-  loadingPreferences,
-  settingUpServices,
-  finalizing,
-  complete,
-  error,
-}
-
-// Extension for initialization step descriptions
-extension InitializationStepExtension on InitializationStep {
-  String get message {
-    switch (this) {
-      case InitializationStep.starting:
-        return 'Initializing...';
-      case InitializationStep.checkingAuth:
-        return 'Checking authentication...';
-      case InitializationStep.loadingPreferences:
-        return 'Loading preferences...';
-      case InitializationStep.settingUpServices:
-        return 'Setting up services...';
-      case InitializationStep.finalizing:
-        return 'Almost ready...';
-      case InitializationStep.complete:
-        return 'Ready!';
-      case InitializationStep.error:
-        return 'Something went wrong';
-    }
-  }
-  
-  String get tip {
-    switch (this) {
-      case InitializationStep.starting:
-        return 'Setting up your workspace';
-      case InitializationStep.checkingAuth:
-        return 'Verifying your account';
-      case InitializationStep.loadingPreferences:
-        return 'Loading your preferences';
-      case InitializationStep.settingUpServices:
-        return 'Preparing AI tools';
-      case InitializationStep.finalizing:
-        return 'Finalizing setup';
-      case InitializationStep.complete:
-        return 'Welcome to Thesis Generator!';
-      case InitializationStep.error:
-        return 'Please try again';
-    }
-  }
-  
-  double get progress {
-    switch (this) {
-      case InitializationStep.starting:
-        return 0.1;
-      case InitializationStep.checkingAuth:
-        return 0.3;
-      case InitializationStep.loadingPreferences:
-        return 0.5;
-      case InitializationStep.settingUpServices:
-        return 0.7;
-      case InitializationStep.finalizing:
-        return 0.9;
-      case InitializationStep.complete:
-        return 1.0;
-      case InitializationStep.error:
-        return 0.0;
-    }
-  }
-}
-

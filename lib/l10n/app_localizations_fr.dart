@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -7,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get welcome => 'Bienvenue sur Thesis Generator';
+  String get welcome => 'Thèse Académique Professionnelle';
 
   @override
   String get onboardDescription1 => 'Créez des thèses académiques professionnelles avec l\'assistance de l\'IA';
@@ -22,7 +24,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardDescription3 => 'Exportez votre thèse au format PDF professionnel';
 
   @override
-  String get easyExport => 'Exportation Facile';
+  String get easyExport => 'Exportation Facile en PDF';
 
   @override
   String get next => 'Suivant';
@@ -184,4 +186,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get generatingContent => 'Génération du contenu...';
+
+  @override
+  String get pleaseCompleteAllChapters => 'Veuillez compléter tous les titres des chapitres';
+
+  @override
+  String get requiredChaptersMissing => 'Les chapitres Introduction et Conclusion sont requis';
+
+  @override
+  String get openFile => 'Ouvrir le Fichier';
+
+  @override
+  String get errorGeneratingOutlines => 'Erreur lors de la Génération des Plans';
+
+  @override
+  String get edit => 'Modifier';
+
+  @override
+  String get addText => 'Ajouter du Texte';
+
+  @override
+  String get highlight => 'Surligner';
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get savePdf => 'Enregistrer le PDF';
+
+  @override
+  String get share => 'Partager';
+
+  @override
+  String get thesisOutline => 'Plan de Thèse';
 }

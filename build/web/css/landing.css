@@ -229,9 +229,25 @@ body {
 }
 
 .subscription-status {
-    font-size: 0.9rem;
-    opacity: 0.9;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.25rem;
 }
+
+.subscription-status.active {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.subscription-status.inactive {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
 
 .user-actions {
     display: flex;
@@ -239,20 +255,56 @@ body {
 }
 
 .user-actions button {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    font-family: inherit;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
+
+
 
 .user-actions button:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
+}
+
+#dashboard-btn {
+  background: #667eea;
+  color: white;
+}
+
+#dashboard-btn:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+#logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#logout-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+
+/* Plan cards in app.html access denied screen */
+.plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.plan-card.popular {
+  transform: scale(1.05);
+}
+
+.plan-card.popular:hover {
+  transform: scale(1.05) translateY(-2px);
 }
 
 
@@ -1312,6 +1364,16 @@ body {
 .plan-button:focus {
     outline: 3px solid rgba(157, 78, 221, 0.5);
     outline-offset: 2px;
+}
+
+.plan-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.plan-button.processing {
+  background: #ccc !important;
+  color: #666 !important;
 }
 
 .pricing-footer {

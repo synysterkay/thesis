@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -7,7 +9,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get welcome => '欢迎使用论文生成器';
+  String get welcome => '专业学术论文';
 
   @override
   String get onboardDescription1 => '使用AI辅助创建专业学术论文';
@@ -22,7 +24,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardDescription3 => '以专业PDF格式导出论文';
 
   @override
-  String get easyExport => '轻松导出';
+  String get easyExport => '轻松PDF导出';
 
   @override
   String get next => '下一步';
@@ -184,4 +186,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generatingContent => '正在生成内容...';
+
+  @override
+  String get pleaseCompleteAllChapters => '请完成所有章节标题';
+
+  @override
+  String get requiredChaptersMissing => '引言和结论章节为必需章节';
+
+  @override
+  String get openFile => '打开文件';
+
+  @override
+  String get errorGeneratingOutlines => '生成大纲时出错';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String get addText => '添加文本';
+
+  @override
+  String get highlight => '高亮';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get savePdf => '保存PDF';
+
+  @override
+  String get share => '分享';
+
+  @override
+  String get thesisOutline => '论文大纲';
 }

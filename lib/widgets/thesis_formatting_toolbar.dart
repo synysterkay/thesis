@@ -15,12 +15,10 @@ class ThesisFormattingToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        QuillToolbar.simple(
-          configurations: QuillSimpleToolbarConfigurations(
-            controller: controller,
-            sharedConfigurations: const QuillSharedConfigurations(
-              locale: Locale('en'),
-            ),
+        // Main QuillSimpleToolbar
+        QuillSimpleToolbar(
+          controller: controller,
+          config: QuillSimpleToolbarConfig(
             multiRowsDisplay: true,
             showFontFamily: true,
             showFontSize: true,
@@ -43,6 +41,8 @@ class ThesisFormattingToolbar extends StatelessWidget {
             showLink: true,
           ),
         ),
+
+        // Custom thesis-specific buttons
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(

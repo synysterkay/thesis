@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -7,19 +9,19 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get welcome => 'Professional Academic Thesis';
+  String get welcome => 'Academic Writing Assistant';
 
   @override
-  String get onboardDescription1 => 'Create professional academic thesis with AI assistance';
+  String get onboardDescription1 => 'Learn to develop professional academic thesis structure';
 
   @override
-  String get smartContent => 'Smart Content Generation';
+  String get smartContent => 'Smart Learning Framework';
 
   @override
-  String get onboardDescription2 => 'Generate well-structured chapters and content automatically';
+  String get onboardDescription2 => 'Practice organizing chapters and content effectively';
 
   @override
-  String get onboardDescription3 => 'Export your thesis in professional PDF format';
+  String get onboardDescription3 => 'Export your learning materials in professional PDF format';
 
   @override
   String get easyExport => 'Easy Export In PDF';
@@ -28,10 +30,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get next => 'Next';
 
   @override
-  String get getStarted => 'Get Started';
+  String get getStarted => 'Start Learning';
 
   @override
-  String get startWritingHere => 'Start writing here...';
+  String get startWritingHere => 'Begin your practice here...';
 
   @override
   String get reportContent => 'Report Content';
@@ -40,7 +42,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unsavedChanges => 'Unsaved Changes';
 
   @override
-  String get saveChangesQuestion => 'Do you want to save your changes?';
+  String get saveChangesQuestion => 'Do you want to save your progress?';
 
   @override
   String get discard => 'Discard';
@@ -64,7 +66,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSubmitted => 'Report submitted successfully';
 
   @override
-  String get changesSaved => 'Changes saved';
+  String get changesSaved => 'Progress saved';
 
   @override
   String get initializationError => 'Initialization Error';
@@ -73,13 +75,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
-  String get exportThesis => 'Export Thesis';
+  String get exportThesis => 'Export Document';
 
   @override
   String get exportAsPdf => 'Export as PDF';
 
   @override
-  String get exportDescription => 'Your thesis will be exported as a PDF file and saved to your Downloads folder.';
+  String get exportDescription => 'Your academic work will be exported as a PDF file and saved to your Downloads folder.';
 
   @override
   String pdfSavedToDownloads(String path) {
@@ -95,7 +97,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get thesis => 'Thesis';
+  String get thesis => 'Academic Structure';
 
   @override
   String get generateAll => 'Generate All';
@@ -104,84 +106,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseCompleteAllSections => 'Please complete all sections before exporting';
 
   @override
-  String get generatedSuccessfully => 'Generated successfully! Click On Pdf To export';
+  String get generatedSuccessfully => 'Structure created successfully! Click On PDF to export';
 
   @override
   String errorGeneratingContent(Object error) {
-    return 'Error generating content: $error';
+    return 'Error creating content: $error';
   }
 
   @override
   String failedToGenerateContent(Object error) {
-    return 'Failed to generate content: $error';
+    return 'Failed to create content: $error';
   }
 
   @override
-  String get loadingMessage1 => 'We are generating your thesis structure...';
+  String get loadingMessage1 => 'Preparing your academic structure...';
 
   @override
-  String get loadingMessage2 => 'This process takes about 4-7 minutes...';
+  String get loadingMessage2 => 'Organizing your learning materials...';
 
   @override
-  String get loadingMessage3 => 'Crafting your academic journey...';
+  String get loadingMessage3 => 'Building your academic framework...';
 
   @override
-  String get loadingMessage4 => 'Organizing your research framework...';
+  String get loadingMessage4 => 'Structuring your research outline...';
 
   @override
-  String get loadingMessage5 => 'Building a solid foundation for your thesis...';
+  String get loadingMessage5 => 'Creating your learning foundation...';
 
   @override
-  String get loadingMessage6 => 'Almost there, finalizing your outline...';
+  String get loadingMessage6 => 'Almost there, finalizing your structure...';
 
   @override
-  String get createThesis => 'Create Thesis';
+  String get createThesis => 'Create Structure';
 
   @override
-  String get thesisTopic => 'Thesis Topic';
+  String get thesisTopic => 'Research Topic';
 
   @override
-  String get enterThesisTopic => 'Enter your thesis topic';
+  String get enterThesisTopic => 'Enter your research topic';
 
   @override
   String get pleaseEnterTopic => 'Please enter a topic';
 
   @override
-  String get generateChapters => 'Generate Chapters';
+  String get generateChapters => 'Create Sections';
 
   @override
-  String get generatedChapters => 'Generated Chapters';
+  String get generatedChapters => 'Created Sections';
 
   @override
   String chapter(Object number) {
-    return 'Chapter $number';
+    return 'Section $number';
   }
 
   @override
-  String get pleaseEnterChapterTitle => 'Please enter chapter title';
+  String get pleaseEnterChapterTitle => 'Please enter section title';
 
   @override
-  String get writingStyle => 'Writing Style';
+  String get writingStyle => 'Academic Style';
 
   @override
   String get format => 'Format';
 
   @override
-  String get generateThesis => 'Generate Thesis';
+  String get generateThesis => 'Create Structure';
 
   @override
-  String get pleaseEnterThesisTopicFirst => 'Please enter a thesis topic first';
+  String get pleaseEnterThesisTopicFirst => 'Please enter a research topic first';
 
   @override
   String failedToGenerateChapters(Object error) {
-    return 'Failed to generate chapters: $error';
+    return 'Failed to create sections: $error';
   }
 
   @override
   String errorGeneratingThesis(Object error) {
-    return 'Error generating thesis: $error';
+    return 'Error creating structure: $error';
   }
 
   @override
-  String get generatingContent => 'Generating content...';
+  String get generatingContent => 'Creating content...';
+
+  @override
+  String get pleaseCompleteAllChapters => 'Please complete all section titles';
+
+  @override
+  String get requiredChaptersMissing => 'Introduction and Conclusion sections are required';
+
+  @override
+  String get openFile => 'Open File';
+
+  @override
+  String get errorGeneratingOutlines => 'Error Creating Outline';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get addText => 'Add Text';
+
+  @override
+  String get highlight => 'Highlight';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get savePdf => 'Save PDF';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get thesisOutline => 'Academic Outline';
 }

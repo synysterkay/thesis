@@ -3,7 +3,6 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/thesis_provider.dart';
 import '../widgets/thesis_formatting_toolbar.dart';
 import '../utils/text_styles.dart';
@@ -47,10 +46,8 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
         ? widget.initialContent
         : '${widget.initialContent}\n';
 
-    _controller = QuillController(
-      document: Document.fromJson([{"insert": content}]),
-      selection: const TextSelection.collapsed(offset: 0),
-    );
+    _controller = QuillController.basic();
+    _controller.document = Document.fromJson([{"insert": content}]);
 
     _controller.changes.listen((event) {
       setState(() => _isDirty = true);
@@ -59,7 +56,6 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -99,7 +95,7 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
                   children: [
                     Icon(Icons.flag_outlined, color: Colors.red[700], size: 20),
                     SizedBox(width: 8),
-                    Text(l10n.reportContent, style: GoogleFonts.lato()),
+                    Text('Report Content', style: GoogleFonts.lato()),
                   ],
                 ),
               ),
@@ -131,8 +127,41 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
                 ),
               ],
             ),
-            child: ThesisFormattingToolbar(
+            child: QuillSimpleToolbar(
               controller: _controller,
+              config: QuillSimpleToolbarConfig(
+                showClipboardPaste: false,
+                showClipboardCopy: false,
+                showClipboardCut: false,
+                showUndo: true,
+                showRedo: true,
+                showFontFamily: false,
+                showFontSize: true,
+                showBoldButton: true,
+                showItalicButton: true,
+                showUnderLineButton: true,
+                showStrikeThrough: false,
+                showInlineCode: false,
+                showColorButton: false,
+                showBackgroundColorButton: false,
+                showClearFormat: true,
+                showAlignmentButtons: true,
+                showLeftAlignment: true,
+                showCenterAlignment: true,
+                showRightAlignment: true,
+                showJustifyAlignment: false,
+                showHeaderStyle: true,
+                showListNumbers: true,
+                showListBullets: true,
+                showListCheck: false,
+                showCodeBlock: false,
+                showQuote: true,
+                showIndent: true,
+                showLink: false,
+                showSearchButton: false,
+                showSubscript: false,
+                showSuperscript: false,
+              ),
             ),
           ),
           Expanded(
@@ -153,37 +182,14 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
                 controller: _controller,
                 focusNode: _focusNode,
                 scrollController: _scrollController,
-                configurations: QuillEditorConfigurations(
+                config: QuillEditorConfig(
                   autoFocus: false,
                   padding: EdgeInsets.all(16),
                   showCursor: true,
                   enableInteractiveSelection: true,
                   expands: false,
                   scrollable: true,
-                  placeholder: l10n.startWritingHere,
-                  customStyles: DefaultStyles(
-                    h1: DefaultTextBlockStyle(
-                      ThesisTextStyles.heading1,
-                      const HorizontalSpacing(0, 0),
-                      const VerticalSpacing(8, 4),
-                      const VerticalSpacing(0, 0),
-                      BoxDecoration(),
-                    ),
-                    h2: DefaultTextBlockStyle(
-                      ThesisTextStyles.heading2,
-                      const HorizontalSpacing(0, 0),
-                      const VerticalSpacing(6, 3),
-                      const VerticalSpacing(0, 0),
-                      BoxDecoration(),
-                    ),
-                    paragraph: DefaultTextBlockStyle(
-                      ThesisTextStyles.bodyText,
-                      const HorizontalSpacing(0, 0),
-                      const VerticalSpacing(0, 0),
-                      const VerticalSpacing(0, 0),
-                      BoxDecoration(),
-                    ),
-                  ),
+                  placeholder: 'Begin your practice here...',
                 ),
               ),
             ),
@@ -194,24 +200,20 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   }
 
   void _handleBack(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     if (_isDirty) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(l10n.unsavedChanges,
-              style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
+          title: Text('Unsaved Changes', style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
           content:
-          Text(l10n.saveChangesQuestion, style: GoogleFonts.lato()),
+          Text('Do you want to save your progress?', style: GoogleFonts.lato()),
           actions: [
             TextButton(
-              child: Text(l10n.discard,
-                  style: GoogleFonts.lato(color: Colors.grey)),
+              child: Text('Discard', style: GoogleFonts.lato(color: Colors.grey)),
               onPressed: () => Navigator.of(context).pop(true),
             ),
             TextButton(
-              child: Text(l10n.save,
-                  style: GoogleFonts.lato(color: Color(0xFF2196F3))),
+              child: Text('Save', style: GoogleFonts.lato(color: Color(0xFF2196F3))),
               onPressed: () {
                 _saveContent();
                 Navigator.of(context).pop(true);
@@ -230,24 +232,22 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   }
 
   void _showReportDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final TextEditingController reportController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.reportContent,
-            style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
+        title: Text('Report Content', style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(l10n.reportContentIssue, style: GoogleFonts.lato()),
+            Text('Please describe the issue with this content:', style: GoogleFonts.lato()),
             SizedBox(height: 16),
             TextField(
               controller: reportController,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: l10n.enterConcern,
+                hintText: 'Enter your concern...',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.all(12),
               ),
@@ -256,12 +256,12 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
         ),
         actions: [
           TextButton(
-            child: Text(l10n.cancel,
+            child: Text('Cancel',
                 style: GoogleFonts.lato(color: Colors.grey)),
             onPressed: () => Navigator.of(context).pop(),
           ),
           TextButton(
-            child: Text(l10n.submit,
+            child: Text('Submit',
                 style: GoogleFonts.lato(color: Colors.red[700])),
             onPressed: () {
               _submitReport(reportController.text);
@@ -274,10 +274,9 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   }
 
   void _submitReport(String reportText) {
-    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.reportSubmitted,
+        content: Text('Report submitted successfully',
             style: GoogleFonts.lato(color: Colors.white)),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
@@ -286,7 +285,6 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   }
 
   void _saveContent() {
-    final l10n = AppLocalizations.of(context)!;
     final plainText = _controller.document.toPlainText();
     ref.read(thesisStateProvider.notifier).updateChapter(
       widget.chapterIndex,
@@ -295,7 +293,7 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
     setState(() => _isDirty = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.changesSaved, style: GoogleFonts.lato()),
+        content: Text('Progress saved', style: GoogleFonts.lato()),
         backgroundColor: Color(0xFF2196F3),
       ),
     );

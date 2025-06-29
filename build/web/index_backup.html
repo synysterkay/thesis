@@ -6,8 +6,8 @@
   <title>Thesis Generator - AI-Powered Academic Writing Assistant</title>
   <meta name="description" content="Generate professional thesis chapters and outlines with AI. Perfect for students and researchers. Supports APA, MLA, Chicago formats.">
   <meta name="keywords" content="thesis generator, AI writing, academic writing, research paper, APA format, MLA format, Chicago style">
-  <meta name="author" content="Thesis Generator">
-  
+  <meta name="google-signin-client_id" content="1098826060423-c72smknm805s927ieg4tm5m8d9k0i1j1.apps.googleusercontent.com">
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://kaynelapps.github.io/thesis-web/">
@@ -29,10 +29,6 @@
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://js.stripe.com">
-  
- <!-- Stripe SDK -->
-  <script src="https://js.stripe.com/v3/"></script>
   
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -40,6 +36,33 @@
   <!-- CSS -->
   <link rel="stylesheet" href="css/landing.css">
   
+  <!-- Firebase v9 SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbErRqwrcX6-ogwmnmr98E3Q4H8KP4w9Q",
+      authDomain: "thesis-generator-web.firebaseapp.com",
+      projectId: "thesis-generator-web",
+      storageBucket: "thesis-generator-web.firebasestorage.app",
+      messagingSenderId: "1098826060423",
+      appId: "1:1098826060423:web:7ee70dc121234297f05e22",
+      measurementId: "G-BY0DNNV0K3"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    window.firebaseApp = app;
+    window.firebaseAuth = getAuth(app);
+    window.firebaseDb = getFirestore(app);
+    window.firebaseAnalytics = getAnalytics(app);
+    
+    console.log('🔥 Firebase initialized successfully');
+  </script>
+
   <!-- Schema.org structured data -->
   <script type="application/ld+json">
     {
@@ -94,8 +117,7 @@
         <a href="#pricing" class="nav-link">Pricing</a>
         <a href="#testimonials" class="nav-link">Reviews</a>
         <a href="#faq" class="nav-link">FAQ</a>
-        <button id="nav-login-btn" class="nav-link nav-cta" onclick="handleMainCTA()">Get Started</button>
-        <button id="nav-app-btn" class="nav-link nav-cta" style="display: none;">Open App</button>
+        <button id="nav-cta-btn" class="nav-link nav-cta" onclick="window.location.href='app.html'">Get Started</button>
       </div>
       <div class="nav-toggle" id="nav-toggle">
         <span></span>
@@ -105,18 +127,18 @@
     </div>
   </nav>
 
-  <!-- User Status Bar -->
+  <!-- User Status Bar (shown when logged in) -->
   <div class="user-status-bar" id="user-status-bar" style="display: none;">
     <div class="user-status-content">
       <div class="user-info">
         <div class="user-avatar">👤</div>
         <div>
           <div id="user-name">User Name</div>
-          <div id="subscription-status" class="subscription-status">No Active Subscription</div>
+          <div id="subscription-status" class="subscription-status">Checking subscription...</div>
         </div>
       </div>
       <div class="user-actions">
-        <button id="dashboard-btn">Dashboard</button>
+        <button id="access-app-btn" onclick="window.location.href='app.html'" style="display: none;">Access App</button>
         <button id="logout-btn">Logout</button>
       </div>
     </div>
@@ -125,82 +147,80 @@
   <main>
     <!-- Hero Section -->
     <section class="hero" id="hero">
-        <div class="hero-content-centered">
-            <div class="app-badge">
-                <span>🎓 AI-Powered</span>
-            </div>
-            <h1>Generate Your Thesis with AI</h1>
-            <p class="hero-subtitle">
-                Transform your research into a professional thesis in minutes with our AI-powered writing assistant.
-            </p>
-            <div class="features-preview">
-                <div class="feature-item">
-                    <span class="feature-icon">🤖</span>
-                    <span>AI Chapter Generation</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">📚</span>
-                    <span>APA, MLA, Chicago</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">✏️</span>
-                    <span>Fully Editable</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">⚡</span>
-                    <span>Instant Results</span>
-                </div>
-            </div>
-            <div class="cta-section">
-                <button id="start-generating" class="cta-primary" aria-label="Start writing thesis with AI">
-                    <span class="button-text">Start Writing My Thesis</span>
-                    <span class="button-arrow">→</span>
-                </button>
-                <p class="cta-subtitle">Professional AI writing • Secure & Private</p>
-            </div>
+      <div class="hero-content-centered">
+        <div class="app-badge">
+          <span>🎓 AI-Powered</span>
         </div>
+        <h1>Generate Your Thesis with AI</h1>
+        <p class="hero-subtitle">
+          Transform your research into a professional thesis in minutes with our AI-powered writing assistant.
+        </p>
+        <div class="features-preview">
+          <div class="feature-item">
+            <span class="feature-icon">🤖</span>
+            <span>AI Chapter Generation</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📚</span>
+            <span>APA, MLA, Chicago</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✏️</span>
+            <span>Fully Editable</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">⚡</span>
+            <span>Instant Results</span>
+          </div>
+        </div>
+        <div class="cta-section">
+          <button id="main-cta-btn" class="cta-primary" onclick="window.location.href='app.html'" aria-label="Start writing thesis with AI">
+            <span class="button-text">Start Writing My Thesis</span>
+            <span class="button-arrow">→</span>
+          </button>
+          <p class="cta-subtitle">Professional AI writing • Secure & Private</p>
+        </div>
+      </div>
     </section>
 
     <!-- Benefits Section -->
     <section class="benefits" id="benefits">
-        <div class="benefits-container">
-            <h2>Why Choose Thesis Generator?</h2>
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <div class="benefit-icon">🎯</div>
-                    <h3>Smart Chapter Structure</h3>
-                    <p>AI automatically generates logical chapter outlines based on your topic and academic field.</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon">📝</div>
-                    <h3>Multiple Writing Styles</h3>
-                    <p>Choose from Academic, Technical, or Analytical writing styles to match your requirements.</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon">📋</div>
-                    <h3>Citation Formats</h3>
-                    <p>Supports APA, MLA, and Chicago citation styles for proper academic formatting.</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon">⚡</div>
-                    <h3>Instant Generation</h3>
-                    <p>Generate complete thesis chapters in minutes with our advanced AI technology.</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon">🔒</div>
-                    <h3>Privacy Focused</h3>
-                    <p>Your thesis content is processed securely and never stored or shared with third parties.</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon">💾</div>
-                    <h3>Export Options</h3>
-                    <p>Download your thesis in multiple formats including PDF, Word, and plain text.</p>
-                </div>
-            </div>
+      <div class="benefits-container">
+        <h2>Why Choose Thesis Generator?</h2>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">🎯</div>
+            <h3>Smart Chapter Structure</h3>
+            <p>AI automatically generates logical chapter outlines based on your topic and academic field.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">📝</div>
+            <h3>Multiple Writing Styles</h3>
+            <p>Choose from Academic, Technical, or Analytical writing styles to match your requirements.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">📋</div>
+            <h3>Citation Formats</h3>
+            <p>Supports APA, MLA, and Chicago citation styles for proper academic formatting.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">⚡</div>
+            <h3>Instant Generation</h3>
+            <p>Generate complete thesis chapters in minutes with our advanced AI technology.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">🔒</div>
+            <h3>Privacy Focused</h3>
+            <p>Your thesis content is processed securely and never stored or shared with third parties.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">💾</div>
+            <h3>Export Options</h3>
+            <p>Download your thesis in multiple formats including PDF, Word, and plain text.</p>
+          </div>
         </div>
+      </div>
     </section>
-
-
 
     <!-- How It Works Section -->
     <section class="how-it-works" id="how-it-works">
@@ -243,7 +263,7 @@
         </div>
         <div class="pricing-grid">
           <!-- Weekly Plan -->
-          <div class="pricing-card weekly-plan">
+          <div class="pricing-card weekly-plan" data-plan="weekly">
             <div class="plan-header">
               <h3 class="plan-name">Weekly</h3>
               <div class="plan-price">
@@ -278,11 +298,11 @@
                 <span>Export to PDF & Word</span>
               </div>
             </div>
-            <button class="plan-button weekly-button" onclick="selectPlan('weekly')">Choose Weekly Plan</button>
+            <button class="plan-button" onclick="window.location.href='app.html'" data-plan="weekly">Choose Weekly Plan</button>
           </div>
           
           <!-- Monthly Plan (Most Popular) -->
-          <div class="pricing-card monthly-plan popular">
+          <div class="pricing-card monthly-plan popular" data-plan="monthly">
             <div class="popular-badge">Most Popular</div>
             <div class="plan-header">
               <h3 class="plan-name">Monthly</h3>
@@ -305,7 +325,7 @@
                 <span class="feature-icon">✅</span>
                 <span>Advanced editing tools</span>
               </div>
-              <div class="feature-item">
+                           <div class="feature-item">
                 <span class="feature-icon">✅</span>
                 <span>Plagiarism checker</span>
               </div>
@@ -318,7 +338,7 @@
                 <span>Collaboration features</span>
               </div>
             </div>
-            <button class="plan-button monthly-button" onclick="selectPlan('monthly')">Choose Monthly Plan</button>
+            <button class="plan-button" onclick="window.location.href='app.html'" data-plan="monthly">Choose Monthly Plan</button>
           </div>
         </div>
         <div class="pricing-footer">
@@ -502,11 +522,10 @@
       <div class="cta-container">
         <h2>Ready to Write Your Thesis?</h2>
         <p>Join thousands of students and researchers who trust AI to help with their academic writing.</p>
-       <button id="start-generating-bottom" class="cta-primary large" onclick="handleMainCTA()" aria-label="Generate thesis with AI now">
-  <span class="button-text">Start Your Subscription</span>
-  <span class="button-arrow">→</span>
-</button>
-
+        <button id="final-cta-btn" class="cta-primary large" onclick="window.location.href='app.html'" aria-label="Generate thesis with AI now">
+          <span class="button-text">Start Your Subscription</span>
+          <span class="button-arrow">→</span>
+        </button>
         <div class="trust-indicators">
           <div class="trust-item">Secure Payments</div>
           <div class="trust-item">Instant Access</div>
@@ -596,147 +615,23 @@
     </div>
   </div>
 
-  <!-- Authentication Modal -->
-  <div id="auth-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="auth-title">Sign In</h2>
-        <button class="modal-close" id="close-auth-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="auth-tabs">
-          <button class="auth-tab active" data-tab="signin">Sign In</button>
-          <button class="auth-tab" data-tab="signup">Sign Up</button>
-        </div>
-        <form id="auth-form">
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" required>
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" required>
-          </div>
-          <div class="form-group" id="confirm-password-group" style="display: none;">
-            <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password">
-          </div>
-          <button type="submit" class="auth-submit-btn">Sign In</button>
-        </form>
-        <div class="auth-divider">
-          <span>or</span>
-        </div>
-        <button id="google-signin" class="google-signin-btn">
-          <span class="google-icon">🔍</span>
-          Continue with Google
-        </button>
-        <div class="auth-links">
-          <a href="#" id="forgot-password">Forgot Password?</a>
-        </div>
-      </div>
+  <!-- Success Messages -->
+  <div id="success-message" class="success-message" style="display: none;">
+    <div class="success-content">
+      <span class="success-icon">✅</span>
+      <span class="success-text">Success!</span>
     </div>
   </div>
 
-  <!-- Subscription Modal -->
-  <div id="subscription-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Choose Your Plan</h2>
-        <button class="modal-close" id="close-subscription-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="subscription-plans">
-          <div class="plan-option" data-plan="weekly">
-            <h3>Weekly Plan</h3>
-            <div class="plan-price">$9.99/week</div>
-            <p>Perfect for short-term projects</p>
-            <button class="plan-button" onclick="selectPlan('weekly')">Choose Weekly</button>
-          </div>
-          <div class="plan-option popular" data-plan="monthly">
-            <div class="popular-badge">Most Popular</div>
-            <h3>Monthly Plan</h3>
-            <div class="plan-price">$26.99/month</div>
-            <p>Best value for ongoing work</p>
-            <button class="plan-button" onclick="selectPlan('monthly')">Choose Monthly</button>
-          </div>
-        </div>
-              </div>
+  <!-- Notification Toast -->
+  <div id="notification-toast" class="notification-toast" style="display: none;">
+    <div class="toast-content">
+      <span class="toast-icon"></span>
+      <span class="toast-message"></span>
     </div>
   </div>
 
-  <!-- Payment Modal -->
-  <div id="payment-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Complete Your Purchase</h2>
-        <button class="modal-close" id="close-payment-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="payment-summary">
-          <h3 id="selected-plan-title">Monthly Plan</h3>
-          <div class="plan-details">
-            <div class="plan-price" id="selected-plan-price">$26.99/month</div>
-            <p id="selected-plan-description">Best value for ongoing thesis work</p>
-          </div>
-        </div>
-        <div id="payment-error" class="payment-error" style="display: none;"></div>
-
-<div class="payment-form">
-  <div id="card-element">
-    <!-- Stripe Elements will create form elements here -->
-  </div>
-  <div id="card-errors" role="alert"></div>
-  
-  <button id="submit-payment" class="cta-primary">
-    <span class="button-text">Complete Purchase</span>
-    <span class="button-arrow">→</span>
-  </button>
-</div>
-        <div class="payment-form">
-          <div id="card-element">
-            <!-- Stripe Elements will create form elements here -->
-          </div>
-          <div id="card-errors" role="alert"></div>
-          
-          <button id="submit-payment" class="cta-primary">
-            <span class="button-text">Complete Purchase</span>
-            <span class="button-arrow">→</span>
-          </button>
-        </div>
-        
-        <div class="payment-security">
-          <div class="security-badges">
-            <div class="security-item">
-              <span class="security-icon">🔒</span>
-              <span>Secure Payment</span>
-            </div>
-            <div class="security-item">
-              <span class="security-icon">🛡️</span>
-              <span>SSL Protected</span>
-            </div>
-            <div class="security-item">
-              <span class="security-icon">💳</span>
-              <span>Stripe Powered</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cookie Consent Banner -->
-  <div id="cookie-banner" class="cookie-banner" style="display: none;">
-    <div class="cookie-content">
-      <p>We use cookies to enhance your experience and analyze site usage. By continuing to use this site, you consent to our use of cookies.</p>
-      <div class="cookie-actions">
-        <button id="accept-cookies" class="cookie-btn accept">Accept</button>
-        <button id="decline-cookies" class="cookie-btn decline">Decline</button>
-        <a href="/privacy" class="cookie-link">Learn More</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Structured Data for SEO -->
+  <!-- Structured Data for FAQ -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -771,167 +666,39 @@
   </script>
 
   <!-- Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BY0DNNV0K3"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'GA_MEASUREMENT_ID');
+    gtag('config', 'G-BY0DNNV0K3');
   </script>
 
-  <!-- Stripe SDK -->
-<script src="https://js.stripe.com/v3/"></script>
-
-<!-- Firebase SDK (using compat version to avoid module issues) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
-
-<!-- Replace the existing Firebase configuration script with: -->
-<script>
-  // Firebase configuration - CORRECTED
-  const firebaseConfig = {
-    apiKey: "AIzaSyBbErRqwrcX6-ogwmnmr98E3Q4H8KP4w9Q",
-    authDomain: "thesis-generator-web.firebaseapp.com",
-    projectId: "thesis-generator-web",
-    storageBucket: "thesis-generator-web.firebasestorage.app",
-    messagingSenderId: "1098826060423",
-    appId: "1:1098826060423:web:7ee70dc121234297f05e22",
-    measurementId: "G-BY0DNNV0K3"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  
-  // Initialize services
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const analytics = firebase.analytics();
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
-  
-  // Configure Google provider
-  googleProvider.addScope('email');
-  googleProvider.addScope('profile');
-  
-  // Make Firebase services available globally
-  window.firebaseAuth = auth;
-  window.firebaseDb = db;
-  window.firebaseAnalytics = analytics;
-  window.googleProvider = googleProvider;
-  
-  // Make Firebase methods available globally
-  window.firebase = firebase;
-  
-  // Auth state listener
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      console.log('👤 User signed in:', user.email);
-      // Track sign in event
-      analytics.logEvent('login', {
-        method: user.providerData[0]?.providerId || 'email'
-      });
-      // Update UI for signed-in user
-      updateUIForSignedInUser(user);
-    } else {
-      console.log('👤 User signed out');
-      // Update UI for signed-out user
-      updateUIForSignedOutUser();
-    }
-  });
-  
-  // Helper functions for UI updates
- function updateUIForSignedInUser(user) {
-  // Update nav buttons
-  const navLoginBtn = document.getElementById('nav-login-btn');
-  const userStatusBar = document.getElementById('user-status-bar');
-  const userName = document.getElementById('user-name');
-  
-  if (navLoginBtn) navLoginBtn.style.display = 'none';
-  // ❌ REMOVED: Dashboard button logic
-  if (userStatusBar) userStatusBar.style.display = 'flex';
-  if (userName) userName.textContent = user.displayName || user.email.split('@')[0];
-  
-  console.log('✅ UI updated for signed-in user:', user.email);
-}
-
-  
- function updateUIForSignedOutUser() {
-  // Reset nav buttons
-  const navLoginBtn = document.getElementById('nav-login-btn');
-  const userStatusBar = document.getElementById('user-status-bar');
-  
-  if (navLoginBtn) navLoginBtn.style.display = 'inline-block';
-  // ❌ REMOVED: Dashboard button logic
-  if (userStatusBar) userStatusBar.style.display = 'none';
-  
-  console.log('✅ UI updated for signed-out user');
-}
-
-  
-  // Global auth modal function
-  window.showAuthModal = function() {
-    const modal = document.getElementById('auth-modal');
-    if (modal) {
-      modal.style.display = 'flex';
-      modal.classList.add('show');
-      document.body.classList.add('no-scroll');
-      // Track modal open event
-      analytics.logEvent('auth_modal_opened');
-    }
-  };
-
-  // Global functions
-  window.goToApp = function() {
-    window.location.href = 'app.html';
-  };
-  
-  window.signOutUser = async function() {
-    try {
-      await auth.signOut();
-      console.log('✅ User signed out successfully');
-      // Track sign out event
-      analytics.logEvent('logout');
-      // Remove any user menus
-      const userMenus = document.querySelectorAll('.user-menu');
-      userMenus.forEach(menu => menu.remove());
-    } catch (error) {
-      console.error('❌ Sign out error:', error);
-    }
-  };
-
-  console.log('🔥 Firebase initialized successfully with project: thesis-generator-web');
-</script>
-
-
-  <!-- Main JavaScript -->
- <script type="module" src="js/firebase-config.js"></script>
-<script type="module" src="js/auth-manager.js"></script>
-<script src="js/payment-manager.js"></script>
-<script src="js/landing.js"></script>
+  <!-- Core JavaScript Files -->
+  <script src="js/auth.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
 
   <!-- Service Worker for PWA -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/js/sw.js')
-        .then(function(registration) {
-          console.log('✅ ServiceWorker registration successful');
-          console.log('📦 SW Scope:', registration.scope);
-        })
-        .catch(function(err) {
-          console.log('❌ ServiceWorker registration failed:', err);
-        });
-    });
-  }
-</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/js/sw.js')
+          .then(function(registration) {
+            console.log('✅ ServiceWorker registration successful');
+          })
+          .catch(function(err) {
+            console.log('❌ ServiceWorker registration failed:', err);
+          });
+      });
+    }
+  </script>
 
   <!-- Performance monitoring -->
   <script>
     window.addEventListener('load', function() {
       if ('performance' in window) {
         const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-        console.log('Page load time:', loadTime + 'ms');
+        console.log('📊 Page load time:', loadTime + 'ms');
         if (typeof gtag !== 'undefined') {
           gtag('event', 'timing_complete', {
             'name': 'load',
@@ -945,19 +712,318 @@
   <!-- Error tracking -->
   <script>
     window.addEventListener('error', function(e) {
-      console.error('JavaScript error:', e.error);
+      console.error('❌ JavaScript error:', e.error);
       if (typeof gtag !== 'undefined') {
         gtag('event', 'exception', {
-          'description': e.error.toString(),
+          'description': e.error?.toString() || 'Unknown error',
+          'fatal': false
+        });
+      }
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('❌ Unhandled promise rejection:', e.reason);
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'exception', {
+          'description': 'Promise rejection: ' + (e.reason?.toString() || 'Unknown'),
           'fatal': false
         });
       }
     });
   </script>
 
+  <!-- URL Parameter Handling -->
+  <script>
+    // Handle URL parameters for payment success/cancel
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      if (urlParams.get('success') === 'true') {
+        showNotification('Welcome! Redirecting to your thesis generator...', 'success');
+        setTimeout(() => {
+          window.location.href = 'app.html';
+        }, 2000);
+      }
+      
+      if (urlParams.get('canceled') === 'true') {
+        showNotification('You can start using the thesis generator anytime.', 'info');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      if (urlParams.get('subscription_required') === 'true') {
+        showNotification('Welcome to the thesis generator!', 'info');
+        setTimeout(() => {
+          document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+        }, 1000);
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    });
+
+    // Global notification function
+    function showNotification(message, type = 'info') {
+      const toast = document.getElementById('notification-toast');
+      const icon = document.querySelector('.toast-icon');
+      const messageEl = document.querySelector('.toast-message');
+      
+      // Set icon based on type
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+      
+      icon.textContent = icons[type] || icons.info;
+      messageEl.textContent = message;
+      
+      // Set colors based on type
+      const colors = {
+        success: '#28a745',
+        error: '#dc3545',
+        warning: '#ffc107',
+        info: '#007bff'
+      };
+      
+      toast.style.backgroundColor = colors[type] || colors.info;
+      toast.style.display = 'flex';
+      toast.classList.add('show');
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 300);
+      }, 5000);
+    }
+
+    // Make it globally available
+    window.showNotification = showNotification;
+  </script>
+
+  <!-- FAQ Accordion Functionality -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const faqItems = document.querySelectorAll('.faq-item');
+      
+      faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        const icon = item.querySelector('.faq-icon');
+        
+        question.addEventListener('click', () => {
+          const isOpen = question.getAttribute('aria-expanded') === 'true';
+          
+          // Close all other items
+          faqItems.forEach(otherItem => {
+            if (otherItem !== item) {
+              const otherQuestion = otherItem.querySelector('.faq-question');
+              const otherAnswer = otherItem.querySelector('.faq-answer');
+              const otherIcon = otherItem.querySelector('.faq-icon');
+              
+              otherQuestion.setAttribute('aria-expanded', 'false');
+              otherAnswer.style.maxHeight = '0';
+              otherIcon.textContent = '+';
+            }
+          });
+          
+          // Toggle current item
+          if (isOpen) {
+            question.setAttribute('aria-expanded', 'false');
+            answer.style.maxHeight = '0';
+            icon.textContent = '+';
+          } else {
+            question.setAttribute('aria-expanded', 'true');
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+            icon.textContent = '−';
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- Smooth Scrolling for Navigation -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+
+      // Mobile navigation toggle
+      const navToggle = document.getElementById('nav-toggle');
+      const navMenu = document.getElementById('nav-menu');
+      
+      if (navToggle && navMenu) {
+        navToggle.addEventListener('click', () => {
+          navMenu.classList.toggle('active');
+          navToggle.classList.toggle('active');
+        });
+      }
+
+      // Close mobile menu when clicking on a link
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          navMenu.classList.remove('active');
+          navToggle.classList.remove('active');
+        });
+      });
+
+      // Scroll progress bar
+      const progressBar = document.querySelector('.scroll-progress');
+      if (progressBar) {
+        window.addEventListener('scroll', () => {
+          const scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+          progressBar.style.width = scrolled + '%';
+        });
+      }
+
+      // Back to top button
+      const backToTop = document.getElementById('back-to-top');
+      if (backToTop) {
+        window.addEventListener('scroll', () => {
+          if (window.scrollY > 300) {
+            backToTop.style.display = 'block';
+          } else {
+            backToTop.style.display = 'none';
+          }
+        });
+
+        backToTop.addEventListener('click', () => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+      }
+
+      // Animated counters for stats
+      const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px 0px -100px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const counter = entry.target;
+            const target = parseInt(counter.getAttribute('data-target'));
+            const increment = target / 100;
+            let current = 0;
+
+            const updateCounter = () => {
+              if (current < target) {
+                current += increment;
+                counter.textContent = Math.ceil(current);
+                requestAnimationFrame(updateCounter);
+              } else {
+                counter.textContent = target;
+              }
+            };
+
+            updateCounter();
+            observer.unobserve(counter);
+          }
+        });
+      }, observerOptions);
+
+      // Observe all stat numbers
+      document.querySelectorAll('.stat-number').forEach(counter => {
+        observer.observe(counter);
+      });
+    });
+  </script>
+
+  <!-- Accessibility Enhancements -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Keyboard navigation for modals
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          // Close any open modals
+          document.querySelectorAll('.modal').forEach(modal => {
+            if (modal.style.display === 'flex') {
+              modal.style.display = 'none';
+              document.body.classList.remove('no-scroll');
+            }
+          });
+        }
+      });
+
+      // Skip link functionality
+      const skipLink = document.querySelector('.skip-link');
+      if (skipLink) {
+        skipLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.focus();
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+    });
+  </script>
+
+  <!-- Button Click Tracking -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Track button clicks for analytics
+      const buttons = [
+        'nav-cta-btn',
+        'main-cta-btn', 
+        'final-cta-btn',
+        'access-app-btn'
+      ];
+
+      buttons.forEach(buttonId => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+          button.addEventListener('click', function() {
+            // Track with Google Analytics
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'click', {
+                'event_category': 'CTA',
+                'event_label': buttonId,
+                'value': 1
+              });
+            }
+            console.log(`🔗 Button clicked: ${buttonId} - Redirecting to app.html`);
+          });
+        }
+      });
+
+      // Track plan button clicks
+      document.querySelectorAll('.plan-button').forEach(button => {
+        button.addEventListener('click', function() {
+          const plan = this.getAttribute('data-plan');
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'click', {
+              'event_category': 'Pricing',
+              'event_label': plan + '_plan',
+              'value': 1
+            });
+          }
+          console.log(`💰 Plan selected: ${plan} - Redirecting to app.html`);
+        });
+      });
+    });
+  </script>
+
   <!-- Preload critical resources for next page -->
   <link rel="preload" href="app.html" as="document">
-  <link rel="preload" href="main.dart.js" as="script">
+  <link rel="prefetch" href="main.dart.js">
 
 </body>
 </html>

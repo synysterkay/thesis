@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'screens/error_screen.dart';
+import 'screens/initialization_screen.dart'; // Add this import
 import 'dart:async';
 import 'dart:io';
 import 'app.dart';
@@ -21,7 +22,10 @@ import 'providers/analytics_provider.dart';
 import 'services/navigation_service.dart';
 import 'services/gemini_service.dart';
 import 'providers/gemini_provider.dart';
-import 'package:superwallkit_flutter/superwallkit_flutter.dart';
+import 'providers/auth_provider.dart';
+import 'providers/subscription_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class InitializationException implements Exception {
   final String message;
@@ -36,7 +40,7 @@ late AppsflyerSdk appsflyerSdk;
 
 Future<void> initializeAppsFlyer() async {
   if (kIsWeb) return; // Skip on web
-  
+
   final Map<String, dynamic> appsFlyerOptions = {
     "afDevKey": "2D7j92NP2LR5CSp95o3iX7",
     "afAppId": "id6739264844",
@@ -63,27 +67,9 @@ Future<void> initializeAppsFlyer() async {
   }
 }
 
-Future<void> initializeSuperwall() async {
-  if (kIsWeb) return; // Skip on web
-  
-  // Determine Superwall API Key for platform
-  String apiKey;
-  try {
-    apiKey = Platform.isIOS
-        ? "pk_fedee2171cfccbd5de869601a33a9c196ec9b838c6f6edec"
-        : "pk_73a34d6e8a5cc3d5a7244f23a39440becef5182393fe8f2c";
-  } catch (e) {
-    // Fallback for web or unsupported platforms
-    apiKey = "pk_73a34d6e8a5cc3d5a7244f23a39440becef5182393fe8f2c";
-  }
-
-  await Superwall.configure(apiKey);
-  print("✅ Superwall initialized successfully");
-}
-
 Future<void> requestTrackingPermission() async {
   if (kIsWeb) return; // Skip on web
-  
+
   try {
     if (Platform.isIOS) {
       final status = await AppTrackingTransparency.trackingAuthorizationStatus;
@@ -99,7 +85,7 @@ Future<void> requestTrackingPermission() async {
 
 Future<void> requestPermissions() async {
   if (kIsWeb) return; // Skip on web
-  
+
   try {
     if (Platform.isAndroid) {
       await Permission.storage.request();
@@ -145,6 +131,8 @@ Future<void> initializeServices() async {
       final container = ProviderContainer();
       container.read(localeProvider.notifier).setLocale(savedLanguage.split('_')[0]);
     }
+
+    print('✅ Core services initialized successfully');
   } catch (e) {
     throw InitializationException('Failed to initialize services', e);
   }
@@ -152,75 +140,112 @@ Future<void> initializeServices() async {
 
 Future<void> initializeAds() async {
   if (kIsWeb) return; // Skip on web
-  
-  await MobileAds.instance.initialize();
-  await FacebookAudienceNetwork.init();
-  final params = ConsentRequestParameters();
-  ConsentInformation.instance.requestConsentInfoUpdate(
-    params,
-        () async {
-      if (await ConsentInformation.instance.isConsentFormAvailable()) {
-        ConsentForm.loadConsentForm(
-              (ConsentForm consentForm) async {
-            consentForm.show((FormError? formError) {});
-          },
-              (error) => print('Consent form error: $error'),
-        );
-      }
-    },
-        (error) => print('Consent info update error: $error'),
-  );
-  MobileAds.instance.updateRequestConfiguration(
-    RequestConfiguration(
-      testDeviceIds: ['EMULATOR'],
-      maxAdContentRating: MaxAdContentRating.g,
-      tagForChildDirectedTreatment: TagForChildDirectedTreatment.unspecified,
-      tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.unspecified,
-    ),
-  );
+
+  try {
+    await MobileAds.instance.initialize();
+    await FacebookAudienceNetwork.init();
+
+    final params = ConsentRequestParameters();
+    ConsentInformation.instance.requestConsentInfoUpdate(
+      params,
+          () async {
+        if (await ConsentInformation.instance.isConsentFormAvailable()) {
+          ConsentForm.loadConsentForm(
+                (ConsentForm consentForm) async {
+              consentForm.show((FormError? formError) {});
+            },
+                (error) => print('Consent form error: $error'),
+          );
+        }
+      },
+          (error) => print('Consent info update error: $error'),
+    );
+
+    MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(
+        testDeviceIds: ['EMULATOR'],
+        maxAdContentRating: MaxAdContentRating.g,
+        tagForChildDirectedTreatment: TagForChildDirectedTreatment.unspecified,
+        tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.unspecified,
+      ),
+    );
+
+    print('✅ Ads initialized successfully');
+  } catch (e) {
+    print('❌ Ads initialization failed: $e');
+  }
 }
 
 void main() {
+  BindingBase.debugZoneErrorsAreFatal = false;
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // ALWAYS start with the splash screen
-    final String initialRoute = '/';
+    print('🚀 Starting Thesis Generator App...');
 
-    // Initialize Firebase
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-
-    List<Override> overrides = [];
-    if (!kIsWeb) { 
-      // Initialize GeminiService
-      final geminiService = GeminiService();
-      await geminiService.initializeRemoteConfig();
-      overrides.add(geminiServiceProvider.overrideWithValue(geminiService));
-
-      analytics = FirebaseAnalytics.instance;
-      await analytics.logAppOpen();
-
-      await initializeAds();
-      
-      // Safe platform checks
-      try {
-        if (Platform.isIOS) {
-          await requestTrackingPermission();
-          await initializeAppsFlyer();
-        }
-      } catch (e) {
-        print('Platform-specific initialization failed: $e');
-      }
-      
-      await requestPermissions();
+    if (kIsWeb) {
+      // Configure Google Sign-In for web
+      print('🔧 Configuring Google Sign-In for web...');
     }
 
-    await initializeServices();
-    await initializeSuperwall();
+    // Initialize Firebase first
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      print('✅ Firebase initialized successfully');
+    } catch (e) {
+      print('❌ Firebase initialization failed: $e');
+      throw InitializationException('Firebase initialization failed', e);
+    }
 
+    // Prepare provider overrides
+    List<Override> overrides = [];
+
+    if (!kIsWeb) {
+      try {
+        // Initialize GeminiService
+        final geminiService = GeminiService();
+        await geminiService.initializeRemoteConfig();
+        overrides.add(geminiServiceProvider.overrideWithValue(geminiService));
+
+        // Initialize Firebase Analytics
+        analytics = FirebaseAnalytics.instance;
+        await analytics.logAppOpen();
+        print('✅ Firebase Analytics initialized');
+
+        // Initialize ads
+        await initializeAds();
+
+        // Platform-specific initialization
+        try {
+          if (Platform.isIOS) {
+            await requestTrackingPermission();
+            await initializeAppsFlyer();
+          }
+        } catch (e) {
+          print('❌ Platform-specific initialization failed: $e');
+        }
+
+        await requestPermissions();
+      } catch (e) {
+        print('❌ Mobile-specific initialization failed: $e');
+      }
+    }
+
+    // Initialize core services
+    await initializeServices();
+
+    // Create provider container
     final container = ProviderContainer(overrides: overrides);
+
+    // For web, always start with initialization screen
+    // For mobile, use splash screen or initialization screen
+    final String initialRoute = kIsWeb ? '/initialization' : '/';
+
+    print('✅ App initialization completed');
+    print('📱 Platform: ${kIsWeb ? 'Web' : 'Mobile'}');
+    print('🔗 Initial route: $initialRoute');
 
     runApp(
       ProviderScope(
@@ -229,12 +254,57 @@ void main() {
       ),
     );
   }, (error, stack) {
-    debugPrint('💥 Fatal error: $error\n$stack');
+    print('💥 Fatal error during app initialization: $error');
+    print('📋 Stack trace: $stack');
+
     runApp(
       MaterialApp(
         home: Scaffold(
+          backgroundColor: Colors.black,
           body: Center(
-            child: Text('A fatal error occurred: ${error.toString()}'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 80,
+                  color: Colors.red,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'App Initialization Failed',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    'A fatal error occurred during startup: ${error.toString()}',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    // Restart the app
+                    main();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF9D4EDD),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

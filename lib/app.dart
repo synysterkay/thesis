@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'services/navigation_service.dart';
 import 'screens/splash_screen.dart';
+import 'screens/initialization_screen.dart';
 import 'screens/thesis_form_screen.dart';
 import 'screens/outline_viewer_screen.dart';
 import 'screens/export_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/language_selection_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'screens/chapter_editor_screen.dart';
 import 'screens/onboard_screen.dart';
 import 'providers/locale_provider.dart';
@@ -25,7 +24,14 @@ import 'screens/onboarding/page_count_screen.dart';
 import 'screens/onboarding/processing_screen.dart';
 import 'screens/onboarding/thesis_preview_screen.dart';
 import 'screens/onboarding/thesis_details_screen.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+// Auth and subscription screens
+import 'screens/signin_screen.dart';
+import 'screens/paywall_screen.dart';
+// Providers
+import 'providers/auth_provider.dart';
+import 'providers/subscription_provider.dart';
+// Widgets
+import 'widgets/protected_route.dart';
 
 // Only import html for web-specific functionality
 import 'package:universal_html/html.dart' as html show window, document;
@@ -34,39 +40,21 @@ class MyApp extends ConsumerWidget {
   final String initialRoute;
   const MyApp({
     super.key,
-   this.initialRoute = '/thesis-form', 
+    this.initialRoute = '/initialization',
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeProvider);
     final analytics = ref.watch(analyticsProvider);
-
-    // Determine the initial route based on platform
-    String effectiveInitialRoute = _determineInitialRoute();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
-      locale: locale,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en', 'US'),
-        Locale('es'),
-        Locale('fr'),
-        Locale('zh'),
-        Locale('hi'),
-      ],
       theme: _buildAppTheme(),
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: analytics),
       ],
-      initialRoute: effectiveInitialRoute,
+      initialRoute: '/initialization',
       routes: _buildAppRoutes(),
       onGenerateRoute: _handleDynamicRoutes,
       onUnknownRoute: _handleUnknownRoute,
@@ -74,27 +62,6 @@ class MyApp extends ConsumerWidget {
         return _AppWrapper(child: child);
       },
     );
-  }
-
-  /// Determine the initial route based on platform and URL
-  String _determineInitialRoute() {
-    if (kIsWeb) {
-      try {
-        // Simple web routing - avoid complex HTML operations
-        if (initialRoute == '/thesis-form' || initialRoute.contains('thesis')) {
-          return '/thesis-form';
-        }
-
-        // Default web route - go directly to thesis form
-        return '/thesis-form';
-      } catch (e) {
-        debugPrint('Error determining web route: $e');
-        return '/thesis-form';
-      }
-    } else {
-      // Mobile app - use splash screen
-      return initialRoute.isEmpty ? '/' : initialRoute;
-    }
   }
 
   /// Build the app theme
@@ -149,14 +116,14 @@ class MyApp extends ConsumerWidget {
         labelStyle: const TextStyle(color: Colors.white70),
         hintStyle: const TextStyle(color: Colors.white54),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: Colors.grey[900],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
         elevation: 4,
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: Colors.grey[900],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -193,23 +160,65 @@ class MyApp extends ConsumerWidget {
   Map<String, WidgetBuilder> _buildAppRoutes() {
     return {
       '/': (context) => const SplashScreen(),
+      '/initialization': (context) => const InitializationScreen(),
+      '/signin': (context) => const SignInScreen(),
+      '/paywall': (context) => const PaywallScreen(),
       '/language': (context) => const LanguageSelectionScreen(),
       '/onboard': (context) => const OnBoardScreen(),
-      '/thesis-form': (context) => const ThesisFormScreen(),
-      '/apiKey': (context) => const ApiKeyScreen(),
-      '/outline': (context) => const OutlineViewerScreen(),
-      '/export': (context) => const ExportScreen(),
+      '/thesis-form': (context) => const ProtectedRoute(
+        child: ThesisFormScreen(),
+        requiresSubscription: true,
+      ),
+      '/apiKey': (context) => const ProtectedRoute(
+        child: ApiKeyScreen(),
+        requiresSubscription: true,
+      ),
+      '/outline': (context) => const ProtectedRoute(
+        child: OutlineViewerScreen(),
+        requiresSubscription: true,
+      ),
+      '/export': (context) => const ProtectedRoute(
+        child: ExportScreen(),
+        requiresSubscription: true,
+      ),
 
       // New onboarding flow routes
-      '/onboarding1': (context) => const OnboardingScreen1(),
-      '/onboarding2': (context) => const OnboardingScreen2(),
-      '/onboarding3': (context) => const OnboardingScreen3(),
-      '/subject-selection': (context) => const SubjectSelectionScreen(),
-      '/academic-level': (context) => const AcademicLevelScreen(),
-      '/page-count': (context) => const PageCountScreen(),
-      '/processing': (context) => const ProcessingScreen(),
-      '/thesis-preview': (context) => const ThesisPreviewScreen(),
-      '/thesis-details': (context) => const ThesisDetailsScreen(),
+      '/onboarding1': (context) => const ProtectedRoute(
+        child: OnboardingScreen1(),
+        requiresSubscription: true,
+      ),
+      '/onboarding2': (context) => const ProtectedRoute(
+        child: OnboardingScreen2(),
+        requiresSubscription: true,
+      ),
+      '/onboarding3': (context) => const ProtectedRoute(
+        child: OnboardingScreen3(),
+        requiresSubscription: true,
+      ),
+      '/subject-selection': (context) => const ProtectedRoute(
+        child: SubjectSelectionScreen(),
+        requiresSubscription: true,
+      ),
+      '/academic-level': (context) => const ProtectedRoute(
+        child: AcademicLevelScreen(),
+        requiresSubscription: true,
+      ),
+      '/page-count': (context) => const ProtectedRoute(
+        child: PageCountScreen(),
+        requiresSubscription: true,
+      ),
+      '/processing': (context) => const ProtectedRoute(
+        child: ProcessingScreen(),
+        requiresSubscription: true,
+      ),
+      '/thesis-preview': (context) => const ProtectedRoute(
+        child: ThesisPreviewScreen(),
+        requiresSubscription: true,
+      ),
+      '/thesis-details': (context) => const ProtectedRoute(
+        child: ThesisDetailsScreen(),
+        requiresSubscription: true,
+      ),
     };
   }
 
@@ -221,11 +230,14 @@ class MyApp extends ConsumerWidget {
 
       if (args != null) {
         return MaterialPageRoute(
-          builder: (context) => ChapterEditorScreen(
-            chapterTitle: args['chapterTitle'] ?? 'Chapter',
-            subheading: args['subheading'] ?? '',
-            initialContent: args['initialContent'] ?? '',
-            chapterIndex: args['chapterIndex'] ?? 0,
+          builder: (context) => ProtectedRoute(
+            requiresSubscription: true,
+            child: ChapterEditorScreen(
+              chapterTitle: args['chapterTitle'] ?? 'Chapter',
+              subheading: args['subheading'] ?? '',
+              initialContent: args['initialContent'] ?? '',
+              chapterIndex: args['chapterIndex'] ?? 0,
+            ),
           ),
           settings: settings,
         );
@@ -237,8 +249,6 @@ class MyApp extends ConsumerWidget {
 
   /// Handle unknown routes
   Route<dynamic> _handleUnknownRoute(RouteSettings settings) {
-    debugPrint('Unknown route: ${settings.name}');
-
     return MaterialPageRoute(
       builder: (context) => const _NotFoundScreen(),
       settings: settings,
@@ -312,22 +322,13 @@ class _NotFoundScreen extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
-                if (kIsWeb) {
-                  // For web, navigate to thesis form
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/thesis-form',
-                        (route) => false,
-                  );
-                } else {
-                  // For mobile, go to splash screen
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/',
-                        (route) => false,
-                  );
-                }
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/initialization',
+                  (route) => false,
+                );
               },
-              icon: const Icon(Icons.home),
-              label: Text(kIsWeb ? 'Go to App' : 'Go Home'),
+                          icon: const Icon(Icons.home),
+              label: const Text('Go to App'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF9D4EDD),
                 foregroundColor: Colors.white,
@@ -337,27 +338,24 @@ class _NotFoundScreen extends StatelessWidget {
                 ),
               ),
             ),
-            if (kIsWeb) ...[
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  try {
-                    html.window.location.href = 'index.html';
-                  } catch (e) {
-                    debugPrint('Failed to navigate to landing page: $e');
-                    // Fallback: try to navigate within the app
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/thesis-form',
-                          (route) => false,
-                    );
-                  }
-                },
-                child: const Text(
-                  '← Back to Landing Page',
-                  style: TextStyle(color: Color(0xFFFF48B0)),
-                ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () {
+                try {
+                  html.window.location.href = 'index.html';
+                } catch (e) {
+                  // Fallback: try to navigate within the app
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/initialization',
+                    (route) => false,
+                  );
+                }
+              },
+              child: const Text(
+                '← Back to Landing Page',
+                style: TextStyle(color: Color(0xFFFF48B0)),
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -372,15 +370,11 @@ class AppConfig {
   static const Color primaryColor = Color(0xFF9D4EDD);
   static const Color secondaryColor = Color(0xFFFF48B0);
 
-  /// Check if running in debug mode
-  static bool get isDebugMode => kDebugMode;
-
   /// Get platform-specific configuration
   static Map<String, dynamic> getPlatformConfig() {
     return {
-      'platform': kIsWeb ? 'web' : 'mobile',
-      'isWeb': kIsWeb,
-      'isDebug': kDebugMode,
+      'platform': 'web',
+      'isWeb': true,
       'version': version,
       'appName': appName,
     };
@@ -460,118 +454,13 @@ class AppNavigation {
   static void navigateAndClearStack(BuildContext context, String routeName) {
     Navigator.of(context).pushNamedAndRemoveUntil(
       routeName,
-          (route) => false,
+      (route) => false,
     );
   }
 
   /// Check if can pop
   static bool canPop(BuildContext context) {
     return Navigator.of(context).canPop();
-  }
-
-  /// Handle web-specific navigation (simplified)
-  static void handleWebNavigation(String path) {
-    if (!kIsWeb) return;
-
-    try {
-      // Simple URL update without complex operations
-      if (kDebugMode) {
-        debugPrint('Web navigation to: $path');
-      }
-    } catch (e) {
-      debugPrint('Failed to update web navigation: $e');
-    }
-  }
-}
-
-/// App state management utilities
-class AppState {
-  /// Check if app is running in PWA mode (simplified)
-  static bool get isPWA {
-    if (!kIsWeb) return false;
-
-    try {
-      // Simplified PWA detection
-      return false; // Default to false to avoid complex web API calls
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Get device type (simplified)
-  static String get deviceType {
-    if (!kIsWeb) return 'mobile';
-
-    try {
-      // Simplified device detection
-      return 'web';
-    } catch (e) {
-      return 'unknown';
-    }
-  }
-
-  /// Get screen size category
-  static String getScreenSizeCategory(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
-    if (width < 600) {
-      return 'small';
-    } else if (width < 1024) {
-      return 'medium';
-    } else {
-      return 'large';
-    }
-  }
-
-  /// Check if dark mode is preferred
-  static bool isDarkModePreferred(BuildContext context) {
-    return MediaQuery.of(context).platformBrightness == Brightness.dark;
-  }
-}
-
-/// Performance monitoring utilities
-class AppPerformance {
-  static final Map<String, DateTime> _timers = {};
-
-  /// Start performance timer
-  static void startTimer(String name) {
-    _timers[name] = DateTime.now();
-    if (kDebugMode) {
-      debugPrint('⏱️ Started timer: $name');
-    }
-  }
-
-  /// End performance timer and log duration
-  static Duration? endTimer(String name) {
-    final startTime = _timers.remove(name);
-    if (startTime == null) return null;
-
-    final duration = DateTime.now().difference(startTime);
-
-    if (kDebugMode) {
-      debugPrint('⏱️ Timer $name: ${duration.inMilliseconds}ms');
-    }
-
-    return duration;
-  }
-
-  /// Log memory usage (debug only)
-  static void logMemoryUsage(String context) {
-    if (!kDebugMode) return;
-
-    try {
-      // This is a placeholder - actual memory monitoring would require platform channels
-      debugPrint('💾 Memory check: $context');
-    } catch (e) {
-      debugPrint('Failed to log memory usage: $e');
-    }
-  }
-
-  /// Log app lifecycle event
-  static void logLifecycleEvent(String event) {
-    if (kDebugMode) {
-      debugPrint('🔄 Lifecycle: $event at ${DateTime.now()}');
-    }
   }
 }
 
@@ -582,25 +471,10 @@ class AppErrorHandler {
     final errorMessage = error.toString();
     final contextInfo = context ?? 'Unknown';
 
-    debugPrint('❌ Error in $contextInfo: $errorMessage');
+    print('❌ Error in $contextInfo: $errorMessage');
 
-    if (stackTrace != null && kDebugMode) {
-      debugPrint('📋 Stack trace: $stackTrace');
-    }
-
-    // Log to analytics if available
-    _logErrorToAnalytics(errorMessage, contextInfo);
-  }
-
-  /// Log error to analytics
-  static void _logErrorToAnalytics(String error, String context) {
-    try {
-      // This would integrate with your analytics provider
-      if (kDebugMode) {
-        debugPrint('📊 Would log error to analytics: $context - $error');
-      }
-    } catch (e) {
-      debugPrint('Failed to log error to analytics: $e');
+    if (stackTrace != null) {
+      print('📋 Stack trace: $stackTrace');
     }
   }
 

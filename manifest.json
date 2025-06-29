@@ -1,11 +1,11 @@
 {
   "name": "Thesis Generator - AI-Powered Academic Writing",
   "short_name": "Thesis Generator",
-  "description": "Generate professional thesis chapters with AI assistance. Supports APA, MLA, Chicago formats.",
+  "description": "Generate professional thesis chapters and outlines with AI",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#9D4EDD",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -23,34 +23,5 @@
   ],
   "categories": ["education", "productivity", "utilities"],
   "lang": "en",
-  "dir": "ltr",
-  "scope": "/",
-  "screenshots": [
-    {
-      "src": "screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "screenshot-narrow.png",
-      "sizes": "640x1136",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Create Thesis",
-      "short_name": "Create",
-      "description": "Start creating your thesis with AI",
-      "url": "/app.html",
-      "icons": [
-        {
-          "src": "favicon.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ]
+  "dir": "ltr"
 }

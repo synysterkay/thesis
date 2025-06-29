@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -7,7 +9,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get welcome => 'Bienvenido a Thesis Generator';
+  String get welcome => 'Tesis Académica Profesional';
 
   @override
   String get onboardDescription1 => 'Crea tesis académicas profesionales con asistencia de IA';
@@ -22,7 +24,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardDescription3 => 'Exporta tu tesis en formato PDF profesional';
 
   @override
-  String get easyExport => 'Exportación Fácil';
+  String get easyExport => 'Exportación Fácil en PDF';
 
   @override
   String get next => 'Siguiente';
@@ -184,4 +186,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get generatingContent => 'Generando contenido...';
+
+  @override
+  String get pleaseCompleteAllChapters => 'Por favor completa todos los títulos de los capítulos';
+
+  @override
+  String get requiredChaptersMissing => 'Los capítulos de Introducción y Conclusión son requeridos';
+
+  @override
+  String get openFile => 'Abrir Archivo';
+
+  @override
+  String get errorGeneratingOutlines => 'Error al Generar Esquemas';
+
+  @override
+  String get edit => 'Editar';
+
+  @override
+  String get addText => 'Agregar Texto';
+
+  @override
+  String get highlight => 'Resaltar';
+
+  @override
+  String get delete => 'Eliminar';
+
+  @override
+  String get savePdf => 'Guardar PDF';
+
+  @override
+  String get share => 'Compartir';
+
+  @override
+  String get thesisOutline => 'Esquema de Tesis';
 }

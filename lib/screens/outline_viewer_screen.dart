@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/thesis_provider.dart';
 import '../providers/loading_provider.dart';
 import '../services/navigation_service.dart';
@@ -75,15 +74,15 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final l10n = AppLocalizations.of(context)!;
     loadingMessages = [
-      l10n.loadingMessage1,
-      l10n.loadingMessage2,
-      l10n.loadingMessage3,
-      l10n.loadingMessage4,
-      l10n.loadingMessage5,
-      l10n.loadingMessage6,
+      'Analyzing your topic...',
+      'Generating chapter structure...',
+      'Creating content outline...',
+      'Organizing sections...',
+      'Finalizing structure...',
+      'Almost ready...',
     ];
+
   }
 
   @override
@@ -303,7 +302,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-    final l10n = AppLocalizations.of(context)!;
     return AppBar(
       backgroundColor: Colors.black,
       elevation: 0,
@@ -315,7 +313,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
         ),
       ),
       title: Text(
-        l10n.thesis,
+        'Academic Structure',
         style: GoogleFonts.lato(
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -333,7 +331,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
             ),
             child: TextButton.icon(
               icon: Icon(Icons.auto_awesome, color: Colors.white),
-              label: Text(l10n.generateAll,
+              label: Text('Generate All',
                   style: GoogleFonts.lato(color: Colors.white)),
               onPressed: () => _handleGenerateAll(context),
             ),
@@ -491,13 +489,12 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   Future<void> _handleGenerateAll(BuildContext context) async {
     if (isGeneratingAll) return;
 
-    final l10n = AppLocalizations.of(context)!;
     final thesisState = ref.read(thesisStateProvider);
 
     await thesisState.whenData((thesis) async {
       setState(() {
         isGeneratingAll = true;
-        currentlyGenerating = l10n.generatingContent;
+        currentlyGenerating = 'Generating Content';
         startGenerateAllCountdown();
         generationSteps.clear();
       });
@@ -570,7 +567,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.errorGeneratingContent(e.toString()))),
+            SnackBar(content: Text('Error generating content: ${e.toString()}')),
           );
         }
       } finally {
@@ -662,50 +659,8 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     }
   }
 
-  void _showGenerationComplete(BuildContext context, AppLocalizations l10n, List<String> failedSections) {
-    if (failedSections.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.generatedSuccessfully,
-            style: GoogleFonts.lato(color: Colors.white),
-          ),
-          backgroundColor: primaryColor,
-        ),
-      );
 
-      Future.delayed(Duration(seconds: 2), () {
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ExportScreen()),
-          );
-        }
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Generation completed with ${failedSections.length} sections requiring attention',
-            style: GoogleFonts.lato(color: Colors.white),
-          ),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
-  }
 
-  void _handleGenerationError(BuildContext context, AppLocalizations l10n, dynamic error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          l10n.errorGeneratingContent(error.toString()),
-          style: GoogleFonts.lato(color: Colors.white),
-        ),
-        backgroundColor: hoverColor,
-      ),
-    );
-  }
 
   void _cleanupGeneration() {
     if (mounted) {
@@ -917,7 +872,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   void _handleExport(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+
     final thesisState = ref.read(thesisStateProvider);
 
     thesisState.whenData((thesis) {
@@ -982,7 +937,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   @override
   Widget build(BuildContext context) {
     final thesisState = ref.watch(thesisStateProvider);
-    final l10n = AppLocalizations.of(context)!;
+
 
     return Scaffold(
       backgroundColor: Colors.black,

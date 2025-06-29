@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/thesis_provider.dart';
 import '../services/gemini_service.dart';
 import '../providers/loading_provider.dart';
@@ -266,7 +265,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return WillPopScope(
       onWillPop: () async {
         await _handleBackPress();
@@ -397,7 +395,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   }
 
   Widget _buildTopicField() {
-    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.3),
@@ -416,8 +413,8 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
         key: const Key('thesis-topic-field'),
         style: GoogleFonts.lato(color: Colors.white),
         decoration: InputDecoration(
-          labelText: l10n.thesisTopic,
-          hintText: l10n.enterThesisTopic,
+          labelText: 'Research Topic',
+          hintText: 'Enter your research topic',
           labelStyle: GoogleFonts.lato(color: secondaryColor),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -432,13 +429,12 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
             borderSide: BorderSide(color: secondaryColor),
           ),
         ),
-        validator: (value) => value?.isEmpty ?? true ? l10n.pleaseEnterTopic : null,
+        validator: (value) => value?.isEmpty ?? true ? 'Please enter a topic' : null,
       ),
     );
   }
 
   Widget _buildGenerateButton() {
-    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -462,7 +458,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
           ),
         ),
         child: Text(
-          l10n.generateChapters,
+          'Create Sections',
           style: GoogleFonts.lato(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -474,10 +470,9 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   }
 
   List<Widget> _buildGeneratedContent() {
-    final l10n = AppLocalizations.of(context)!;
     return [
       Text(
-        l10n.generatedChapters,
+        'Created Sections',
         style: GoogleFonts.lato(
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -494,7 +489,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   }
 
   List<Widget> _buildChapterFields() {
-    final l10n = AppLocalizations.of(context)!;
     return _chapterControllers.asMap().entries.map((entry) {
       int idx = entry.key;
       var controller = entry.value;
@@ -520,7 +514,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
                 key: Key('chapter-field-$idx'),
                 style: GoogleFonts.lato(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: l10n.chapter(idx + 1),
+                  labelText: 'Section ${idx + 1}',
                   labelStyle: GoogleFonts.lato(color: secondaryColor),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -535,7 +529,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
                     borderSide: BorderSide(color: secondaryColor),
                   ),
                 ),
-                validator: (value) => value?.isEmpty ?? true ? l10n.pleaseEnterChapterTitle : null,
+                validator: (value) => value?.isEmpty ?? true ? 'Please enter section title' : null,
               ),
             ),
             IconButton(
@@ -549,7 +543,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   }
 
   Widget _buildDropdowns() {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Container(
@@ -571,7 +564,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
             dropdownColor: Colors.grey[900],
             style: GoogleFonts.lato(color: Colors.white),
             decoration: InputDecoration(
-              labelText: l10n.writingStyle,
+              labelText: 'Academic Style',
               labelStyle: GoogleFonts.lato(color: secondaryColor),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -615,7 +608,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
             dropdownColor: Colors.grey[900],
             style: GoogleFonts.lato(color: Colors.white),
             decoration: InputDecoration(
-              labelText: l10n.format,
+              labelText: 'Format',
               labelStyle: GoogleFonts.lato(color: secondaryColor),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -644,7 +637,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   }
 
   Widget _buildSubmitButton() {
-    final l10n = AppLocalizations.of(context)!;
     return Container(
         decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -668,7 +660,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
     ),
     ),
     child: Text(
-    l10n.generateThesis,
+      'Create Structure',
     style: GoogleFonts.lato(
     fontSize: 16,
       fontWeight: FontWeight.bold,
@@ -729,7 +721,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   }
 
   void _submitForm() async {
-    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       try {
         final chapters = _chapterControllers.map((c) => c.text).toList();
@@ -742,7 +733,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
         Navigator.pushReplacementNamed(context, '/outline');
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorGeneratingThesis(e.toString()))),
+          SnackBar(content: Text('Error creating structure: ${e.toString()}')),
         );
       }
     }

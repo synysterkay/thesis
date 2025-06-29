@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -7,7 +9,7 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
-  String get welcome => 'थीसिस जनरेटर में आपका स्वागत है';
+  String get welcome => 'पेशेवर शैक्षणिक थीसिस';
 
   @override
   String get onboardDescription1 => 'AI सहायता से पेशेवर शैक्षणिक थीसिस बनाएं';
@@ -22,7 +24,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboardDescription3 => 'अपनी थीसिस को पेशेवर PDF प्रारूप में निर्यात करें';
 
   @override
-  String get easyExport => 'आसान निर्यात';
+  String get easyExport => 'PDF में आसान निर्यात';
 
   @override
   String get next => 'अगला';
@@ -184,4 +186,37 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get generatingContent => 'सामग्री उत्पन्न हो रही है...';
+
+  @override
+  String get pleaseCompleteAllChapters => 'कृपया सभी अध्यायों के शीर्षक पूरे करें';
+
+  @override
+  String get requiredChaptersMissing => 'परिचय और निष्कर्ष अध्याय आवश्यक हैं';
+
+  @override
+  String get openFile => 'फ़ाइल खोलें';
+
+  @override
+  String get errorGeneratingOutlines => 'रूपरेखा उत्पन्न करने में त्रुटि';
+
+  @override
+  String get edit => 'संपादित करें';
+
+  @override
+  String get addText => 'टेक्स्ट जोड़ें';
+
+  @override
+  String get highlight => 'हाइलाइट करें';
+
+  @override
+  String get delete => 'हटाएं';
+
+  @override
+  String get savePdf => 'PDF सहेजें';
+
+  @override
+  String get share => 'साझा करें';
+
+  @override
+  String get thesisOutline => 'थीसिस रूपरेखा';
 }

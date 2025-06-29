@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class ErrorScreen extends StatelessWidget {
   final String error;
@@ -9,7 +9,7 @@ class ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+
 
     return MaterialApp(
       home: Scaffold(
@@ -28,7 +28,7 @@ class ErrorScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 24),
                   Text(
-                    l10n.initializationError,
+                    'Initialization Error',
                     style: GoogleFonts.lato(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -54,7 +54,7 @@ class ErrorScreen extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),
                     child: Text(
-                      l10n.retry,
+                      'Retry',
                       style: GoogleFonts.lato(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

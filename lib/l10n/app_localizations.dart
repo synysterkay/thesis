@@ -104,31 +104,31 @@ abstract class AppLocalizations {
   /// No description provided for @welcome.
   ///
   /// In en, this message translates to:
-  /// **'Professional Academic Thesis'**
+  /// **'Academic Writing Assistant'**
   String get welcome;
 
   /// No description provided for @onboardDescription1.
   ///
   /// In en, this message translates to:
-  /// **'Create professional academic thesis with AI assistance'**
+  /// **'Learn to develop professional academic thesis structure'**
   String get onboardDescription1;
 
   /// No description provided for @smartContent.
   ///
   /// In en, this message translates to:
-  /// **'Smart Content Generation'**
+  /// **'Smart Learning Framework'**
   String get smartContent;
 
   /// No description provided for @onboardDescription2.
   ///
   /// In en, this message translates to:
-  /// **'Generate well-structured chapters and content automatically'**
+  /// **'Practice organizing chapters and content effectively'**
   String get onboardDescription2;
 
   /// No description provided for @onboardDescription3.
   ///
   /// In en, this message translates to:
-  /// **'Export your thesis in professional PDF format'**
+  /// **'Export your learning materials in professional PDF format'**
   String get onboardDescription3;
 
   /// No description provided for @easyExport.
@@ -146,13 +146,13 @@ abstract class AppLocalizations {
   /// No description provided for @getStarted.
   ///
   /// In en, this message translates to:
-  /// **'Get Started'**
+  /// **'Start Learning'**
   String get getStarted;
 
   /// No description provided for @startWritingHere.
   ///
   /// In en, this message translates to:
-  /// **'Start writing here...'**
+  /// **'Begin your practice here...'**
   String get startWritingHere;
 
   /// No description provided for @reportContent.
@@ -170,7 +170,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveChangesQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Do you want to save your changes?'**
+  /// **'Do you want to save your progress?'**
   String get saveChangesQuestion;
 
   /// No description provided for @discard.
@@ -218,7 +218,7 @@ abstract class AppLocalizations {
   /// No description provided for @changesSaved.
   ///
   /// In en, this message translates to:
-  /// **'Changes saved'**
+  /// **'Progress saved'**
   String get changesSaved;
 
   /// No description provided for @initializationError.
@@ -236,7 +236,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportThesis.
   ///
   /// In en, this message translates to:
-  /// **'Export Thesis'**
+  /// **'Export Document'**
   String get exportThesis;
 
   /// No description provided for @exportAsPdf.
@@ -248,7 +248,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportDescription.
   ///
   /// In en, this message translates to:
-  /// **'Your thesis will be exported as a PDF file and saved to your Downloads folder.'**
+  /// **'Your academic work will be exported as a PDF file and saved to your Downloads folder.'**
   String get exportDescription;
 
   /// No description provided for @pdfSavedToDownloads.
@@ -272,7 +272,7 @@ abstract class AppLocalizations {
   /// No description provided for @thesis.
   ///
   /// In en, this message translates to:
-  /// **'Thesis'**
+  /// **'Academic Structure'**
   String get thesis;
 
   /// No description provided for @generateAll.
@@ -290,73 +290,73 @@ abstract class AppLocalizations {
   /// No description provided for @generatedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'Generated successfully! Click On Pdf To export'**
+  /// **'Structure created successfully! Click On PDF to export'**
   String get generatedSuccessfully;
 
   /// No description provided for @errorGeneratingContent.
   ///
   /// In en, this message translates to:
-  /// **'Error generating content: {error}'**
+  /// **'Error creating content: {error}'**
   String errorGeneratingContent(Object error);
 
   /// No description provided for @failedToGenerateContent.
   ///
   /// In en, this message translates to:
-  /// **'Failed to generate content: {error}'**
+  /// **'Failed to create content: {error}'**
   String failedToGenerateContent(Object error);
 
   /// No description provided for @loadingMessage1.
   ///
   /// In en, this message translates to:
-  /// **'We are generating your thesis structure...'**
+  /// **'Preparing your academic structure...'**
   String get loadingMessage1;
 
   /// No description provided for @loadingMessage2.
   ///
   /// In en, this message translates to:
-  /// **'This process takes about 4-7 minutes...'**
+  /// **'Organizing your learning materials...'**
   String get loadingMessage2;
 
   /// No description provided for @loadingMessage3.
   ///
   /// In en, this message translates to:
-  /// **'Crafting your academic journey...'**
+  /// **'Building your academic framework...'**
   String get loadingMessage3;
 
   /// No description provided for @loadingMessage4.
   ///
   /// In en, this message translates to:
-  /// **'Organizing your research framework...'**
+  /// **'Structuring your research outline...'**
   String get loadingMessage4;
 
   /// No description provided for @loadingMessage5.
   ///
   /// In en, this message translates to:
-  /// **'Building a solid foundation for your thesis...'**
+  /// **'Creating your learning foundation...'**
   String get loadingMessage5;
 
   /// No description provided for @loadingMessage6.
   ///
   /// In en, this message translates to:
-  /// **'Almost there, finalizing your outline...'**
+  /// **'Almost there, finalizing your structure...'**
   String get loadingMessage6;
 
   /// No description provided for @createThesis.
   ///
   /// In en, this message translates to:
-  /// **'Create Thesis'**
+  /// **'Create Structure'**
   String get createThesis;
 
   /// No description provided for @thesisTopic.
   ///
   /// In en, this message translates to:
-  /// **'Thesis Topic'**
+  /// **'Research Topic'**
   String get thesisTopic;
 
   /// No description provided for @enterThesisTopic.
   ///
   /// In en, this message translates to:
-  /// **'Enter your thesis topic'**
+  /// **'Enter your research topic'**
   String get enterThesisTopic;
 
   /// No description provided for @pleaseEnterTopic.
@@ -368,31 +368,31 @@ abstract class AppLocalizations {
   /// No description provided for @generateChapters.
   ///
   /// In en, this message translates to:
-  /// **'Generate Chapters'**
+  /// **'Create Sections'**
   String get generateChapters;
 
   /// No description provided for @generatedChapters.
   ///
   /// In en, this message translates to:
-  /// **'Generated Chapters'**
+  /// **'Created Sections'**
   String get generatedChapters;
 
   /// No description provided for @chapter.
   ///
   /// In en, this message translates to:
-  /// **'Chapter {number}'**
+  /// **'Section {number}'**
   String chapter(Object number);
 
   /// No description provided for @pleaseEnterChapterTitle.
   ///
   /// In en, this message translates to:
-  /// **'Please enter chapter title'**
+  /// **'Please enter section title'**
   String get pleaseEnterChapterTitle;
 
   /// No description provided for @writingStyle.
   ///
   /// In en, this message translates to:
-  /// **'Writing Style'**
+  /// **'Academic Style'**
   String get writingStyle;
 
   /// No description provided for @format.
@@ -404,32 +404,98 @@ abstract class AppLocalizations {
   /// No description provided for @generateThesis.
   ///
   /// In en, this message translates to:
-  /// **'Generate Thesis'**
+  /// **'Create Structure'**
   String get generateThesis;
 
   /// No description provided for @pleaseEnterThesisTopicFirst.
   ///
   /// In en, this message translates to:
-  /// **'Please enter a thesis topic first'**
+  /// **'Please enter a research topic first'**
   String get pleaseEnterThesisTopicFirst;
 
   /// No description provided for @failedToGenerateChapters.
   ///
   /// In en, this message translates to:
-  /// **'Failed to generate chapters: {error}'**
+  /// **'Failed to create sections: {error}'**
   String failedToGenerateChapters(Object error);
 
   /// No description provided for @errorGeneratingThesis.
   ///
   /// In en, this message translates to:
-  /// **'Error generating thesis: {error}'**
+  /// **'Error creating structure: {error}'**
   String errorGeneratingThesis(Object error);
 
   /// No description provided for @generatingContent.
   ///
   /// In en, this message translates to:
-  /// **'Generating content...'**
+  /// **'Creating content...'**
   String get generatingContent;
+
+  /// No description provided for @pleaseCompleteAllChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Please complete all section titles'**
+  String get pleaseCompleteAllChapters;
+
+  /// No description provided for @requiredChaptersMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduction and Conclusion sections are required'**
+  String get requiredChaptersMissing;
+
+  /// No description provided for @openFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Open File'**
+  String get openFile;
+
+  /// No description provided for @errorGeneratingOutlines.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Creating Outline'**
+  String get errorGeneratingOutlines;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @addText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Text'**
+  String get addText;
+
+  /// No description provided for @highlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight'**
+  String get highlight;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @savePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Save PDF'**
+  String get savePdf;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @thesisOutline.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Outline'**
+  String get thesisOutline;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

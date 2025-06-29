@@ -1,42 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base href="$FLUTTER_BASE_HREF">
+  <base href="/">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Create your thesis with AI - Professional academic writing assistant">
-  <meta name="keywords" content="thesis generator, AI writing, academic writing, research paper">
-  <meta name="author" content="Thesis Generator">
-  
-  <!-- Mobile Web App -->
+  <meta name="description" content="Thesis Generator">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Thesis Generator">
-  
-  <!-- Theme Colors -->
-  <meta name="theme-color" content="#9D4EDD">
-  <meta name="msapplication-navbutton-color" content="#9D4EDD">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
-  <!-- Icons -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="thesis_generator">
   <link rel="icon" type="image/png" href="favicon.png"/>
-  <link rel="apple-touch-icon" href="favicon.png">
-  <link rel="manifest" href="manifest.json">
-  
-  <title>Create Your Thesis - AI-Powered Academic Writing</title>
+  <title>Thesis Generator</title>
 
-  <!-- Preconnect for performance -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://www.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* ==============================================
-       LOADING SCREEN STYLES
-       ============================================== */
-    
     * {
       margin: 0;
       padding: 0;
@@ -44,1178 +25,745 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       overflow: hidden;
     }
 
     .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      width: 100vw;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
       position: fixed;
       top: 0;
       left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       z-index: 9999;
-      transition: opacity 0.5s ease-out;
     }
 
-    .loading.fade-out {
-      opacity: 0;
-      pointer-events: none;
+    .logo-container {
+      position: relative;
+      margin-bottom: 40px;
+      animation: logoScale 2s ease-out;
     }
 
-    .loading-content {
-      text-align: center;
-      max-width: 400px;
-      padding: 2rem;
-    }
-
-    .app-logo {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(45deg, #9D4EDD, #FF48B0);
-      border-radius: 20px;
+    .logo {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #9D4EDD 0%, #FF48B0 100%);
+      border-radius: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 2rem;
-      font-size: 2rem;
-      box-shadow: 0 8px 32px rgba(157, 78, 221, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    .logo-icon {
+      font-size: 60px;
+      color: white;
+      z-index: 1;
+    }
+
+    .brand-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+      text-align: center;
+    }
+
+    .brand-subtitle {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+      margin-bottom: 60px;
+      text-align: center;
+    }
+
+    .spinner-container {
+      position: relative;
+      margin-bottom: 30px;
     }
 
     .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255, 255, 255, 0.2);
-      border-top: 4px solid #FF48B0;
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 0 auto 1.5rem;
     }
 
+    .loading-text {
+      font-size: 18px;
+      color: white;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      animation: fadeInOut 2s ease-in-out infinite;
+    }
+
+    .progress-bar {
+      width: 250px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, white, #f0f0f0);
+      border-radius: 2px;
+      width: 0%;
+      animation: progressFill 3s ease-in-out infinite;
+    }
+
+    .loading-tip {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInOut 2s ease-in-out infinite 1s;
+    }
+
+    .features-preview {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .feature-chip {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: white;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      animation: chipFloat 3s ease-in-out infinite;
+    }
+
+    .feature-chip:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+
+    .feature-chip:nth-child(3) {
+      animation-delay: 1s;
+    }
+
+    /* Animations */
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    .loading-text {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.02em;
+    @keyframes logoScale {
+      0% { 
+        transform: scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% { 
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
-    .loading-subtext {
-      font-size: 1rem;
-      opacity: 0.8;
-      margin-bottom: 2rem;
-      line-height: 1.4;
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
     }
 
-    .loading-progress {
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 1rem;
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
     }
 
-    .loading-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #FF48B0, #9D4EDD);
-      border-radius: 2px;
-      width: 0%;
-      animation: progress 3s ease-in-out;
-    }
-
-    @keyframes progress {
+    @keyframes progressFill {
       0% { width: 0%; }
-      50% { width: 60%; }
+      50% { width: 70%; }
       100% { width: 100%; }
     }
 
-    .loading-tips {
-      font-size: 0.9rem;
-      opacity: 0.7;
-      font-style: italic;
+    @keyframes chipFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
     }
 
-    /* ==============================================
-       ERROR STATE STYLES
-       ============================================== */
-
-    .error-content {
-      text-align: center;
-      max-width: 500px;
-      padding: 2rem;
-    }
-
-    .error-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      opacity: 0.8;
-    }
-
-    .error-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: #FF6B6B;
-    }
-
-    .error-message {
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-      line-height: 1.5;
-      opacity: 0.9;
-    }
-
-    .error-suggestions {
-      text-align: left;
-      margin: 1.5rem 0;
-      padding: 1.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-    }
-
-    .error-suggestions h3 {
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
-    }
-
-    .error-suggestions ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .error-suggestions li {
-      margin-bottom: 0.8rem;
-      padding-left: 1.5rem;
-      position: relative;
-    }
-
-    .error-suggestions li::before {
-      content: "→";
-      position: absolute;
-      left: 0;
-      color: #FF48B0;
-      font-weight: bold;
-    }
-
-    .error-actions {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 2rem;
-    }
-
-    .btn {
-      padding: 0.8rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.3s ease;
-      min-width: 120px;
-      justify-content: center;
-    }
-
-    .btn-primary {
-      background: linear-gradient(45deg, #9D4EDD, #FF48B0);
-      color: white;
-      box-shadow: 0 4px 15px rgba(157, 78, 221, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(157, 78, 221, 0.4);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-1px);
-    }
-
-    /* ==============================================
-       RESPONSIVE DESIGN
-       ============================================== */
-
-    @media (max-width: 768px) {
-      .loading-content,
-      .error-content {
-        padding: 1rem;
-        max-width: 90%;
-      }
-
-      .app-logo {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .loading-text {
-        font-size: 1.2rem;
-      }
-
-      .loading-subtext {
-        font-size: 0.9rem;
-      }
-
-      .error-title {
-        font-size: 1.5rem;
-      }
-
-      .error-message {
-        font-size: 1rem;
-      }
-
-      .error-actions {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .btn {
-        width: 100%;
-        max-width: 200px;
-      }
-    }
-
+    /* Responsive Design */
     @media (max-width: 480px) {
-      .loading-content,
-      .error-content {
-        padding: 0.5rem;
+      .logo {
+        width: 100px;
+        height: 100px;
+        border-radius: 25px;
       }
 
-      .app-logo {
+      .logo-icon {
+        font-size: 50px;
+      }
+
+      .brand-title {
+        font-size: 28px;
+      }
+
+      .brand-subtitle {
+        font-size: 16px;
+      }
+
+      .spinner {
         width: 50px;
         height: 50px;
-        font-size: 1.2rem;
       }
 
-      .loading-text {
-        font-size: 1.1rem;
+      .progress-bar {
+        width: 200px;
       }
 
-      .error-suggestions {
-        padding: 1rem;
+      .features-preview {
+        padding: 0 20px;
       }
     }
 
-    /* ==============================================
-       ACCESSIBILITY IMPROVEMENTS
-       ============================================== */
-
-    @media (prefers-reduced-motion: reduce) {
-      .spinner {
-        animation: none;
-      }
-      
-      .loading-progress-bar {
-        animation: none;
-        width: 100%;
-      }
-      
-      .btn {
-        transition: none;
-      }
-    }
-
-    @media (prefers-color-scheme: light) {
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
       .loading {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       }
     }
 
-    /* ==============================================
-       FLUTTER APP CONTAINER
-       ============================================== */
-
-    #flutter-app {
-      width: 100%;
-      height: 100vh;
-      display: none;
-    }
-
-    #flutter-app.loaded {
-      display: block;
-    }
-
-    /* ==============================================
-       UTILITY CLASSES
-       ============================================== */
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .fade-in {
-      animation: fadeIn 0.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ==============================================
-       CRITICAL CSS FOR FLUTTER
-       ============================================== */
-
-    /* Ensure Flutter app takes full viewport */
-    flt-glass-pane {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    /* Hide Flutter loading indicator since we have our own */
-    flt-glass-pane * {
-      pointer-events: auto !important;
-    }
-
-    /* Optimize for mobile */
-    @media (max-width: 768px) {
-      body {
-        -webkit-text-size-adjust: 100%;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-      }
-    }
-
-    /* Prevent zoom on input focus (iOS) */
-    @media screen and (max-width: 768px) {
-      input[type="text"],
-      input[type="email"],
-      input[type="password"],
-      textarea,
-      select {
-        font-size: 16px !important;
-      }
-    }
-
-    /* Loading animation optimizations */
+    /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
+      .logo-container,
       .spinner,
-      .loading-progress-bar,
-      .fade-in {
-        animation: none !important;
-        transition: none !important;
+      .loading-text,
+      .loading-tip,
+      .feature-chip {
+        animation: none;
+      }
+      
+      .progress-fill {
+        animation: none;
+        width: 70%;
       }
     }
 
-    /* High contrast mode support */
+    /* High contrast mode */
     @media (prefers-contrast: high) {
-      .loading {
-        background: #000000;
-        color: #ffffff;
+      .logo {
+        border: 2px solid white;
       }
       
-      .btn-primary {
-        background: #ffffff;
-        color: #000000;
-        border: 2px solid #ffffff;
-      }
-    }
-
-    /* Print styles */
-    @media print {
-      .loading,
-      .error-content {
-        display: none !important;
-      }
-      
-      body::after {
-        content: "This is a web application and cannot be printed. Please visit the website to use Thesis Generator.";
-        display: block;
-        text-align: center;
-        padding: 2rem;
-        font-size: 1.2rem;
+      .feature-chip {
+        border: 2px solid white;
+        background: rgba(255, 255, 255, 0.3);
       }
     }
   </style>
 
-  <!-- Firebase Configuration - UPDATED WITH CORRECT PROJECT -->
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyBbErRqwrcX6-ogwmnmr98E3Q4H8KP4w9Q",
-      authDomain: "thesis-generator-web.firebaseapp.com",
-      projectId: "thesis-generator-web",
-      storageBucket: "thesis-generator-web.firebasestorage.app",
-      messagingSenderId: "1098826060423",
-      appId: "1:1098826060423:web:7ee70dc121234297f05e22",
-      measurementId: "G-BY0DNNV0K3"
+      apiKey: "AIzaSyCrwRYgtoLrEagqb2m-E1VOocxNr-9By30",
+      projectId: "thesis-generator-2024",
+      storageBucket: "thesis-generator-2024.firebasestorage.app",
+      messagingSenderId: "153965444638",
+      appId: "1:153965444638:android:7f3a717c504bb5f471780f",
+      authDomain: "thesis-generator-2024.firebaseapp.com"
     };
-
-    // Global error handler
-    window.addEventListener('error', function(e) {
-      console.error('Global error:', e.error);
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'exception', {
-          'description': e.error?.toString() || 'Unknown error',
-          'fatal': false
-        });
-      }
-    });
-
-    // Performance monitoring
-    window.addEventListener('load', function() {
-      if ('performance' in window) {
-        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-        console.log('App load time:', loadTime + 'ms');
-        
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'timing_complete', {
-            'name': 'app_load',
-            'value': loadTime
-          });
-        }
-      }
-    });
   </script>
 
-  <!-- Firebase SDK -->
   <script type="module">
-    try {
-      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
-      const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-      const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
-      const { getAnalytics } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js');
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-      const app = initializeApp(firebaseConfig);
-      window.fbApp = app;
-      
-      // Initialize services
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-      
-      // Initialize analytics if supported
-      if (typeof gtag !== 'undefined') {
-        const analytics = getAnalytics(app);
-        window.fbAnalytics = analytics;
-      }
-      
-      console.log('✅ Firebase initialized successfully');
-    } catch (error) {
-      console.error('❌ Firebase initialization failed:', error);
-      // App can still work without Firebase
-    }
-  </script>
-
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BY0DNNV0K3"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-BY0DNNV0K3');
+    const app = initializeApp(firebaseConfig);
+    window.fbApp = app;
   </script>
 </head>
-
 <body>
-  <!-- Screen Reader Announcement -->
-  <div class="sr-only" aria-live="polite" id="sr-status">
-    Loading Thesis Generator application...
-  </div>
-
-  <!-- Loading Screen -->
-  <div class="loading" id="loading-screen" role="status" aria-label="Loading application">
-    <div class="loading-content">
-      <div class="app-logo" aria-hidden="true">🎓</div>
-      
-      <div class="spinner" aria-hidden="true"></div>
-      
-      <div class="loading-text">Loading Thesis Generator</div>
-      <div class="loading-subtext">Preparing your AI writing assistant...</div>
-      
-      <div class="loading-progress" aria-hidden="true">
-        <div class="loading-progress-bar"></div>
-      </div>
-      
-      <div class="loading-tips" id="loading-tip">
-        💡 Tip: Use your own API key for faster generation
-      </div>
+<div class="loading" id="loading-screen">
+  <div class="logo-container">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
     </div>
   </div>
 
-  <!-- Flutter App Container -->
-  <div id="flutter-app"></div>
+  <h1 class="brand-title">Thesis Generator</h1>
+  <p class="brand-subtitle">AI-Powered Academic Writing</p>
 
-  <!-- Flutter Engine -->
-  <script src="flutter.js" defer></script>
-  
-  <script>
-    // ==============================================
-    // LOADING TIPS ROTATION
-    // ==============================================
-    
-    const loadingTips = [
-      "💡 Tip: Use your own API key for faster generation",
-      "📚 Tip: Choose the right citation format (APA, MLA, Chicago)",
-      "✏️ Tip: All generated content is fully editable",
-      "🎯 Tip: Be specific with your thesis topic for better results",
-      "⚡ Tip: Generate chapters one by one for better quality",
-      "🔍 Tip: Review and customize the AI-generated content",
-      "📖 Tip: Use academic writing style for formal papers"
-    ];
-    
-    let tipIndex = 0;
-    const tipElement = document.getElementById('loading-tip');
-    
-    function rotateTips() {
-      if (tipElement) {
-        tipElement.style.opacity = '0';
-        setTimeout(() => {
-          tipIndex = (tipIndex + 1) % loadingTips.length;
-          tipElement.textContent = loadingTips[tipIndex];
-          tipElement.style.opacity = '0.7';
-        }, 300);
-      }
-    }
-    
-    // Rotate tips every 2 seconds
-    const tipInterval = setInterval(rotateTips, 2000);
+  <div class="spinner-container">
+    <div class="spinner"></div>
+  </div>
 
-    // ==============================================
-    // FLUTTER APP INITIALIZATION
-    // ==============================================
+  <div class="loading-text" id="loading-text">Initializing...</div>
+
+  <div class="progress-bar">
+    <div class="progress-fill"></div>
+  </div>
+
+  <div class="loading-tip" id="loading-tip">Setting up your workspace</div>
+
+  <div class="features-preview">
+    <div class="feature-chip">🤖 AI Powered</div>
+    <div class="feature-chip">📚 Citations</div>
+    <div class="feature-chip">⚡ Fast</div>
+  </div>
+</div>
+
+<script src="flutter.js" defer></script>
+<script>
+  // Loading messages and tips
+  const loadingMessages = [
+    "Initializing...",
+    "Loading AI models...",
+    "Setting up Firebase...",
+    "Configuring services...",
+    "Almost ready..."
+  ];
+
+  const loadingTips = [
+    "Setting up your workspace",
+    "Preparing AI writing tools",
+    "Configuring citation formats",
+    "Loading your preferences",
+    "Finalizing setup"
+  ];
+
+  let messageIndex = 0;
+  let tipIndex = 0;
+
+  // Rotate loading messages
+  function rotateMessages() {
+    const loadingTextEl = document.getElementById('loading-text');
+    const loadingTipEl = document.getElementById('loading-tip');
     
-    window.addEventListener('load', async function() {
-      const loadingScreen = document.getElementById('loading-screen');
-      const flutterApp = document.getElementById('flutter-app');
-      const srStatus = document.getElementById('sr-status');
+    if (loadingTextEl && loadingTipEl) {
+      messageIndex = (messageIndex + 1) % loadingMessages.length;
+      tipIndex = (tipIndex + 1) % loadingTips.length;
       
-      // Update screen reader
-      if (srStatus) {
-        srStatus.textContent = 'Loading Flutter application components...';
-      }
+      loadingTextEl.textContent = loadingMessages[messageIndex];
+      loadingTipEl.textContent = loadingTips[tipIndex];
+    }
+  }
 
-      // Configure Flutter
-      window._flutter = {
-        loader: {
-          serviceWorker: {
-            serviceWorkerVersion: null,
-            serviceWorkerUrl: null
-          }
+  // Start message rotation
+  const messageInterval = setInterval(rotateMessages, 2000);
+
+  window.addEventListener('load', async function() {
+    var loading = document.getElementById('loading-screen');
+
+    _flutter = {
+      loader: {
+        serviceWorker: {
+          serviceWorkerVersion: null
         }
-      };
+      }
+    };
 
-      // Create script loading promise
-      const scriptLoaderPromise = new Promise((resolve, reject) => {
-        const scriptElement = document.createElement('script');
-        scriptElement.src = 'main.dart.js';
-        scriptElement.type = 'application/javascript';
-        scriptElement.async = true;
+    var scriptLoaderPromise = new Promise((resolve) => {
+      var scriptElement = document.createElement('script');
+      scriptElement.src = 'main.dart.js';
+      scriptElement.type = 'application/javascript';
+      document.body.append(scriptElement);
+
+      scriptElement.addEventListener('load', () => {
+        // Clear the message rotation interval
+        clearInterval(messageInterval);
         
-        // Success handler
-        scriptElement.addEventListener('load', () => {
-          console.log('✅ Flutter app loaded successfully');
-          resolve();
-        });
+        // Fade out the loading screen
+        loading.style.transition = 'opacity 0.5s ease-out';
+        loading.style.opacity = '0';
         
-        // Error handler
-        scriptElement.addEventListener('error', (error) => {
-          console.error('❌ Failed to load Flutter app:', error);
-          reject(new Error('Failed to load Flutter application'));
-        });
+        setTimeout(() => {
+          loading.style.display = 'none';
+        }, 500);
         
-        // Add to DOM
-        document.body.appendChild(scriptElement);
+        resolve();
       });
 
-      try {
-        // Wait for Flutter to load
-        await scriptLoaderPromise;
+      // Handle script loading errors
+      scriptElement.addEventListener('error', () => {
+        clearInterval(messageInterval);
         
-        // Clear tip rotation
-        clearInterval(tipInterval);
+        const loadingTextEl = document.getElementById('loading-text');
+        const loadingTipEl = document.getElementById('loading-tip');
         
-        // Update screen reader
-        if (srStatus) {
-          srStatus.textContent = 'Thesis Generator loaded successfully. You can now create your thesis.';
+        if (loadingTextEl && loadingTipEl) {
+          loadingTextEl.textContent = 'Loading failed';
+          loadingTextEl.style.color = '#ff6b6b';
+          loadingTipEl.textContent = 'Please refresh the page';
+          loadingTipEl.style.color = '#ff6b6b';
         }
-        
-        // Hide loading screen with animation
-        setTimeout(() => {
-          loadingScreen.classList.add('fade-out');
-          flutterApp.classList.add('loaded');
-          
-          // Remove loading screen after animation
-          setTimeout(() => {
-            loadingScreen.style.display = 'none';
-          }, 500);
-        }, 800);
-        
-        // Track successful load
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'app_loaded', {
-            'event_category': 'Flutter App',
-            'event_label': 'Success'
-          });
-        }
-        
-      } catch (error) {
-        console.error('Flutter loading error:', error);
-        showErrorScreen(error);
-        
-        // Track loading error
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'app_load_error', {
-            'event_category': 'Flutter App',
-            'event_label': error.message || 'Unknown error'
-          });
-        }
-      }
+      });
     });
 
-    // ==============================================
-    // ERROR HANDLING
-    // ==============================================
-    
-    function showErrorScreen(error) {
-      const loadingScreen = document.getElementById('loading-screen');
-      const srStatus = document.getElementById('sr-status');
-      
-      // Clear tip rotation
-      clearInterval(tipInterval);
-      
-      // Update screen reader
-      if (srStatus) {
-        srStatus.textContent = 'Error loading application. Please try refreshing the page.';
-      }
-      
-      // Show error content
-      loadingScreen.innerHTML = `
-        <div class="error-content fade-in">
-          <div class="error-icon" aria-hidden="true">⚠️</div>
-          <h1 class="error-title">Unable to Load Thesis Generator</h1>
-          <p class="error-message">
-            We're having trouble loading the application. This might be due to a network issue or browser compatibility.
-          </p>
-          
-          <div class="error-suggestions">
-            <h3>Try these solutions:</h3>
-            <ul>
-              <li>Refresh the page and try again</li>
-              <li>Check your internet connection</li>
-              <li>Clear your browser cache and cookies</li>
-              <li>Try using a different browser (Chrome, Firefox, Safari)</li>
-              <li>Disable browser extensions temporarily</li>
-              <li>Make sure JavaScript is enabled</li>
-            </ul>
-          </div>
-          
-          <div class="error-actions">
-            <button onclick="window.location.reload()" class="btn btn-primary">
-              <span>🔄</span>
-              Try Again
-            </button>
-            <a href="index.html" class="btn btn-secondary">
-              <span>←</span>
-              Back to Home
-            </a>
-            <button onclick="runDiagnostics()" class="btn btn-secondary">
-              <span>🔧</span>
-              Run Diagnostics
-            </button>
-          </div>
-          
-          <details style="margin-top: 2rem; opacity: 0.7;">
-            <summary style="cursor: pointer; margin-bottom: 1rem;">Technical Details</summary>
-            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; text-align: left;">
-              <strong>Error:</strong> ${error?.message || 'Unknown error'}<br>
-              <strong>User Agent:</strong> ${navigator.userAgent}<br>
-              <strong>URL:</strong> ${window.location.href}<br>
-              <strong>Timestamp:</strong> ${new Date().toISOString()}
-            </div>
-          </details>
-        </div>
-      `;
-    }
+    await scriptLoaderPromise;
+  });
 
-    // ==============================================
-    // DIAGNOSTICS FUNCTION
-    // ==============================================
-    
-    function runDiagnostics() {
-      const diagnostics = {
-        javascript: typeof window !== 'undefined',
-        localStorage: (() => {
-          try {
-            localStorage.setItem('test', 'test');
-            localStorage.removeItem('test');
-            return true;
-          } catch (e) {
-            return false;
-          }
-        })(),
-        fetch: typeof fetch !== 'undefined',
-        webgl: (() => {
-          try {
-            const canvas = document.createElement('canvas');
-            return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
-          } catch (e) {
-            return false;
-          }
-        })(),
-        serviceWorker: 'serviceWorker' in navigator,
-        online: navigator.onLine,
-        cookiesEnabled: navigator.cookieEnabled,
-        platform: navigator.platform,
-        language: navigator.language
-      };
-      
-      const results = Object.entries(diagnostics)
-        .map(([key, value]) => `${key}: ${value ? '✅' : '❌'}`)
-        .join('\n');
-      
-      alert(`Browser Diagnostics:\n\n${results}\n\nIf most items show ❌, try updating your browser or using a different one.`);
-      
-      // Track diagnostics
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'diagnostics_run', {
-          'event_category': 'Error Handling',
-          'custom_parameters': diagnostics
-        });
-      }
+  // Handle visibility change (when user switches tabs)
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      clearInterval(messageInterval);
+    } else {
+      // Restart message rotation when tab becomes visible again
+      const messageInterval = setInterval(rotateMessages, 2000);
     }
+  });
 
-    // ==============================================
-    // NETWORK STATUS MONITORING
-    // ==============================================
+  // Performance monitoring
+  window.addEventListener('load', function() {
+    if ('performance' in window) {
+      const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+      console.log('🚀 App.html load time:', loadTime + 'ms');
+    }
+  });
+
+  // Error handling
+  window.addEventListener('error', function(e) {
+    console.error('❌ App.html error:', e.error);
     
-    window.addEventListener('online', function() {
-      console.log('🌐 Back online');
-      const srStatus = document.getElementById('sr-status');
-      if (srStatus) {
-        srStatus.textContent = 'Connection restored. You can continue using the application.';
-      }
+    const loadingTextEl = document.getElementById('loading-text');
+    const loadingTipEl = document.getElementById('loading-tip');
+    
+    if (loadingTextEl && loadingTipEl) {
+      loadingTextEl.textContent = 'Something went wrong';
+      loadingTextEl.style.color = '#ff6b6b';
+      loadingTipEl.textContent = 'Please refresh the page';
+      loadingTipEl.style.color = '#ff6b6b';
+    }
+  });
+
+  // Prevent right-click context menu in production
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
     });
-    
-    window.addEventListener('offline', function() {
-      console.log('📡 Gone offline');
-      const srStatus = document.getElementById('sr-status');
-      if (srStatus) {
-        srStatus.textContent = 'You are currently offline. Some features may not work properly.';
-      }
-    });
+  }
 
-    // ==============================================
-    // KEYBOARD SHORTCUTS
-    // ==============================================
-    
-    document.addEventListener('keydown', function(e) {
-      // Ctrl/Cmd + R: Reload
-      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-        // Let default behavior handle reload
-        return;
-      }
-      
-      // Escape: Go back to home
-      if (e.key === 'Escape' && e.shiftKey) {
-        if (confirm('Go back to home page?')) {
-          window.location.href = 'index.html';
-        }
-      }
-      
-      // F5: Reload
-      if (e.key === 'F5') {
-        // Let default behavior handle reload
-        return;
-      }
-    });
-
-    // ==============================================
-    // PERFORMANCE MONITORING
-    // ==============================================
-    
-    // Monitor memory usage (if available)
-    if ('memory' in performance) {
-      setInterval(() => {
-        const memory = performance.memory;
-        if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
-          console.warn('⚠️ High memory usage detected');
-        }
-      }, 30000); // Check every 30 seconds
-    }
-    
-    // Monitor long tasks (if available)
-    if ('PerformanceObserver' in window) {
-      try {
-        const observer = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            if (entry.duration > 50) {
-              console.warn('⚠️ Long task detected:', entry.duration + 'ms');
-            }
-          }
-        });
-        observer.observe({ entryTypes: ['longtask'] });
-      } catch (e) {
-        // PerformanceObserver not fully supported
-      }
-    }
-
-    // ==============================================
-    // ACCESSIBILITY ENHANCEMENTS
-    // ==============================================
-    
-    // Announce loading progress to screen readers
-    let loadingProgress = 0;
-    const progressInterval = setInterval(() => {
-      loadingProgress += 10;
-      const srStatus = document.getElementById('sr-status');
-      if (srStatus && loadingProgress <= 100) {
-        srStatus.textContent = `Loading progress: ${loadingProgress}%`;
-      }
-      if (loadingProgress >= 100) {
-        clearInterval(progressInterval);
-      }
-    }, 300);
-
-    // ==============================================
-    // BROWSER COMPATIBILITY CHECKS
-    // ==============================================
-    
-    function checkBrowserCompatibility() {
-      const issues = [];
-      
-      // Check for essential features
-      if (!window.fetch) issues.push('Fetch API not supported');
-      if (!window.Promise) issues.push('Promises not supported');
-      if (!window.localStorage) issues.push('Local Storage not available');
-      if (!document.querySelector) issues.push('Modern DOM methods not supported');
-      
-      // Check for recommended features
-      if (!window.IntersectionObserver) console.warn('IntersectionObserver not supported - some animations may not work');
-      if (!window.requestAnimationFrame) console.warn('RequestAnimationFrame not supported - animations may be choppy');
-      
-      if (issues.length > 0) {
-        console.error('❌ Browser compatibility issues:', issues);
-        return false;
-      }
-      
-      console.log('✅ Browser compatibility check passed');
+   // Add keyboard shortcut for refresh (Ctrl+R or F5)
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
+      // Allow refresh
       return true;
     }
-    
-    // Run compatibility check
-    if (!checkBrowserCompatibility()) {
-      setTimeout(() => {
-        showErrorScreen(new Error('Your browser may not be fully compatible with this application. Please try updating your browser or using a modern browser like Chrome, Firefox, or Safari.'));
-      }, 1000);
-    }
+  });
 
-    // ==============================================
-    // ANALYTICS INTEGRATION
-    // ==============================================
-    
-    // Track page view
-    if (typeof gtag !== 'undefined') {
-      gtag('config', 'G-BY0DNNV0K3', {
-        page_title: 'Thesis Generator App',
-        page_location: window.location.href
-      });
-    }
-    
-        // Track user engagement
-    let engagementStartTime = Date.now();
-    
-    window.addEventListener('beforeunload', function() {
-      const engagementTime = Date.now() - engagementStartTime;
-      if (typeof gtag !== 'undefined' && engagementTime > 1000) {
-        gtag('event', 'engagement_time', {
-          'event_category': 'User Engagement',
-          'value': Math.round(engagementTime / 1000) // in seconds
-        });
-      }
+  // Preload critical resources
+  function preloadResources() {
+    const resources = [
+      'main.dart.js',
+      'flutter.js'
+    ];
+
+    resources.forEach(resource => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.href = resource;
+      link.as = 'script';
+      document.head.appendChild(link);
     });
-
-    // ==============================================
-    // SERVICE WORKER REGISTRATION
-    // ==============================================
-    
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('flutter_service_worker.js')
-          .then(function(registration) {
-            console.log('✅ ServiceWorker registration successful');
-          })
-          .catch(function(err) {
-            console.log('⚠️ ServiceWorker registration failed (this is normal for development)');
-          });
-      });
-    }
-
-    // ==============================================
-    // PWA INSTALL PROMPT
-    // ==============================================
-    
-    let deferredPrompt;
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      deferredPrompt = e;
-      
-      // Show install button or banner
-      console.log('💾 PWA install prompt available');
-      
-      // Track the event
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'pwa_install_prompt_shown', {
-          'event_category': 'PWA'
-        });
-      }
-    });
-
-    // Handle PWA install
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('✅ User accepted the PWA install prompt');
-            if (typeof gtag !== 'undefined') {
-              gtag('event', 'pwa_installed', {
-                'event_category': 'PWA'
-              });
-            }
-          } else {
-            console.log('❌ User dismissed the PWA install prompt');
-            if (typeof gtag !== 'undefined') {
-              gtag('event', 'pwa_install_dismissed', {
-                'event_category': 'PWA'
-              });
-            }
-          }
-          deferredPrompt = null;
-        });
-      }
-    }
-
-    // Detect if app is running as PWA
-    function isPWA() {
-      return window.matchMedia('(display-mode: standalone)').matches || 
-             window.navigator.standalone === true;
-    }
-
-    if (isPWA()) {
-      console.log('📱 Running as PWA');
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'pwa_launched', {
-          'event_category': 'PWA'
-        });
-      }
-    }
-
-    // ==============================================
-    // DEVICE DETECTION
-    // ==============================================
-    
-    function getDeviceInfo() {
-      const ua = navigator.userAgent;
-      let device = 'desktop';
-      let os = 'unknown';
-      
-      // Detect mobile devices
-      if (/Android/i.test(ua)) {
-        device = 'mobile';
-        os = 'android';
-      } else if (/iPhone|iPad|iPod/i.test(ua)) {
-        device = /iPad/i.test(ua) ? 'tablet' : 'mobile';
-        os = 'ios';
-      } else if (/Windows/i.test(ua)) {
-        os = 'windows';
-      } else if (/Mac/i.test(ua)) {
-        os = 'macos';
-      } else if (/Linux/i.test(ua)) {
-        os = 'linux';
-      }
-      
-      return { device, os };
-    }
-
-    const deviceInfo = getDeviceInfo();
-    console.log('📱 Device info:', deviceInfo);
-
-    // Track device info
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'device_info', {
-        'event_category': 'Device',
-        'device_type': deviceInfo.device,
-        'operating_system': deviceInfo.os
-      });
-    }
-
-    // ==============================================
-    // INITIALIZATION COMPLETE
-    // ==============================================
-    
-    console.log('🎓 Thesis Generator app initialization complete');
-    console.log('📱 Platform:', navigator.platform);
-    console.log('🌐 User Agent:', navigator.userAgent);
-    console.log('🔗 URL:', window.location.href);
-    console.log('🔥 Firebase Config:', firebaseConfig.projectId);
-  </script>
-
-  <!-- Structured Data for SEO -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Thesis Generator",
-    "description": "AI-powered academic writing assistant for creating professional thesis content",
-    "url": "https://thesis-generator-web.web.app/app.html",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "Web Browser",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "featureList": [
-      "AI Chapter Generation",
-      "Multiple Citation Formats",
-      "Academic Writing Styles",
-      "Real-time Editing",
-      "Export Options"
-    ],
-    "author": {
-      "@type": "Organization",
-      "name": "Thesis Generator"
-    },
-    "datePublished": "2024-01-01",
-    "dateModified": "2024-12-26"
   }
-  </script>
 
-  <!-- Fallback for users with JavaScript disabled -->
-  <noscript>
-    <div style="
-      display: flex;
-      justify-content: center;
+  // Start preloading when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', preloadResources);
+  } else {
+    preloadResources();
+  }
+
+  // Add smooth transition when Flutter app is ready
+  window.addEventListener('flutter-initialized', function() {
+    const loading = document.getElementById('loading-screen');
+    if (loading) {
+      loading.classList.add('fade-out');
+      setTimeout(() => {
+        loading.remove();
+      }, 500);
+    }
+  });
+
+  // Memory cleanup
+  window.addEventListener('beforeunload', function() {
+    clearInterval(messageInterval);
+  });
+</script>
+
+<!-- Add fade-out class for smooth transition -->
+<style>
+  .fade-out {
+    opacity: 0 !important;
+    transition: opacity 0.5s ease-out !important;
+  }
+
+  /* Loading screen entrance animation */
+  .loading {
+    animation: loadingEntrance 0.8s ease-out;
+  }
+
+  @keyframes loadingEntrance {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Add pulsing effect to spinner */
+  .spinner-container::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.7;
+    }
+  }
+
+  /* Add glow effect to logo */
+  .logo {
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 0 20px rgba(157, 78, 221, 0.3);
+  }
+
+  /* Enhance feature chips */
+  .feature-chip {
+    transition: all 0.3s ease;
+  }
+
+  .feature-chip:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Add loading dots animation */
+  .loading-text::after {
+    content: '';
+    animation: loadingDots 1.5s infinite;
+  }
+
+  @keyframes loadingDots {
+    0%, 20% {
+      content: '';
+    }
+    40% {
+      content: '.';
+    }
+    60% {
+      content: '..';
+    }
+    80%, 100% {
+      content: '...';
+    }
+  }
+
+  /* Improve accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .loading {
+      animation: none;
+    }
+    
+    .logo-container {
+      animation: none;
+    }
+    
+    .spinner {
+      animation: spin 3s linear infinite;
+    }
+    
+    .spinner-container::after {
+      animation: none;
+    }
+  }
+
+  /* High contrast improvements */
+  @media (prefers-contrast: high) {
+    .loading {
+      background: #000;
+    }
+    
+    .brand-title,
+    .brand-subtitle,
+    .loading-text,
+    .loading-tip {
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    
+    .spinner {
+      border-top-color: #fff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .progress-fill {
+      background: #fff;
+    }
+  }
+
+  /* Print styles (hide loading screen when printing) */
+  @media print {
+    .loading {
+      display: none !important;
+    }
+  }
+
+  /* Focus styles for accessibility */
+  .feature-chip:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+  }
+
+  /* Loading screen for different screen sizes */
+  @media (max-width: 320px) {
+    .brand-title {
+      font-size: 24px;
+    }
+    
+    .brand-subtitle {
+      font-size: 14px;
+    }
+    
+    .progress-bar {
+      width: 150px;
+    }
+    
+    .features-preview {
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      text-align: center;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      padding: 2rem;
-    ">
-      <div style="max-width: 500px;">
-        <div style="font-size: 4rem; margin-bottom: 2rem;">🎓</div>
-        <h1 style="font-size: 2rem; margin-bottom: 1rem; font-weight: 700;">JavaScript Required</h1>
-        <p style="font-size: 1.2rem; margin-bottom: 2rem; line-height: 1.5; opacity: 0.9;">
-          Thesis Generator requires JavaScript to function properly. Please enable JavaScript in your browser settings and refresh the page.
-        </p>
-        <div style="margin-bottom: 2rem;">
-          <h3 style="margin-bottom: 1rem;">How to enable JavaScript:</h3>
-          <div style="text-align: left; background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem;">
-            <strong>Chrome:</strong> Settings → Privacy and Security → Site Settings → JavaScript → Allowed
-          </div>
-          <div style="text-align: left; background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem;">
-            <strong>Firefox:</strong> about:config → javascript.enabled → true
-          </div>
-          <div style="text-align: left; background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px;">
-            <strong>Safari:</strong> Preferences → Security → Enable JavaScript
-          </div>
-        </div>
-        <a href="index.html" style="
-          display: inline-block;
-          background: linear-gradient(45deg, #9D4EDD, #FF48B0);
-          color: white;
-          text-decoration: none;
-          padding: 1rem 2rem;
-          border-radius: 8px;
-          font-weight: 600;
-          margin-top: 1rem;
-        ">← Back to Home</a>
-      </div>
-    </div>
-  </noscript>
+    }
+  }
 
-  <!-- Preload critical resources -->
-  <link rel="preload" href="main.dart.js" as="script">
-  <link rel="preload" href="flutter.js" as="script">
-  <link rel="dns-prefetch" href="//fonts.googleapis.com">
-  <link rel="dns-prefetch" href="//www.gstatic.com">
-  <link rel="dns-prefetch" href="//firestore.googleapis.com">
+  @media (min-width: 1200px) {
+    .logo {
+      width: 140px;
+      height: 140px;
+      border-radius: 35px;
+    }
+    
+    .logo-icon {
+      font-size: 70px;
+    }
+    
+    .brand-title {
+      font-size: 36px;
+    }
+    
+    .brand-subtitle {
+      font-size: 20px;
+    }
+  }
 
-  <!-- Meta tags for social sharing -->
-  <meta property="og:title" content="Thesis Generator - AI-Powered Academic Writing">
-  <meta property="og:description" content="Create professional thesis chapters with AI assistance. Supports APA, MLA, Chicago formats.">
-  <meta property="og:image" content="https://thesis-generator-web.web.app/favicon.png">
-  <meta property="og:url" content="https://thesis-generator-web.web.app/app.html">
-  <meta property="og:type" content="website">
-  
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Thesis Generator - AI-Powered Academic Writing">
-  <meta name="twitter:description" content="Create professional thesis chapters with AI assistance. Supports APA, MLA, Chicago formats.">
-  <meta name="twitter:image" content="https://thesis-generator-web.web.app/favicon.png">
+  /* Add subtle background pattern */
+  .loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
 
-  <!-- Additional meta tags -->
-  <meta name="robots" content="index, follow">
-  <meta name="googlebot" content="index, follow">
-  <link rel="canonical" href="https://thesis-generator-web.web.app/app.html">
+  /* Improve text rendering */
+  .brand-title,
+  .brand-subtitle,
+  .loading-text,
+  .loading-tip,
+  .feature-chip {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-  <!-- Security headers -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
-  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  /* Add loading state indicators */
+  .loading-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+  }
 
-  <!-- Viewport meta for better mobile experience -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  .loading-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    animation: loadingDotPulse 1.5s ease-in-out infinite;
+  }
 
-  <!-- Apple-specific meta tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Thesis Generator">
+  .loading-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
 
-  <!-- Microsoft-specific meta tags -->
-  <meta name="msapplication-TileColor" content="#9D4EDD">
-  <meta name="msapplication-config" content="browserconfig.xml">
+  .loading-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
 
-  <!-- Prefetch DNS for external resources -->
-  <link rel="dns-prefetch" href="//www.googletagmanager.com">
-  <link rel="dns-prefetch" href="//firebase.googleapis.com">
-  <link rel="dns-prefetch" href="//firebaseapp.com">
+  @keyframes loadingDotPulse {
+    0%, 60%, 100% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    30% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+</style>
 
-  <!-- Preconnect to critical third-party origins -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<!-- Add loading indicators at the bottom -->
+<div class="loading-indicator">
+  <div class="loading-dot"></div>
+  <div class="loading-dot"></div>
+  <div class="loading-dot"></div>
+</div>
 
 </body>
 </html>

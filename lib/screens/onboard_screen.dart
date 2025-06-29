@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'thesis_form_screen.dart';
 import '../widgets/native_ad_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/base_subscription_service.dart';
-import '../providers/subscription_provider.dart';
-import '../services/android_subscription_service.dart';
-import '../services/ios_subscription_service.dart';
 import 'dart:io';
 import 'package:thesis_generator/screens/onboarding/subject_selection_screen.dart';
 
@@ -38,26 +33,24 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final l10n = AppLocalizations.of(context)!;
     pages = [
       {
-        'title': l10n.welcome,
+        'title': 'Academic Writing Assistant',
         'description': 'Create professional academic thesis with AI assistance',
         'image': 'assets/onboard1.jpg',
       },
       {
-        'title': l10n.smartContent,
+        'title': 'Smart Learning Framework',
         'description': 'Generate well-structured chapters and content automatically',
         'image': 'assets/onboard2.jpg',
       },
       {
-        'title': l10n.easyExport,
+        'title': 'Easy Export In PDF',
         'description': 'Export your thesis in professional PDF format',
         'image': 'assets/onboard3.jpg',
       },
     ];
   }
-
 
   @override
   void dispose() {
@@ -79,7 +72,6 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final subscriptionState = ref.watch(subscriptionProvider);
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
@@ -105,7 +97,7 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   }
 
   Widget _buildPage(Map<String, String> page) {
-    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         Padding(
@@ -178,7 +170,7 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
                             return buttonGradient.createShader(bounds);
                           },
                           child: Text(
-                            l10n.getStarted,
+                            'Start Learning',
                             style: GoogleFonts.notoSans(
                               fontSize: 14,
                               color: Colors.white,
@@ -186,7 +178,7 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
                           )
                       )
                           : Text(
-                        l10n.next,
+                        'Next',
                         style: GoogleFonts.notoSans(
                           fontSize: 14,
                           color: Colors.white,
@@ -210,5 +202,4 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
       ],
     );
   }
-
 }

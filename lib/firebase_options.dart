@@ -18,29 +18,31 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCrwRYgtoLrEagqb2m-E1VOocxNr-9By30',
-    appId: '1:153965444638:android:7f3a717c504bb5f471780f',
-    messagingSenderId: '153965444638',
-    projectId: 'thesis-generator-2024',
-    storageBucket: 'thesis-generator-2024.firebasestorage.app',
+    apiKey: 'AIzaSyC4lXSwpcLOUteTeTqMxiqT2Zx5sOumGYU',
+    appId: '1:1098826060423:android:3f0226d2dd4fc3ddf05e22',
+    messagingSenderId: '1098826060423',
+    projectId: 'thesis-generator-web',
+    storageBucket: 'thesis-generator-web.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDzUnNezUdzqCDVQ32Nl15b_osug350jU4',
-    appId: '1:153965444638:ios:dab9894438d1527771780f',
-    messagingSenderId: '153965444638',
-    projectId: 'thesis-generator-2024',
-    storageBucket: 'thesis-generator-2024.firebasestorage.app',
+    apiKey: 'AIzaSyA7bAnM-URPBcwPEMfRZ47z1lkJpmE8AyI',
+    appId: '1:1098826060423:ios:4a57fbcca138ff95f05e22',
+    messagingSenderId: '1098826060423',
+    projectId: 'thesis-generator-web',
+    storageBucket: 'thesis-generator-web.firebasestorage.app',
+    iosClientId: '1098826060423-73kddmjuao2m1rsnocpb2goicionifol.apps.googleusercontent.com',
     iosBundleId: 'com.thesis.generator.ai',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAgqosyJt30acT9hCwmHFRudeYoeHmu-1o',
-    appId: '1:153965444638:web:bd46afd4bd40926471780f',
-    messagingSenderId: '153965444638',
-    projectId: 'thesis-generator-2024',
-    authDomain: 'thesis-generator-2024.firebaseapp.com',
-    storageBucket: 'thesis-generator-2024.firebasestorage.app',
+    apiKey: 'AIzaSyBbErRqwrcX6-ogwmnmr98E3Q4H8KP4w9Q',
+    appId: '1:1098826060423:web:7ee70dc121234297f05e22',
+    messagingSenderId: '1098826060423',
+    projectId: 'thesis-generator-web',
+    authDomain: 'thesis-generator-web.firebaseapp.com',
+    storageBucket: 'thesis-generator-web.firebasestorage.app',
+    measurementId: 'G-BY0DNNV0K3',
   );
 
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -222,7 +222,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -239,7 +239,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           },
         ).animate().fadeIn(delay: 200.ms),
         title: Text(
-          l10n.exportThesis,
+          'Export Thesis',
           style: GoogleFonts.lato(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -263,10 +263,10 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildToolbarButton(Icons.edit, l10n.edit, _toggleEditMode),
-                _buildToolbarButton(Icons.text_fields, l10n.addText, _handleAddText),
-                _buildToolbarButton(Icons.highlight, l10n.highlight, _handleHighlight),
-                _buildToolbarButton(Icons.delete, l10n.delete, _handleDelete),
+                _buildToolbarButton(Icons.edit, 'Edit', _toggleEditMode),
+                _buildToolbarButton(Icons.text_fields,'addText', _handleAddText),
+                _buildToolbarButton(Icons.highlight,'highlight', _handleHighlight),
+                _buildToolbarButton(Icons.delete,'delete', _handleDelete),
               ],
             ),
           ),
@@ -293,7 +293,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         Icon(Icons.save, size: 20, color: Colors.white),
                         SizedBox(width: 8),
                         Text(
-                          l10n.savePdf,
+                          'Save PDF',
                           style: GoogleFonts.lato(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -321,7 +321,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         Icon(Icons.share, size: 20, color: Colors.white),
                         SizedBox(width: 8),
                         Text(
-                          l10n.share,
+                          'Share',
                           style: GoogleFonts.lato(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../app.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
+import 'dart:html' as html;
+
 
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
@@ -33,6 +35,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       Navigator.of(context).pushReplacementNamed('/thesis-form');
     }
   }
+
+void _handleBackButton() {
+  html.window.location.href = 'https://thesisgenerator.tech';
+}
 
   Future<void> _startThesis() async {
     if (_isLoading) return;
@@ -143,15 +149,27 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final user = ref.watch(currentUserProvider);
-    final subscriptionState = ref.watch(subscriptionStatusProvider);
+Widget build(BuildContext context) {
+  final user = ref.watch(currentUserProvider);
+  final subscriptionState = ref.watch(subscriptionStatusProvider);
 
-    return Scaffold(
+  return WillPopScope(
+    onWillPop: () async {
+      _handleBackButton();
+      return false; // Prevent default back behavior
+    },
+    child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: Color(0xFF6C757D),
+          ),
+          onPressed: _handleBackButton,
+        ),
         title: const Text(
           'AI Thesis Generator',
           style: TextStyle(
@@ -176,7 +194,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               await authService.signOut();
 
               if (mounted) {
-                Navigator.of(context).pushReplacementNamed('/signin');
+                _handleBackButton(); // Go to thesisgenerator.tech
               }
             },
           ),
@@ -312,7 +330,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 width: 24,
                                 child: CircularProgressIndicator(
                                   color: Color(0xFF667eea),
-                                                                  strokeWidth: 2,
+                                  strokeWidth: 2,
                                 ),
                               )
                             : const Text(
@@ -456,7 +474,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     ),
                   ),
                 ),
-              ),
+                ),
+
 
               const SizedBox(height: 40),
 
@@ -550,8 +569,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildFeatureCard(String emoji, String title, String description) {
     return Container(
@@ -630,4 +650,3 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     );
   }
 }
-

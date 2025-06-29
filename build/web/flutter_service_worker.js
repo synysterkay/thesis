@@ -4,7 +4,7 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
 const RESOURCES = {"cancel.html": "78bc808a2a887161b132debcd1aa57e2",
-"flutter_bootstrap.js": "078ed383ca0fe31e91948da887154292",
+"flutter_bootstrap.js": "409909ef4bb8399e0994771fa6172721",
 "flutter_template.html": "4a68ecf53c5dbe3b00f167fabb109e45",
 "version.json": "ba178fe82132b9b714d1715213dc6380",
 "index_backup.html": "9f0ec5364ba80d37d7ea7d9efb544227",
@@ -40,7 +40,7 @@ const RESOURCES = {"cancel.html": "78bc808a2a887161b132debcd1aa57e2",
 "js/webhook-handler.js": "2cd7512829358a336f241341a537d391",
 "js/landing.js": "73756c202bed338571dd58fd856bd176",
 "js/sw.js": "db906c82fe7bce88e5a8b0b3e7e42734",
-"main.dart.js": "ef2956ea89d7629eb972141662707718",
+"main.dart.js": "a6829cd24971d4df613a2b75cb2a80f0",
 "terms.html": "e052b63081ebffbe62ed180c8995da27",
 "cookies.html": "967c7716c91ca1a1fc6cc15247265fdd",
 "flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",

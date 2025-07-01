@@ -63,7 +63,7 @@ class GeminiService {
   String? _userApiKey;
   GeminiService() ;
   final List<String> _apiKeys = [
-    'AIzaSyCjA4h-fn9z2UbDRa_uOUeUahul0poe4GA',
+    'AIzaSyDtH2niottKPgMlx0adprvIHIkvtMAoVMs',
     'AIzaSyCE487wEu8VCtnrufphb0jhKrGoXAzZE7E',
     'AIzaSyCvPBVcU0VO2IImQycGcwxuPP0uo9WF8m8',
     'AIzaSyAnUwFSIl0-JkRKa_KkhMz5HdTP1H04Sss',

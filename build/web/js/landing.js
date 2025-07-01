@@ -12,6 +12,7 @@ class LandingPage {
     this.setupAnimations();
     this.setupCookieConsent();
     this.setupFormHandling();
+    this.setupVisibilityFixes();
   }
 
   setupNavigation() {
@@ -184,28 +185,125 @@ class LandingPage {
   }
 
   setupAnimations() {
-    // Intersection Observer for scroll animations
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-in');
-        }
-      });
-    }, observerOptions);
-
-    // Observe elements for animation
+    // First ensure all content is visible immediately
     const animatedElements = document.querySelectorAll(
       '.benefit-card, .testimonial-card, .step, .feature-row, .pricing-card'
     );
     
+    // Make content visible immediately to prevent blank sections
     animatedElements.forEach(el => {
-      observer.observe(el);
+      el.style.opacity = '1';
+      el.style.visibility = 'visible';
+      el.style.transform = 'translateY(0)';
+      el.classList.add('animate-in');
     });
+
+    // Only add intersection observer animations if user doesn't prefer reduced motion
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            // Add a subtle animation effect
+            entry.target.style.transform = 'translateY(0)';
+            entry.target.style.opacity = '1';
+          }
+        });
+      }, observerOptions);
+
+      // Re-observe elements for enhanced animation
+      animatedElements.forEach(el => {
+        // Reset for animation
+        el.style.transform = 'translateY(20px)';
+        el.style.opacity = '0.8';
+        observer.observe(el);
+      });
+    }
+  }
+
+  setupVisibilityFixes() {
+    // Emergency visibility fix for all content sections
+    const contentSections = [
+      '.benefits-grid',
+      '.steps',
+      '.pricing-grid', 
+      '.features-list',
+      '.testimonials-grid'
+    ];
+
+    contentSections.forEach(selector => {
+      const section = document.querySelector(selector);
+      if (section) {
+        section.style.opacity = '1';
+        section.style.visibility = 'visible';
+        section.style.display = section.classList.contains('steps') ? 'flex' : 
+                                section.classList.contains('features-list') ? 'block' : 'grid';
+      }
+    });
+
+    // Ensure all cards are visible
+    const allCards = document.querySelectorAll(
+      '.benefit-card, .testimonial-card, .step, .feature-row, .pricing-card'
+    );
+    
+    allCards.forEach(card => {
+      card.style.opacity = '1';
+      card.style.visibility = 'visible';
+      card.style.display = 'block';
+      card.style.transform = 'none';
+    });
+
+    // Fix specific layout issues
+    this.fixLayoutIssues();
+  }
+
+  fixLayoutIssues() {
+    // Fix steps layout
+    const stepsContainer = document.querySelector('.steps');
+    if (stepsContainer) {
+      stepsContainer.style.display = 'flex';
+      stepsContainer.style.flexWrap = 'wrap';
+      stepsContainer.style.justifyContent = 'center';
+      stepsContainer.style.alignItems = 'flex-start';
+      stepsContainer.style.gap = '2rem';
+    }
+
+    // Fix features list
+    const featuresList = document.querySelector('.features-list');
+    if (featuresList) {
+      featuresList.style.display = 'block';
+      featuresList.style.maxWidth = '800px';
+      featuresList.style.margin = '0 auto';
+    }
+
+    // Fix pricing grid
+    const pricingGrid = document.querySelector('.pricing-grid');
+    if (pricingGrid) {
+      pricingGrid.style.display = 'grid';
+      pricingGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+      pricingGrid.style.gap = '2rem';
+    }
+
+    // Fix benefits grid
+    const benefitsGrid = document.querySelector('.benefits-grid');
+    if (benefitsGrid) {
+      benefitsGrid.style.display = 'grid';
+      benefitsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+      benefitsGrid.style.gap = '2rem';
+    }
+
+    // Fix testimonials grid
+    const testimonialsGrid = document.querySelector('.testimonials-grid');
+    if (testimonialsGrid) {
+      testimonialsGrid.style.display = 'grid';
+      testimonialsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+      testimonialsGrid.style.gap = '2rem';
+    }
   }
 
   setupCookieConsent() {
@@ -345,33 +443,322 @@ class LandingPage {
       if (navToggle) navToggle.classList.remove('active');
       document.body.classList.remove('nav-open');
     }
+
+    // Re-fix layouts on resize
+    this.fixLayoutIssues();
+  }
+
+  // Debug method to check visibility
+  debugVisibility() {
+    const sections = [
+      '.benefits',
+      '.how-it-works', 
+      '.pricing',
+      '.features-showcase',
+      '.testimonials'
+    ];
+
+    sections.forEach(selector => {
+      const section = document.querySelector(selector);
+      if (section) {
+               console.log(`${selector}:`, {
+          display: getComputedStyle(section).display,
+          visibility: getComputedStyle(section).visibility,
+          opacity: getComputedStyle(section).opacity,
+          height: section.offsetHeight
+        });
+      }
+    });
+
+    const cards = document.querySelectorAll('.benefit-card, .testimonial-card, .step, .feature-row, .pricing-card');
+    console.log(`Found ${cards.length} content cards`);
+    
+    cards.forEach((card, index) => {
+      const styles = getComputedStyle(card);
+      console.log(`Card ${index}:`, {
+        display: styles.display,
+        visibility: styles.visibility,
+        opacity: styles.opacity,
+        transform: styles.transform
+      });
+    });
+  }
+
+  // Force visibility method as last resort
+  forceVisibility() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .benefit-card, .testimonial-card, .step, .feature-row, .pricing-card {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: block !important;
+        transform: none !important;
+      }
+      
+      .benefits-grid, .testimonials-grid, .pricing-grid {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      
+      .steps {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      
+      .features-list {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    console.log('🔧 Force visibility styles applied');
+  }
+
+  // Initialize content visibility immediately
+  initializeContentVisibility() {
+    // Run multiple times to ensure content shows
+    this.setupVisibilityFixes();
+    
+    setTimeout(() => {
+      this.setupVisibilityFixes();
+    }, 100);
+    
+    setTimeout(() => {
+      this.setupVisibilityFixes();
+      this.debugVisibility();
+    }, 500);
+    
+    // Force visibility as backup
+    setTimeout(() => {
+      const hiddenElements = document.querySelectorAll('.benefit-card, .testimonial-card, .step, .feature-row, .pricing-card');
+      let hasHiddenContent = false;
+      
+      hiddenElements.forEach(el => {
+        const styles = getComputedStyle(el);
+        if (styles.opacity === '0' || styles.visibility === 'hidden' || styles.display === 'none') {
+          hasHiddenContent = true;
+        }
+      });
+      
+      if (hasHiddenContent) {
+        console.warn('⚠️ Hidden content detected, applying force visibility');
+        this.forceVisibility();
+      }
+    }, 1000);
   }
 }
 
-// Initialize when DOM is ready
+// Enhanced initialization with multiple fallbacks
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('🚀 Initializing landing page...');
+  
   const landingPage = new LandingPage();
+  
+  // Initialize content visibility immediately
+  landingPage.initializeContentVisibility();
   
   // Handle window resize
   window.addEventListener('resize', () => {
     landingPage.handleResize();
   });
   
-  // Make showNotification globally available
+  // Make methods globally available for debugging
+  window.landingPage = landingPage;
   window.showNotification = (message, type) => {
     landingPage.showNotification(message, type);
   };
+  window.debugVisibility = () => {
+    landingPage.debugVisibility();
+  };
+  window.forceVisibility = () => {
+    landingPage.forceVisibility();
+  };
+  
+  console.log('✅ Landing page initialized successfully');
 });
+
+// Backup initialization if DOMContentLoaded already fired
+if (document.readyState === 'loading') {
+  // DOMContentLoaded has not fired yet
+} else {
+  // DOMContentLoaded has already fired
+  console.log('🔄 DOM already loaded, initializing immediately...');
+  const landingPage = new LandingPage();
+  landingPage.initializeContentVisibility();
+  
+  window.landingPage = landingPage;
+  window.showNotification = (message, type) => {
+    landingPage.showNotification(message, type);
+  };
+}
 
 // Performance monitoring
 window.addEventListener('load', () => {
-  console.log('🚀 Landing page loaded successfully');
+  console.log('🚀 Landing page fully loaded');
+  
+  // Final visibility check
+  setTimeout(() => {
+    const allSections = document.querySelectorAll('.benefits, .how-it-works, .pricing, .features-showcase, .testimonials');
+    const allCards = document.querySelectorAll('.benefit-card, .testimonial-card, .step, .feature-row, .pricing-card');
+    
+    console.log(`📊 Page stats: ${allSections.length} sections, ${allCards.length} content cards`);
+    
+    // Check if any content is still hidden
+    let hiddenCount = 0;
+    allCards.forEach(card => {
+      const styles = getComputedStyle(card);
+      if (styles.opacity === '0' || styles.visibility === 'hidden') {
+        hiddenCount++;
+      }
+    });
+    
+    if (hiddenCount > 0) {
+      console.warn(`⚠️ ${hiddenCount} cards still hidden, applying emergency fix`);
+      if (window.landingPage) {
+        window.landingPage.forceVisibility();
+      }
+    } else {
+      console.log('✅ All content is visible');
+    }
+  }, 2000);
   
   // Log performance metrics
   if ('performance' in window) {
     const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
     console.log(`⚡ Page load time: ${loadTime}ms`);
+    
+    // Track performance with analytics if available
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'timing_complete', {
+        'name': 'load',
+        'value': loadTime
+      });
+    }
   }
 });
 
-console.log('📄 Modern landing page scripts loaded');
+// Error handling
+window.addEventListener('error', (e) => {
+  console.error('❌ JavaScript error:', e.error);
+  
+  // Try to ensure content is still visible even if there are errors
+  setTimeout(() => {
+    if (window.landingPage) {
+      window.landingPage.forceVisibility();
+    }
+  }, 100);
+  
+  // Track errors with analytics if available
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'exception', {
+      'description': e.error?.toString() || 'Unknown error',
+      'fatal': false
+    });
+  }
+});
+
+// Handle unhandled promise rejections
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('❌ Unhandled promise rejection:', e.reason);
+  
+  // Track with analytics if available
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'exception', {
+      'description': 'Promise rejection: ' + (e.reason?.toString() || 'Unknown'),
+      'fatal': false
+    });
+  }
+});
+
+// Intersection Observer polyfill check
+if (!('IntersectionObserver' in window)) {
+  console.warn('⚠️ IntersectionObserver not supported, loading polyfill...');
+  
+  // Fallback: make all content visible immediately
+  document.addEventListener('DOMContentLoaded', () => {
+    const allCards = document.querySelectorAll('.benefit-card, .testimonial-card, .step, .feature-row, .pricing-card');
+    allCards.forEach(card => {
+      card.style.opacity = '1';
+      card.style.visibility = 'visible';
+      card.style.transform = 'none';
+      card.classList.add('animate-in');
+    });
+  });
+}
+
+// CSS animation support check
+const supportsAnimations = CSS.supports('animation', 'none');
+if (!supportsAnimations) {
+  console.warn('⚠️ CSS animations not supported');
+  
+  // Ensure content is visible without animations
+  document.addEventListener('DOMContentLoaded', () => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .benefit-card, .testimonial-card, .step, .feature-row, .pricing-card {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  });
+}
+
+// Reduced motion preference handling
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  console.log('🎯 Reduced motion preferred, disabling animations');
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    const style = document.createElement('style');
+    style.textContent = `
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      
+      .benefit-card, .testimonial-card, .step, .feature-row, .pricing-card {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  });
+}
+
+// Debug mode activation
+if (window.location.search.includes('debug=true')) {
+  console.log('🐛 Debug mode activated');
+  
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (window.debugVisibility) {
+        window.debugVisibility();
+      }
+    }, 1000);
+  });
+}
+
+// Final safety net - ensure content is visible after everything loads
+setTimeout(() => {
+  const criticalElements = document.querySelectorAll('.benefit-card, .testimonial-card, .step, .feature-row, .pricing-card');
+  
+  criticalElements.forEach(el => {
+    if (getComputedStyle(el).opacity === '0' || getComputedStyle(el).visibility === 'hidden') {
+      el.style.opacity = '1';
+      el.style.visibility = 'visible';
+      el.style.transform = 'none';
+      el.style.display = 'block';
+    }
+  });
+  
+  console.log('🛡️ Final safety net applied');
+}, 3000);
+
+console.log('📄 Modern landing page scripts loaded successfully');

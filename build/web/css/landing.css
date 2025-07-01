@@ -84,7 +84,7 @@ p {
     gap: 0.5rem;
     text-decoration: none;
     font-family: inherit;
-    min-height: 48px; /* Accessibility: minimum touch target */
+    min-height: 48px;
     white-space: nowrap;
     text-align: center;
     line-height: 1.2;
@@ -270,6 +270,44 @@ p {
     transition: all 0.3s ease;
 }
 
+/* Add this after the existing .nav-cta rule around line 150: */
+#main-cta-btn,
+#final-cta-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-family: inherit;
+    min-height: 48px;
+    white-space: nowrap;
+    text-align: center;
+    line-height: 1.2;
+}
+
+#main-cta-btn:hover,
+#final-cta-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+#final-cta-btn {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.1rem;
+    min-height: 56px;
+}
+
+
 /* User Status Bar */
 .user-status-bar {
     background: #f8fafc;
@@ -407,9 +445,11 @@ p {
 }
 
 .benefits-grid {
-    display: grid;
+    display: grid !important;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .benefit-card {
@@ -419,6 +459,10 @@ p {
     text-align: center;
     border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
 }
 
 .benefit-card:hover {
@@ -454,17 +498,25 @@ p {
 }
 
 .steps {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: flex-start;
     justify-content: center;
     gap: 2rem;
     max-width: 900px;
     margin: 0 auto;
+    flex-wrap: wrap;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .step {
     text-align: center;
     flex: 1;
+    min-width: 250px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
 }
 
 .step-number {
@@ -494,6 +546,7 @@ p {
 .step-arrow {
     color: #cbd5e0;
     font-size: 1.5rem;
+    align-self: center;
 }
 
 /* Pricing Section */
@@ -514,11 +567,13 @@ p {
 }
 
 .pricing-grid {
-    display: grid;
+    display: grid !important;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
     max-width: 800px;
     margin: 0 auto;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .pricing-card {
@@ -528,6 +583,10 @@ p {
     border: 1px solid #e2e8f0;
     position: relative;
     transition: all 0.2s ease;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
 }
 
 .pricing-card:hover {
@@ -659,6 +718,9 @@ p {
 .features-list {
     max-width: 800px;
     margin: 0 auto;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
 }
 
 .feature-row {
@@ -670,6 +732,9 @@ p {
     background: #f8fafc;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
 }
 
 .feature-row .feature-icon {
@@ -700,9 +765,11 @@ p {
 }
 
 .testimonials-grid {
-    display: grid;
+    display: grid !important;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .testimonial-card {
@@ -711,6 +778,10 @@ p {
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
 }
 
 .testimonial-card:hover {
@@ -1169,21 +1240,45 @@ footer {
 
 /* Animations */
 .animate-in {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    visibility: visible !important;
 }
 
+/* CRITICAL: Force visibility for all content cards */
 .benefit-card,
 .testimonial-card,
 .step,
 .feature-row,
 .pricing-card {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.6s ease;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
 }
 
-/* FIXED: Enhanced Responsive Design for Buttons */
+/* CRITICAL: Force visibility for all grid containers */
+.benefits-grid,
+.testimonials-grid,
+.pricing-grid {
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.steps {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.features-list {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Enhanced Responsive Design */
 @media (max-width: 768px) {
     .nav-menu {
         position: fixed;
@@ -1223,7 +1318,7 @@ footer {
         overflow: hidden;
     }
 
-    /* FIXED: Mobile Button Improvements */
+    /* Mobile Button Improvements */
     .btn-primary,
     .cta-primary {
         padding: 1rem 1.5rem;
@@ -1275,7 +1370,7 @@ footer {
     }
 
     .steps {
-        flex-direction: column;
+        flex-direction: column !important;
         gap: 2rem;
     }
 
@@ -1284,7 +1379,7 @@ footer {
     }
 
     .pricing-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .pricing-card.popular {
@@ -1293,7 +1388,7 @@ footer {
 
     .benefits-grid,
     .testimonials-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .feature-row {
@@ -1365,7 +1460,7 @@ footer {
         line-height: 1.4;
     }
 
-    /* FIXED: Extra Small Screen Button Adjustments */
+    /* Extra Small Screen Button Adjustments */
     .btn-primary,
     .cta-primary {
         padding: 0.9rem 1.2rem;
@@ -1453,12 +1548,12 @@ footer {
     }
 
     .benefits-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
         gap: 1.5rem;
     }
 
     .testimonials-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
         gap: 1.5rem;
     }
 
@@ -1466,7 +1561,7 @@ footer {
         gap: 1.5rem;
     }
 
-    /* FIXED: Better text wrapping for long button text */
+    /* Better text wrapping for long button text */
     .cta-section {
         max-width: 100%;
         overflow: hidden;
@@ -1478,7 +1573,7 @@ footer {
     }
 }
 
-/* FIXED: Extra responsive breakpoint for very small screens */
+/* Extra responsive breakpoint for very small screens */
 @media (max-width: 360px) {
     .btn-primary,
     .cta-primary,
@@ -1549,8 +1644,8 @@ footer {
     }
 
     .animate-in {
-        opacity: 1;
-        transform: none;
+        opacity: 1 !important;
+        transform: none !important;
     }
 
     .benefit-card,
@@ -1558,8 +1653,8 @@ footer {
     .step,
     .feature-row,
     .pricing-card {
-        opacity: 1;
-        transform: none;
+        opacity: 1 !important;
+        transform: none !important;
     }
 
     html {
@@ -2205,6 +2300,21 @@ footer {
 .pr-3 { padding-right: 0.75rem; }
 .pr-4 { padding-right: 1rem; }
 
+/* Performance optimizations */
+.will-change-transform {
+    will-change: transform;
+}
+
+.will-change-opacity {
+    will-change: opacity;
+}
+
+.gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
 /* Final optimizations and cleanup */
 * {
     box-sizing: border-box;
@@ -2235,19 +2345,60 @@ button:disabled {
     opacity: 0.6;
 }
 
-/* Performance optimizations */
-.will-change-transform {
-    will-change: transform;
+/* EMERGENCY VISIBILITY OVERRIDE - HIGHEST PRIORITY */
+.benefit-card,
+.testimonial-card,
+.step,
+.feature-row,
+.pricing-card {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
+    position: relative !important;
+    z-index: 1 !important;
 }
 
-.will-change-opacity {
-    will-change: opacity;
+.benefits-grid,
+.testimonials-grid,
+.pricing-grid {
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)) !important;
+    gap: 2rem !important;
 }
 
-.gpu-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
+.steps {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 2rem !important;
+}
+
+.features-list {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Force all sections to be visible */
+.benefits,
+.how-it-works,
+.pricing,
+.features-showcase,
+.testimonials,
+.faq,
+.stats,
+.final-cta {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
 }
 
 /* End of CSS file */
+
+

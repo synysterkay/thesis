@@ -111,9 +111,9 @@ p {
 }
 
 .btn-secondary {
-    background: white;
-    color: #374151;
-    border: 1px solid #d1d5db;
+    background: #2563eb;
+    color: white;
+    border: 1px solid #2563eb;
     padding: 1rem 2rem;
     border-radius: 8px;
     font-size: 1rem;
@@ -133,8 +133,9 @@ p {
 }
 
 .btn-secondary:hover {
-    border-color: #9ca3af;
-    background: #f9fafb;
+    border-color: #1d4ed8;
+    background: #1d4ed8;
+    color: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -601,7 +602,7 @@ p {
 
 .popular-badge {
     position: absolute;
-    top: -12px;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
     background: #2563eb;
@@ -1613,7 +1614,7 @@ footer {
     }
 
     .btn-secondary {
-        border: 2px solid #374151;
+        border: 2px solid #1d4ed8;
     }
 
     .benefit-card,

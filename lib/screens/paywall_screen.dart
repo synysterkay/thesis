@@ -769,53 +769,34 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
   }
 
   Widget _buildMonthlyPlan() {
-    final isSelected = _selectedPlan == 'monthly';
-    final isLoading = _isLoading && isSelected;
+  final isSelected = _selectedPlan == 'monthly';
+  final isLoading = _isLoading && isSelected;
 
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF2563EB), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2563EB).withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Popular badge
-          Positioned(
-            top: -16,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'Most Popular AI Essay Writer',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+  return Container(
+    // Add margin to provide space for the label
+    margin: const EdgeInsets.only(top: 16),
+    child: Stack(
+      clipBehavior: Clip.none, // Allow overflow outside the stack bounds
+      children: [
+        // Main card container
+        Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF2563EB), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF2563EB).withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
-            ),
+            ],
           ),
-
-          Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 16), // Space for the label
               
               // Plan header
               Column(
@@ -867,7 +848,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
               const SizedBox(height: 32),
 
-                           // Features
+              // Features
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -916,10 +897,43 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+
+        // Popular badge - positioned above the card
+        Positioned(
+          top: -8, // Position above the card
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Text(
+                'Most Popular AI Essay Writer',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildFeatureItem(IconData icon, String text) {
     return Padding(

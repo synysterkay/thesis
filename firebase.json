@@ -1,1 +1,77 @@
-{"hosting":{"public":"web","ignore":["firebase.json","**/.*","**/node_modules/**"],"rewrites":[{"source":"/api/check-subscription","function":"checkSubscription"},{"source":"/api/create-checkout-session","function":"createCheckoutSession"},{"source":"/webhooks/stripe","function":"stripeWebhook"},{"source":"/webhooks/revenuecat","function":"revenuecatWebhook"},{"source":"/api/health","function":"healthCheck"},{"source":"**","destination":"/index.html"}]},"functions":{"source":"functions","runtime":"nodejs18"},"firestore":{"rules":"firestore.rules","indexes":"firestore.indexes.json"},"flutter":{"platforms":{"android":{"default":{"projectId":"thesis-generator-web","appId":"1:1098826060423:android:3f0226d2dd4fc3ddf05e22","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"thesis-generator-web","appId":"1:1098826060423:ios:4a57fbcca138ff95f05e22","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"thesis-generator-web","configurations":{"android":"1:1098826060423:android:3f0226d2dd4fc3ddf05e22","ios":"1:1098826060423:ios:4a57fbcca138ff95f05e22","web":"1:1098826060423:web:7ee70dc121234297f05e22"}}}}}}
+{
+  "hosting": {
+    "public": "web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/check-subscription",
+        "function": "checkSubscription"
+      },
+      {
+        "source": "/api/create-checkout-session",
+        "function": "createCheckoutSession"
+      },
+      {
+        "source": "/webhooks/stripe",
+        "function": "stripeWebhook"
+      },
+      {
+        "source": "/webhooks/revenuecat",
+        "function": "revenuecatWebhook"
+      },
+      {
+        "source": "/api/health",
+        "function": "healthCheck"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs18"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "thesis-generator-web",
+          "appId": "1:1098826060423:android:3f0226d2dd4fc3ddf05e22",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "thesis-generator-web",
+          "appId": "1:1098826060423:ios:4a57fbcca138ff95f05e22",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "thesis-generator-web",
+          "configurations": {
+            "android": "1:1098826060423:android:3f0226d2dd4fc3ddf05e22",
+            "ios": "1:1098826060423:ios:4a57fbcca138ff95f05e22",
+            "web": "1:1098826060423:web:7ee70dc121234297f05e22"
+          }
+        }
+      }
+    }
+  },
+  "extensions": {
+    "firestore-stripe-payments": "stripe/firestore-stripe-payments@0.3.4",
+    "firestore-stripe-payments-s6m5": "stripe/firestore-stripe-payments@0.3.4"
+  }
+}

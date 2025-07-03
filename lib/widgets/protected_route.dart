@@ -42,7 +42,7 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
     try {
       // Small delay to allow providers to initialize
-      await Future.delayed(const Duration(milliseconds: 100));
+       await Future.delayed(const Duration(milliseconds: 100));
       
       if (!mounted) return;
 
@@ -60,7 +60,7 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
     setState(() => _hasNavigated = true);
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
+      if (mounted && context.mounted) {
         Navigator.of(context).pushReplacementNamed('/signin');
       }
     });
@@ -72,7 +72,7 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
     setState(() => _hasNavigated = true);
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
+      if (mounted && context.mounted) {
         Navigator.of(context).pushReplacementNamed('/paywall');
       }
     });
@@ -80,25 +80,59 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
   Widget _buildLoadingScreen({String? message, String? userInfo}) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(
-              color: Color(0xFF9D4EDD),
+            Container(
+              width: 80,
+              height: 80,
+              margin: const EdgeInsets.only(bottom: 30),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFE9ECEF)),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+                    ),
+                  ),
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF667eea),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
             Text(
               message ?? 'Loading...',
-              style: AppTheme.bodyStyle,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1a1a1a),
+              ),
               textAlign: TextAlign.center,
             ),
             if (userInfo != null) ...[
               const SizedBox(height: 8),
               Text(
                 userInfo,
-                style: AppTheme.captionStyle,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -116,7 +150,7 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
     IconData icon = Icons.error_outline,
   }) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -131,19 +165,33 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
               const SizedBox(height: 24),
               Text(
                 title,
-                style: AppTheme.headingStyle,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1a1a1a),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 message,
-                style: AppTheme.bodyStyle,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 onPressed: onRetry,
-                style: AppTheme.primaryButtonStyle,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF667eea),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
               ),
@@ -156,7 +204,7 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
   Widget _buildAccountSyncError(User user, String subscriptionUserId) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -169,42 +217,56 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                 color: Colors.orange,
               ),
               const SizedBox(height: 24),
-              Text(
+              const Text(
                 'Account Sync Issue',
-                style: AppTheme.headingStyle,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1a1a1a),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'There\'s a mismatch between your account and subscription data. Please sign out and sign back in to resolve this issue.',
-                style: AppTheme.bodyStyle,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[900],
+                  color: const Color(0xFFF8F9FA),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE9ECEF)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Debug Info:',
-                      style: AppTheme.captionStyle.copyWith(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+                        color: Colors.grey[800],
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Auth User ID: ${user.uid}',
-                      style: AppTheme.captionStyle.copyWith(fontSize: 12),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
                     ),
                     Text(
                       'Subscription User ID: $subscriptionUserId',
-                      style: AppTheme.captionStyle.copyWith(fontSize: 12),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
@@ -214,16 +276,16 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                 onPressed: () async {
                   try {
                     final authService = ref.read(authServiceProvider);
-                    final subscriptionService = ref.read(subscriptionServiceProvider);
+                    final subscriptionActions = ref.read(subscriptionActionsProvider);
 
-                    await subscriptionService.handleSignOut();
+                    await subscriptionActions.handleSignOut();
                     await authService.signOut();
 
-                    if (mounted) {
+                    if (mounted && context.mounted) {
                       Navigator.of(context).pushReplacementNamed('/signin');
                     }
                   } catch (e) {
-                    if (mounted) {
+                    if (mounted && context.mounted) {
                       AppErrorHandler.showErrorSnackBar(
                         context, 
                         'Sign out failed: ${e.toString()}'
@@ -231,7 +293,14 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                     }
                   }
                 },
-                style: AppTheme.primaryButtonStyle,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF667eea),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
                 icon: const Icon(Icons.logout),
                 label: const Text('Sign Out & Retry'),
               ),
@@ -274,51 +343,53 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
         // User is signed in, check subscription if required
         if (widget.requiresSubscription) {
-          // Show loading while checking subscription
-          if (subscriptionState.isLoading) {
-            return _buildLoadingScreen(
-              message: 'Checking subscription status...',
-              userInfo: 'User: ${user.email ?? user.uid}',
-            );
-          }
-
-          // Subscription error
-          if (subscriptionState.error != null) {
-            return _buildErrorScreen(
-              title: 'Subscription Error',
-              message: 'Failed to verify subscription: ${subscriptionState.error}',
-              onRetry: () async {
-                try {
-                  final subscriptionService = ref.read(subscriptionServiceProvider);
-                  await subscriptionService.refreshSubscriptionStatus();
-                } catch (e) {
-                  if (mounted) {
-                    AppErrorHandler.showErrorSnackBar(
-                      context, 
-                      'Refresh failed: ${e.toString()}'
-                    );
+          return subscriptionState.when(
+            loading: () {
+              return _buildLoadingScreen(
+                message: 'Checking subscription status...',
+                userInfo: 'User: ${user.email ?? user.uid}',
+              );
+            },
+            error: (error, stack) {
+              return _buildErrorScreen(
+                title: 'Subscription Error',
+                message: 'Failed to verify subscription: ${error.toString()}',
+                onRetry: () async {
+                  try {
+                    final subscriptionActions = ref.read(subscriptionActionsProvider);
+                    await subscriptionActions.refreshSubscriptionStatus();
+                  } catch (e) {
+                    if (mounted && context.mounted) {
+                      AppErrorHandler.showErrorSnackBar(
+                        context, 
+                        'Refresh failed: ${e.toString()}'
+                      );
+                    }
                   }
-                }
-              },
-              iconColor: Colors.orange,
-              icon: Icons.subscriptions,
-            );
-          }
+                },
+                iconColor: Colors.orange,
+                icon: Icons.subscriptions,
+              );
+            },
+            data: (status) {
+              // Check for user ID mismatch (security check)
+              if (status.userId != null && status.userId != user.uid) {
+                return _buildAccountSyncError(user, status.userId!);
+              }
 
-          // Check for user ID mismatch (security check)
-          if (subscriptionState.userId != null && 
-              subscriptionState.userId != user.uid) {
-            return _buildAccountSyncError(user, subscriptionState.userId!);
-          }
+              // User doesn't have active subscription
+              if (!status.isActive) {
+                _navigateToPaywall();
+                return _buildLoadingScreen(message: 'Redirecting to subscription...');
+              }
 
-          // User doesn't have active subscription
-          if (!subscriptionState.isActive) {
-            _navigateToPaywall();
-            return _buildLoadingScreen(message: 'Redirecting to subscription...');
-          }
+              // All checks passed - show protected content
+              return widget.child;
+            },
+          );
         }
 
-        // All checks passed - show protected content
+        // No subscription required - show content
         return widget.child;
       },
     );
@@ -410,7 +481,7 @@ class RouteProtection {
     required String actionLabel,
   }) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -420,24 +491,38 @@ class RouteProtection {
               const Icon(
                 Icons.lock_outline,
                 size: 64,
-                color: Color(0xFF9D4EDD),
+                color: Color(0xFF667eea),
               ),
               const SizedBox(height: 24),
               Text(
                 title,
-                style: AppTheme.headingStyle,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1a1a1a),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 message,
-                style: AppTheme.bodyStyle,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: onAction,
-                style: AppTheme.primaryButtonStyle,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF667eea),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
                 child: Text(actionLabel),
               ),
             ],
@@ -447,3 +532,4 @@ class RouteProtection {
     );
   }
 }
+

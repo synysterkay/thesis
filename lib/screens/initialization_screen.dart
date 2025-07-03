@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../app.dart';
@@ -17,28 +18,30 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
   late AnimationController _logoController;
   late AnimationController _progressController;
   late AnimationController _fadeController;
-  
+  late AnimationController _pulseController;
+
   late Animation<double> _logoScale;
   late Animation<double> _progressValue;
   late Animation<double> _fadeOpacity;
+  late Animation<double> _pulseScale;
 
-  String _currentMessage = 'Initializing...';
-  String _currentTip = 'Setting up your workspace';
-  
+  String _currentMessage = 'Initializing AI Essay Writer...';
+  String _currentTip = 'Setting up your thesis generator workspace';
+
   final List<String> _loadingMessages = [
-    'Initializing...',
+    'Initializing AI Essay Writer...',
     'Checking authentication...',
-    'Loading preferences...',
-    'Setting up services...',
-    'Almost ready...'
+    'Loading AI essay generator preferences...',
+    'Verifying thesis generator subscription...',
+    'Almost ready for AI written essays...'
   ];
 
   final List<String> _loadingTips = [
-    'Setting up your workspace',
-    'Verifying your account',
-    'Loading your preferences',
-    'Preparing AI tools',
-    'Finalizing setup'
+    'Setting up your thesis generator workspace',
+    'Verifying your AI essay writer account',
+    'Loading your AI essay generator preferences',
+    'Checking thesis statement generator subscription',
+    'Finalizing AI essay writer setup'
   ];
 
   int _messageIndex = 0;
@@ -58,12 +61,17 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     );
 
     _progressController = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 4),
       vsync: this,
     );
 
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _pulseController = AnimationController(
+      duration: const Duration(seconds: 2),
       vsync: this,
     );
 
@@ -91,54 +99,117 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
       curve: Curves.easeOut,
     ));
 
+    _pulseScale = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
+    ));
+
     _logoController.forward();
     _progressController.forward();
+    _pulseController.repeat(reverse: true);
   }
 
   void _startInitialization() async {
     try {
-      // Simulate initialization steps with proper timing
-      await Future.delayed(const Duration(milliseconds: 500));
-      _updateMessage(1);
-      
-      // Check authentication
+      // Step 1: Initial setup
       await Future.delayed(const Duration(milliseconds: 800));
-      final user = ref.read(currentUserProvider);
-      
-      _updateMessage(2);
-      await Future.delayed(const Duration(milliseconds: 600));
-      
-      if (user != null) {
-        // User is signed in, check subscription
-        _updateMessage(3);
-        await Future.delayed(const Duration(milliseconds: 700));
-        
-        final subscriptionService = ref.read(subscriptionServiceProvider);
-        await subscriptionService.handleSignIn(user);
-        
-        _updateMessage(4);
-        await Future.delayed(const Duration(milliseconds: 500));
-        
-        final isSubscribed = ref.read(isSubscribedProvider);
-        
-        if (!mounted || _hasNavigated) return;
-        
-        _hasNavigated = true;
-        await _navigateToScreen(isSubscribed ? '/thesis-form' : '/paywall');
-      } else {
-        // User not signed in
-        _updateMessage(4);
-        await Future.delayed(const Duration(milliseconds: 500));
-        
-        if (!mounted || _hasNavigated) return;
-        
-        _hasNavigated = true;
-        await _navigateToScreen('/signin');
-      }
+      _updateMessage(1);
+
+      // Step 2: Check authentication
+      await Future.delayed(const Duration(milliseconds: 1000));
+      final authState = ref.read(authStateProvider);
+
+      await authState.when(
+        data: (user) async {
+          if (user != null) {
+            // User is signed in
+            _updateMessage(2);
+            await Future.delayed(const Duration(milliseconds: 800));
+
+            // Step 3: Check subscription if user is signed in
+            _updateMessage(3);
+            await Future.delayed(const Duration(milliseconds: 1000));
+
+            final subscriptionState = ref.read(subscriptionStatusProvider);
+            await subscriptionState.when(
+              data: (status) async {
+                _updateMessage(4);
+                await Future.delayed(const Duration(milliseconds: 800));
+
+                if (!mounted || _hasNavigated) return;
+
+                _hasNavigated = true;
+                if (status.isActive) {
+                  await _navigateToScreen('/thesis-form');
+                } else {
+                  await _navigateToScreen('/paywall');
+                }
+              },
+              loading: () async {
+                // Wait a bit more for subscription to load
+                await Future.delayed(const Duration(milliseconds: 1500));
+
+                if (!mounted || _hasNavigated) return;
+
+                final isSubscribed = ref.read(isSubscribedProvider);
+                _updateMessage(4);
+                await Future.delayed(const Duration(milliseconds: 500));
+
+                _hasNavigated = true;
+                if (isSubscribed) {
+                  await _navigateToScreen('/thesis-form');
+                } else {
+                  await _navigateToScreen('/paywall');
+                }
+              },
+              error: (error, stack) async {
+                if (!mounted || _hasNavigated) return;
+
+                _hasNavigated = true;
+                // On subscription error, go to paywall to retry
+                await _navigateToScreen('/paywall');
+              },
+            );
+          } else {
+            // User not signed in
+            _updateMessage(2);
+            await Future.delayed(const Duration(milliseconds: 800));
+
+            _updateMessage(4);
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            if (!mounted || _hasNavigated) return;
+
+            _hasNavigated = true;
+            await _navigateToScreen('/signin');
+          }
+        },
+        loading: () async {
+          // Wait for auth to load
+          await Future.delayed(const Duration(milliseconds: 2000));
+
+          if (!mounted || _hasNavigated) return;
+
+          // If still loading after timeout, go to signin
+          _hasNavigated = true;
+          await _navigateToScreen('/signin');
+        },
+        error: (error, stack) async {
+          if (!mounted || _hasNavigated) return;
+
+          _hasNavigated = true;
+          await _navigateToScreen('/signin');
+        },
+      );
     } catch (e) {
       if (mounted && !_hasNavigated) {
         _hasNavigated = true;
-        AppErrorHandler.showErrorSnackBar(context, 'Initialization failed: ${e.toString()}');
+        if (context.mounted) {
+          AppErrorHandler.showErrorSnackBar(context, 'Initialization failed: ${e.toString()}');
+        }
         await _navigateToScreen('/signin');
       }
     }
@@ -156,8 +227,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
 
   Future<void> _navigateToScreen(String route) async {
     await _fadeController.forward();
-    
-    if (mounted) {
+
+    if (mounted && context.mounted) {
       Navigator.of(context).pushReplacementNamed(route);
     }
   }
@@ -167,11 +238,16 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     _logoController.dispose();
     _progressController.dispose();
     _fadeController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isDesktop = screenWidth > 768;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: AnimatedBuilder(
@@ -179,240 +255,286 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
         builder: (context, child) {
           return Opacity(
             opacity: _fadeOpacity.value,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Logo with animation
-                    AnimatedBuilder(
-                      animation: _logoScale,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: _logoScale.value,
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            margin: const EdgeInsets.only(bottom: 40),
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: screenHeight,
+                  ),
+                  child: Center(
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: isDesktop ? 600 : screenWidth * 0.9,
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 48 : 24,
+                        vertical: 32,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Hero Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF667eea).withOpacity(0.3),
-                                  blurRadius: 20,
-                                  spreadRadius: 0,
-                                  offset: const Offset(0, 10),
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(50),
+                              border: Border.all(color: const Color(0xFFDBEAFE)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  PhosphorIcons.robot(PhosphorIconsStyle.regular),
+                                  size: 16,
+                                  color: const Color(0xFF2563EB),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'AI Essay Writer Powered',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF2563EB),
+                                  ),
                                 ),
                               ],
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
-                              child: Image.asset(
-                                'assets/logo.png',
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  // Fallback to gradient container with icon if image fails
-                                  return Container(
-                                    width: 120,
-                                    height: 120,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Logo with animation
+                          AnimatedBuilder(
+                            animation: _logoScale,
+                            builder: (context, child) {
+                              return AnimatedBuilder(
+                                animation: _pulseScale,
+                                builder: (context, child) {
+                                  return Transform.scale(
+                                    scale: _logoScale.value * _pulseScale.value,
+                                    child: Container(
+                                      width: isDesktop ? 120 : 100,
+                                      height: isDesktop ? 120 : 100,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(30),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFF2563EB).withOpacity(0.3),
+                                            blurRadius: 20,
+                                            spreadRadius: 0,
+                                            offset: const Offset(0, 10),
+                                          ),
+                                        ],
                                       ),
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: const Icon(
-                                      Icons.school_rounded,
-                                      size: 60,
-                                      color: Colors.white,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(30),
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            PhosphorIcons.graduationCap(PhosphorIconsStyle.regular),
+                                            size: 60,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },
-                              ),
-                            ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
 
-                    // Brand title
-                    const Text(
-                      'Thesis Generator',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1a1a1a),
-                        letterSpacing: -0.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                          const SizedBox(height: 32),
 
-                    const SizedBox(height: 12),
-
-                    // Brand subtitle
-                    Text(
-                      'AI-Powered Academic Writing',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    const SizedBox(height: 60),
-
-                    // Professional loading indicator
-                    Container(
-                      width: 80,
-                      height: 80,
-                      margin: const EdgeInsets.only(bottom: 30),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFE9ECEF)),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Spinning indicator
-                          const SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+                          // Brand title
+                          Text(
+                            'Thesis Generator & AI Essay Writer',
+                            style: TextStyle(
+                              fontSize: isDesktop ? 42 : 32,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A1A),
+                              letterSpacing: -0.5,
+                              height: 1.1,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          // Center icon
+
+                          const SizedBox(height: 16),
+
+                          // Brand subtitle
+                          Text(
+                            'Generate complete, professionally written theses and AI-generated essays in minutes with our advanced thesis generator and AI essay writer technology.',
+                            style: TextStyle(
+                              fontSize: isDesktop ? 20 : 18,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF4A5568),
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+
+                          const SizedBox(height: 48),
+
+                          // Features preview
+                          Wrap(
+                            spacing: isDesktop ? 32 : 16,
+                            runSpacing: 16,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              _buildFeatureItem(PhosphorIcons.robot(PhosphorIconsStyle.regular), 'AI Essay Generator'),
+                              _buildFeatureItem(PhosphorIcons.book(PhosphorIconsStyle.regular), 'Thesis Statement Generator'),
+                              _buildFeatureItem(PhosphorIcons.pencil(PhosphorIconsStyle.regular), 'Paper Writer AI'),
+                              _buildFeatureItem(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'AI Write Essay Instantly'),
+                            ],
+                          ),
+
+                          const SizedBox(height: 64),
+
+                          // Professional loading indicator
                           Container(
-                            width: 16,
-                            height: 16,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF667eea),
-                              borderRadius: BorderRadius.circular(8),
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Spinning indicator
+                                const SizedBox(
+                                  width: 50,
+                                  height: 50,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                                  ),
+                                ),
+                                // Center icon
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF2563EB),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
 
-                    // Loading text with animation
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: Text(
-                        _currentMessage,
-                        key: ValueKey(_currentMessage),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1a1a1a),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                          const SizedBox(height: 32),
 
-                    const SizedBox(height: 16),
-
-                    // Progress bar
-                    Container(
-                      width: 280,
-                      height: 6,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(3),
-                        border: Border.all(color: const Color(0xFFE9ECEF)),
-                      ),
-                      child: AnimatedBuilder(
-                        animation: _progressValue,
-                        builder: (context, child) {
-                          return FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: _progressValue.value,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                                ),
-                                borderRadius: BorderRadius.circular(3),
+                          // Loading text with animation
+                                                  AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Text(
+                              _currentMessage,
+                              key: ValueKey(_currentMessage),
+                              style: TextStyle(
+                                fontSize: isDesktop ? 20 : 18,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1A1A1A),
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                          ),
 
-                    // Loading tip
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: Text(
-                        _currentTip,
-                        key: ValueKey(_currentTip),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                          const SizedBox(height: 20),
 
-                    const SizedBox(height: 40),
+                          // Progress bar
+                          Container(
+                            width: isDesktop ? 320 : 280,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: AnimatedBuilder(
+                              animation: _progressValue,
+                              builder: (context, child) {
+                                return FractionallySizedBox(
+                                  alignment: Alignment.centerLeft,
+                                  widthFactor: _progressValue.value,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
 
-                    // Feature chips
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE9ECEF)),
-                      ),
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          _buildFeatureChip('🤖 AI Powered', 0),
-                          _buildFeatureChip('📚 Citations', 1),
-                          _buildFeatureChip('⚡ Fast', 2),
-                          _buildFeatureChip('🔒 Secure', 3),
+                          const SizedBox(height: 24),
+
+                          // Loading tip
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Text(
+                              _currentTip,
+                              key: ValueKey(_currentTip),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF6B7280),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          const SizedBox(height: 48),
+
+                          // Trust indicators
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: Wrap(
+                              spacing: isDesktop ? 32 : 16,
+                              runSpacing: 16,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                _buildTrustItem(PhosphorIcons.shield(PhosphorIconsStyle.regular), 'Secure AI Essay Writer'),
+                                _buildTrustItem(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'Instant AI Written Essays'),
+                                _buildTrustItem(PhosphorIcons.graduationCap(PhosphorIconsStyle.regular), 'Academic Quality'),
+                                _buildTrustItem(PhosphorIcons.checkCircle(PhosphorIconsStyle.regular), '7-Day Guarantee'),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
-
-                    const SizedBox(height: 40),
-
-                    // Loading dots indicator
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(3, (index) {
-                        return AnimatedBuilder(
-                          animation: _logoController,
-                          builder: (context, child) {
-                            final delay = index * 0.2;
-                            final animationValue = (_logoController.value + delay) % 1.0;
-                            final opacity = 0.3 + (0.7 * (1 - (animationValue - 0.5).abs() * 2));
-                            
-                            return Container(
-                              width: 8,
-                              height: 8,
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFF667eea).withOpacity(opacity.clamp(0.0, 1.0)),
-                              ),
-                            );
-                          },
-                        );
-                      }),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -422,41 +544,57 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     );
   }
 
-  Widget _buildFeatureChip(String text, int index) {
-    return AnimatedBuilder(
-      animation: _logoController,
-      builder: (context, child) {
-        final delay = index * 0.3;
-        final animationValue = (_logoController.value + delay) % 1.0;
-        final translateY = 3 * (1 - (animationValue - 0.5).abs() * 2);
-        
-        return Transform.translate(
-          offset: Offset(0, -translateY),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: const Color(0xFFE9ECEF)),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
-              ),
-            ),
+  Widget _buildFeatureItem(IconData icon, String text) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFDBEAFE)),
           ),
-        );
-      },
+          child: Icon(
+            icon,
+            size: 24,
+            color: const Color(0xFF2563EB),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF4A5568),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrustItem(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: const Color(0xFF64748B),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF64748B),
+          ),
+        ),
+      ],
     );
   }
 }
+

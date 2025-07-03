@@ -1,12 +1,35 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const stripe = require('stripe')(functions.config().stripe?.secret_key || process.env.STRIPE_SECRET_KEY);
 const cors = require('cors')({
-  origin: true,
+  origin: [
+    'https://thesisgenerator.tech',
+    'https://www.thesisgenerator.tech',
+    'https://thesis-generator-web.web.app',
+    'https://thesis-generator-web.firebaseapp.com',
+    'http://localhost:3000',
+    'http://localhost:5000'
+  ],
   credentials: true
 });
 
+// Initialize Firebase Admin
 admin.initializeApp();
+
+// Your domain configuration
+const DOMAIN = 'https://thesisgenerator.tech';
+const APP_DOMAIN = 'https://thesis-generator-web.web.app';
+
+// Stripe Payment Links (from your provided links)
+const PAYMENT_LINKS = {
+  weekly: 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01',
+  monthly: 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02'
+};
+
+// Price IDs (you'll need to get these from your Stripe dashboard)
+const PRICE_IDS = {
+  weekly: 'price_1RbhGMEHyyRHgrPiSXQFnnrT',
+  monthly: 'price_1RbhH1EHyyRHgrPiijEs1rTB'
+};
 
 // Helper function to verify Firebase Auth token
 async function verifyAuthToken(req) {
@@ -20,508 +43,385 @@ async function verifyAuthToken(req) {
   return decodedToken;
 }
 
-// 💳 API Endpoint: Create Checkout Session (Direct Stripe)
-exports.createCheckoutSession = functions.https.onRequest((req, res) => {
-  return cors(req, res, async () => {
-    try {
-      console.log('💳 Create checkout session request received');
-      
-      // Verify authentication
-      const decodedToken = await verifyAuthToken(req);
-      const userId = decodedToken.uid;
-      
-      const { priceId, planType, userEmail } = req.body;
-      
-      console.log('💳 Creating checkout session:', { userId, priceId, planType, userEmail });
-      
-      // Get user data from Firebase
-      const userDoc = await admin.firestore().collection('users').doc(userId).get();
-      const userData = userDoc.data();
-      
-      if (!userData) {
-        throw new Error('User not found in database');
-      }
-      
-      // Create Stripe checkout session
-      const session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        line_items: [{
-          price: priceId,
-          quantity: 1,
-        }],
-        success_url: `${req.headers.origin || 'https://thesis-generator-web.web.app'}/app.html?session_id={CHECKOUT_SESSION_ID}&success=true`,
-        cancel_url: `${req.headers.origin || 'https://thesis-generator-web.web.app'}/index.html?canceled=true`,
-        client_reference_id: userId,
-        customer_email: userEmail || userData.email,
-        allow_promotion_codes: true,
-        billing_address_collection: 'required',
-        metadata: {
-          firebase_user_id: userId,
-          plan_type: planType,
-          user_email: userEmail || userData.email
-        },
-        subscription_data: {
-          description: `Thesis Generator ${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`,
-          metadata: {
-            firebase_user_id: userId,
-            plan_type: planType
-          }
-        }
-      });
-      
-      // Log checkout session creation
-      await admin.firestore().collection('checkout_sessions').doc(session.id).set({
-        userId: userId,
-        userEmail: userEmail || userData.email,
-        planType: planType,
-        priceId: priceId,
-        status: 'created',
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      
-      console.log('✅ Checkout session created:', session.id);
-      
-      res.json({
-        success: true,
-        sessionId: session.id,
-        checkoutUrl: session.url
-      });
-      
-    } catch (error) {
-      console.error('❌ Error creating checkout session:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message
-      });
-    }
-  });
-});
-
-// 🔍 API Endpoint: Check Subscription Status (Firebase only)
+// 🔍 API Endpoint: Check Subscription Status
 exports.checkSubscription = functions.https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
-      console.log('🔍 Check subscription request received');
+      console.log('🔍 Checking subscription status...');
       
       // Verify authentication
       const decodedToken = await verifyAuthToken(req);
       const userId = decodedToken.uid;
       
-      console.log('👤 Checking subscription for user:', userId);
-      
-      // Get user data from Firebase
-      const userDoc = await admin.firestore().collection('users').doc(userId).get();
-      const userData = userDoc.data();
-      
-      if (!userData) {
-        return res.json({
-          success: true,
-          hasActiveSubscription: false,
-          subscription: null,
-          source: 'firebase'
+      console.log(`👤 User ID: ${userId}`);
+
+      // Get user's active subscriptions from Firestore
+      const subscriptionsSnapshot = await admin.firestore()
+        .collection('customers')
+        .doc(userId)
+        .collection('subscriptions')
+        .where('status', 'in', ['active', 'trialing'])
+        .orderBy('created', 'desc')
+        .limit(1)
+        .get();
+
+      if (subscriptionsSnapshot.empty) {
+        console.log('📭 No active subscriptions found');
+        return res.status(200).json({
+          isActive: false,
+          status: 'no_active_subscription',
+          userId: userId,
+          message: 'No active subscription found'
         });
       }
+
+      const subscriptionDoc = subscriptionsSnapshot.docs[0];
+      const subscription = subscriptionDoc.data();
       
-      // Check if subscription is still valid
-      const subscriptionStatus = userData.subscriptionStatus || 'inactive';
-      const subscriptionEndDate = userData.subscriptionEndDate;
+      console.log(`📋 Found subscription: ${subscription.status}`);
+
+      // Extract plan type from price ID
+      let planType = 'unknown';
+      if (subscription.items && subscription.items.length > 0) {
+        const priceId = subscription.items[0].price.id;
+        planType = getPlanTypeFromPriceId(priceId);
+      }
+
+      // Check if subscription is actually active
+      const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+      const currentTime = Math.floor(Date.now() / 1000);
+      const isNotExpired = !subscription.current_period_end || subscription.current_period_end > currentTime;
+
+      const response = {
+        isActive: isActive && isNotExpired,
+        status: subscription.status,
+        planType: planType,
+        userId: userId,
+        subscriptionId: subscriptionDoc.id,
+        currentPeriodEnd: subscription.current_period_end,
+        currentPeriodStart: subscription.current_period_start,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+        customerId: subscription.customer,
+        created: subscription.created
+      };
+
+      console.log('✅ Subscription status response:', {
+        isActive: response.isActive,
+        status: response.status,
+        planType: response.planType
+      });
+
+      return res.status(200).json(response);
+
+    } catch (error) {
+      console.error('❌ Error checking subscription:', error);
+      return res.status(500).json({
+        error: 'Failed to check subscription status',
+        details: error.message,
+        isActive: false
+      });
+    }
+  });
+});
+
+// 🔗 API Endpoint: Get Payment Links
+exports.getPaymentLinks = functions.https.onRequest((req, res) => {
+  return cors(req, res, async () => {
+    try {
+      console.log('🔗 Getting payment links...');
       
-      let hasActiveSubscription = false;
-      
-      if (subscriptionStatus === 'active') {
-        if (subscriptionEndDate) {
-          const endDate = subscriptionEndDate.toDate ? subscriptionEndDate.toDate() : new Date(subscriptionEndDate);
-          hasActiveSubscription = endDate > new Date();
-          
-          // If expired, update status
-          if (!hasActiveSubscription) {
-            await admin.firestore().collection('users').doc(userId).update({
-              subscriptionStatus: 'expired',
-              expiredAt: admin.firestore.FieldValue.serverTimestamp(),
-              lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-            });
+      // Optionally verify authentication
+      try {
+        await verifyAuthToken(req);
+      } catch (e) {
+        console.log('⚠️ No auth token provided, returning public payment links');
+      }
+
+      const response = {
+        success: true,
+        paymentLinks: PAYMENT_LINKS,
+        domain: DOMAIN,
+        appDomain: APP_DOMAIN,
+        plans: {
+          weekly: {
+            priceId: PRICE_IDS.weekly,
+            paymentLink: PAYMENT_LINKS.weekly,
+            price: '$9.99',
+            interval: 'week'
+          },
+          monthly: {
+            priceId: PRICE_IDS.monthly,
+            paymentLink: PAYMENT_LINKS.monthly,
+            price: '$26.99',
+            interval: 'month'
           }
-        } else {
-          // No end date means active
-          hasActiveSubscription = true;
+        }
+      };
+
+      console.log('✅ Payment links response sent');
+      return res.status(200).json(response);
+
+    } catch (error) {
+      console.error('❌ Error getting payment links:', error);
+      return res.status(500).json({
+        error: 'Failed to get payment links',
+        details: error.message
+      });
+    }
+  });
+});
+
+// 🏪 API Endpoint: Create Customer Portal Session
+exports.createPortalSession = functions.https.onCall(async (data, context) => {
+  try {
+    console.log('🏪 Creating customer portal session...');
+    
+    // Verify authentication
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+
+    const userId = context.auth.uid;
+    const returnUrl = data.returnUrl || `${DOMAIN}/paywall`;
+
+    console.log(`👤 User ID: ${userId}`);
+    console.log(`🔗 Return URL: ${returnUrl}`);
+
+    // Create portal session document in Firestore
+    // The Firebase Stripe Extension will automatically process this
+    const portalSessionRef = await admin.firestore()
+      .collection('customers')
+      .doc(userId)
+      .collection('portal_sessions')
+      .add({
+        returnUrl: returnUrl,
+        created_at: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+    console.log(`📄 Portal session document created: ${portalSessionRef.id}`);
+
+    // Wait for the Firebase Extension to process and add the URL
+    let attempts = 0;
+    const maxAttempts = 30;
+    
+    while (attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const doc = await portalSessionRef.get();
+      const docData = doc.data();
+      
+      if (docData && docData.url) {
+        console.log('✅ Portal URL created successfully');
+        return { 
+          success: true,
+          url: docData.url, 
+          sessionId: portalSessionRef.id 
+        };
+      }
+      
+      if (docData && docData.error) {
+        console.error('❌ Portal session error:', docData.error);
+        throw new functions.https.HttpsError('internal', `Portal session error: ${docData.error}`);
+      }
+      
+      attempts++;
+      console.log(`⏳ Waiting for portal URL... (${attempts}/${maxAttempts})`);
+    }
+
+    throw new functions.https.HttpsError('deadline-exceeded', 'Timeout waiting for portal session URL');
+
+  } catch (error) {
+    console.error('❌ Error creating portal session:', error);
+    throw new functions.https.HttpsError('internal', `Failed to create portal session: ${error.message}`);
+  }
+});
+
+// 📊 API Endpoint: Get Customer Data
+exports.getCustomerData = functions.https.onCall(async (data, context) => {
+  try {
+    console.log('📊 Getting customer data...');
+    
+    // Verify authentication
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+
+    const userId = context.auth.uid;
+    console.log(`👤 User ID: ${userId}`);
+
+    // Get customer document
+    const customerDoc = await admin.firestore()
+      .collection('customers')
+      .doc(userId)
+      .get();
+
+    if (!customerDoc.exists) {
+      console.log('👤 Customer document does not exist');
+      return { 
+        success: true,
+        exists: false,
+        userId: userId
+      };
+    }
+
+    const customerData = customerDoc.data();
+    
+    // Get subscription data
+    const subscriptionsSnapshot = await admin.firestore()
+      .collection('customers')
+      .doc(userId)
+      .collection('subscriptions')
+      .orderBy('created', 'desc')
+      .limit(5)
+      .get();
+
+    const subscriptions = subscriptionsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    console.log('✅ Customer data retrieved');
+
+    return {
+      success: true,
+      exists: true,
+      customer: customerData,
+      subscriptions: subscriptions,
+      subscriptionCount: subscriptions.length
+    };
+
+  } catch (error) {
+    console.error('❌ Error getting customer data:', error);
+    throw new functions.https.HttpsError('internal', `Failed to get customer data: ${error.message}`);
+  }
+});
+
+// 🎯 Trigger: Handle new user creation
+exports.createCustomerOnSignup = functions.auth.user().onCreate(async (user) => {
+  try {
+    console.log(`👤 New user created: ${user.uid}`);
+    
+    // Create customer document for Stripe Extension
+    await admin.firestore()
+      .collection('customers')
+      .doc(user.uid)
+      .set({
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        metadata: {
+          firebaseUID: user.uid,
+          source: 'thesisgenerator.tech'
+        }
+      });
+
+    console.log(`✅ Customer document created for user: ${user.uid}`);
+  } catch (error) {
+    console.error('❌ Error creating customer document:', error);
+  }
+});
+
+// 🗑️ Trigger: Handle user deletion
+exports.deleteCustomerOnDelete = functions.auth.user().onDelete(async (user) => {
+  try {
+    console.log(`🗑️ User deleted: ${user.uid}`);
+    
+    // Delete customer document and subcollections
+    const customerRef = admin.firestore().collection('customers').doc(user.uid);
+    
+    // Delete subcollections
+    const subcollections = ['checkout_sessions', 'portal_sessions', 'subscriptions'];
+    
+    for (const subcollection of subcollections) {
+      const snapshot = await customerRef.collection(subcollection).get();
+      const batch = admin.firestore().batch();
+      
+      snapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      
+      if (!snapshot.empty) {
+        await batch.commit();
+      }
+    }
+    
+    // Delete customer document
+    await customerRef.delete();
+    
+    console.log(`✅ Customer data deleted for user: ${user.uid}`);
+  } catch (error) {
+    console.error('❌ Error deleting customer data:', error);
+  }
+});
+
+// 📈 Analytics: Track subscription events
+exports.trackSubscriptionEvent = functions.firestore
+  .document('customers/{customerId}/subscriptions/{subscriptionId}')
+  .onWrite(async (change, context) => {
+    try {
+      const customerId = context.params.customerId;
+      const subscriptionId = context.params.subscriptionId;
+      
+      const before = change.before.exists ? change.before.data() : null;
+      const after = change.after.exists ? change.after.data() : null;
+      
+      let eventType = 'unknown';
+      
+      if (!before && after) {
+        eventType = 'subscription_created';
+      } else if (before && !after) {
+        eventType = 'subscription_deleted';
+      } else if (before && after) {
+        if (before.status !== after.status) {
+          eventType = `subscription_${after.status}`;
         }
       }
       
-      console.log('✅ Subscription check complete:', { userId, hasActiveSubscription });
+      console.log(`📊 Subscription event: ${eventType} for customer ${customerId}`);
       
-      res.json({
-        success: true,
-        hasActiveSubscription,
-        subscription: hasActiveSubscription ? {
-          status: userData.subscriptionStatus,
-          plan: userData.subscriptionPlan,
-          startDate: userData.subscriptionStartDate,
-          endDate: userData.subscriptionEndDate
-        } : null,
-        source: 'firebase'
-      });
+      // Log to analytics collection
+      await admin.firestore()
+        .collection('analytics')
+        .collection('subscription_events')
+        .add({
+          customerId: customerId,
+          subscriptionId: subscriptionId,
+          eventType: eventType,
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          beforeStatus: before?.status || null,
+          afterStatus: after?.status || null,
+          planType: getPlanTypeFromPriceId(after?.items?.[0]?.price?.id),
+          domain: DOMAIN
+        });
       
     } catch (error) {
-      console.error('❌ Error checking subscription:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message
-      });
+      console.error('❌ Error tracking subscription event:', error);
     }
   });
-});
 
-// 🔗 Webhook: Handle Stripe Events
-exports.stripeWebhook = functions.https.onRequest((req, res) => {
-  return cors(req, res, async () => {
-    const sig = req.headers['stripe-signature'];
-    const webhookSecret = functions.config().stripe?.webhook_secret || process.env.STRIPE_WEBHOOK_SECRET;
-    
-    let event;
-    
-    try {
-      event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
-    } catch (err) {
-      console.error('❌ Webhook signature verification failed:', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-    
-    console.log('🔗 Stripe webhook received:', event.type);
-    
-    try {
-      switch (event.type) {
-        case 'checkout.session.completed':
-          await handleCheckoutCompleted(event.data.object);
-          break;
-          
-        case 'customer.subscription.created':
-          await handleSubscriptionCreated(event.data.object);
-          break;
-          
-        case 'customer.subscription.updated':
-          await handleSubscriptionUpdated(event.data.object);
-          break;
-          
-        case 'customer.subscription.deleted':
-          await handleSubscriptionDeleted(event.data.object);
-          break;
-          
-        case 'invoice.payment_succeeded':
-          await handlePaymentSucceeded(event.data.object);
-          break;
-          
-        case 'invoice.payment_failed':
-          await handlePaymentFailed(event.data.object);
-          break;
-          
-        default:
-          console.log(`Unhandled event type: ${event.type}`);
-      }
-    } catch (error) {
-      console.error('❌ Error processing webhook:', error);
-      return res.status(500).send('Webhook processing failed');
-    }
-    
-    res.status(200).send('Webhook processed');
-  });
-});
-
-// Helper function: Handle successful checkout
-async function handleCheckoutCompleted(session) {
-  try {
-    const userId = session.client_reference_id || session.metadata?.firebase_user_id;
-    const planType = session.metadata?.plan_type;
-    
-    if (!userId) {
-      console.error('❌ No user ID found in checkout session');
-      return;
-    }
-    
-    console.log('✅ Checkout completed for user:', userId);
-    
-    // Update checkout session status
-    await admin.firestore().collection('checkout_sessions').doc(session.id).update({
-      status: 'completed',
-      completedAt: admin.firestore.FieldValue.serverTimestamp(),
-      customerId: session.customer,
-      subscriptionId: session.subscription
-    });
-    
-    // Calculate subscription end date
-    const now = new Date();
-    const endDate = new Date();
-    
-    if (planType === 'weekly') {
-      endDate.setDate(now.getDate() + 7);
-    } else if (planType === 'monthly') {
-      endDate.setMonth(now.getMonth() + 1);
-    }
-    
-    // Update user subscription status
-    await admin.firestore().collection('users').doc(userId).update({
-      subscriptionStatus: 'active',
-      subscriptionPlan: planType,
-      stripeCustomerId: session.customer,
-      stripeSubscriptionId: session.subscription,
-      subscriptionStartDate: admin.firestore.FieldValue.serverTimestamp(),
-      subscriptionEndDate: admin.firestore.Timestamp.fromDate(endDate),
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-    console.log('✅ User subscription activated:', userId);
-    
-  } catch (error) {
-    console.error('❌ Error handling checkout completion:', error);
-  }
-}
-
-// Helper function: Handle subscription creation
-async function handleSubscriptionCreated(subscription) {
-  try {
-    const userId = subscription.metadata?.firebase_user_id;
-    
-    if (!userId) {
-      console.error('❌ No user ID found in subscription metadata');
-      return;
-    }
-    
-    console.log('✅ Subscription created for user:', userId);
-    
-    // Update subscription details in Firebase
-    await admin.firestore().collection('users').doc(userId).update({
-      stripeSubscriptionId: subscription.id,
-      subscriptionStatus: subscription.status,
-      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-  } catch (error) {
-    console.error('❌ Error handling subscription creation:', error);
-  }
-}
-
-// Helper function: Handle subscription updates
-async function handleSubscriptionUpdated(subscription) {
-  try {
-    const userId = subscription.metadata?.firebase_user_id;
-    
-    if (!userId) {
-      console.error('❌ No user ID found in subscription metadata');
-      return;
-    }
-    
-    console.log('🔄 Subscription updated for user:', userId, 'Status:', subscription.status);
-    
-    // Update subscription status in Firebase
-    await admin.firestore().collection('users').doc(userId).update({
-      subscriptionStatus: subscription.status,
-      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-  } catch (error) {
-    console.error('❌ Error handling subscription update:', error);
-  }
-}
-
-// Helper function: Handle subscription deletion
-async function handleSubscriptionDeleted(subscription) {
-  try {
-    const userId = subscription.metadata?.firebase_user_id;
-    
-    if (!userId) {
-      console.error('❌ No user ID found in subscription metadata');
-      return;
-    }
-    
-    console.log('❌ Subscription deleted for user:', userId);
-    
-    // Update subscription status to inactive
-    await admin.firestore().collection('users').doc(userId).update({
-      subscriptionStatus: 'inactive',
-      subscriptionEndDate: admin.firestore.FieldValue.serverTimestamp(),
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-  } catch (error) {
-    console.error('❌ Error handling subscription deletion:', error);
-  }
-}
-
-// Helper function: Handle successful payment
-async function handlePaymentSucceeded(invoice) {
-  try {
-    const subscriptionId = invoice.subscription;
-    
-    if (!subscriptionId) {
-      console.log('ℹ️ Payment succeeded but no subscription ID found');
-      return;
-    }
-    
-    // Get subscription details
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const userId = subscription.metadata?.firebase_user_id;
-    
-    if (!userId) {
-      console.error('❌ No user ID found in subscription metadata');
-      return;
-    }
-    
-    console.log('✅ Payment succeeded for user:', userId);
-    
-    // Update payment status and extend subscription
-    await admin.firestore().collection('users').doc(userId).update({
-      subscriptionStatus: 'active',
-      lastPaymentDate: admin.firestore.FieldValue.serverTimestamp(),
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-  } catch (error) {
-    console.error('❌ Error handling payment success:', error);
-  }
-}
-
-// Helper function: Handle failed payment
-async function handlePaymentFailed(invoice) {
-  try {
-    const subscriptionId = invoice.subscription;
-    
-    if (!subscriptionId) {
-      console.log('ℹ️ Payment failed but no subscription ID found');
-      return;
-    }
-    
-    // Get subscription details
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const userId = subscription.metadata?.firebase_user_id;
-    
-    if (!userId) {
-      console.error('❌ No user ID found in subscription metadata');
-      return;
-    }
-    
-    console.log('❌ Payment failed for user:', userId);
-    
-    // Update payment status
-    await admin.firestore().collection('users').doc(userId).update({
-      subscriptionStatus: 'past_due',
-      lastPaymentFailure: admin.firestore.FieldValue.serverTimestamp(),
-      paymentIssue: true,
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-    } catch (error) {
-    console.error('❌ Error handling payment failure:', error);
-  }
-}
-
-// 🔧 Callable function: Get user subscription status
-exports.getUserSubscription = functions.https.onCall(async (data, context) => {
-  try {
-    // Verify authentication
-    if (!context.auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
-    }
-    
-    const userId = context.auth.uid;
-    
-    // Get user data from Firebase
-    const userDoc = await admin.firestore().collection('users').doc(userId).get();
-    const userData = userDoc.data();
-    
-    if (!userData) {
-      throw new functions.https.HttpsError('not-found', 'User not found');
-    }
-    
-    return {
-      subscriptionStatus: userData.subscriptionStatus || 'inactive',
-      subscriptionPlan: userData.subscriptionPlan || null,
-      subscriptionEndDate: userData.subscriptionEndDate || null,
-      hasActiveSubscription: userData.subscriptionStatus === 'active'
-    };
-    
-  } catch (error) {
-    console.error('❌ Error getting user subscription:', error);
-    throw new functions.https.HttpsError('internal', error.message);
-  }
-});
-
-// 🔧 Callable function: Cancel subscription
-exports.cancelSubscription = functions.https.onCall(async (data, context) => {
-  try {
-    // Verify authentication
-    if (!context.auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
-    }
-    
-    const userId = context.auth.uid;
-    
-    // Get user data from Firebase
-    const userDoc = await admin.firestore().collection('users').doc(userId).get();
-    const userData = userDoc.data();
-    
-    if (!userData || !userData.stripeSubscriptionId) {
-      throw new functions.https.HttpsError('not-found', 'No active subscription found');
-    }
-    
-    // Cancel subscription in Stripe
-    await stripe.subscriptions.update(userData.stripeSubscriptionId, {
-      cancel_at_period_end: true
-    });
-    
-    // Update Firebase
-    await admin.firestore().collection('users').doc(userId).update({
-      subscriptionCancelledAt: admin.firestore.FieldValue.serverTimestamp(),
-      willCancelAtPeriodEnd: true,
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-    
-    console.log('✅ Subscription cancelled for user:', userId);
-    
-    return {
-      success: true,
-      message: 'Subscription will be cancelled at the end of the current period'
-    };
-    
-  } catch (error) {
-    console.error('❌ Error cancelling subscription:', error);
-    throw new functions.https.HttpsError('internal', error.message);
-  }
-});
-
-// 🔧 Health check endpoint
+// 🔧 Utility: Health check endpoint
 exports.healthCheck = functions.https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
-      // Check Firebase connection
-      const testDoc = await admin.firestore().collection('health').doc('test').get();
+      const timestamp = new Date().toISOString();
+      console.log(`🏥 Health check at ${timestamp}`);
       
-      // Check Stripe connection
-      let stripeStatus = 'not_configured';
-      const stripeKey = functions.config().stripe?.secret_key || process.env.STRIPE_SECRET_KEY;
-      
-      if (stripeKey) {
-        try {
-          await stripe.products.list({ limit: 1 });
-          stripeStatus = 'connected';
-        } catch (error) {
-          stripeStatus = 'error';
-        }
-      }
-      
-      res.json({
+      // Test Firestore connection
+      await admin.firestore().collection('_health').doc('check').set({
+        timestamp: timestamp,
         status: 'healthy',
-        timestamp: new Date().toISOString(),
-        services: {
-          firebase: 'connected',
-          stripe: stripeStatus
-        },
-        version: '1.0.0'
+        domain: DOMAIN
       });
       
+      res.status(200).json({
+        status: 'healthy',
+        timestamp: timestamp,
+        domain: DOMAIN,
+        appDomain: APP_DOMAIN,
+        paymentLinks: PAYMENT_LINKS,
+        message: 'Thesis Generator API is operational'
+      });
     } catch (error) {
       console.error('❌ Health check failed:', error);
       res.status(500).json({
@@ -533,45 +433,380 @@ exports.healthCheck = functions.https.onRequest((req, res) => {
   });
 });
 
-// 🔧 Scheduled function: Check and update expired subscriptions
-exports.checkExpiredSubscriptions = functions.pubsub.schedule('every 24 hours').onRun(async (context) => {
+// 🐛 Debug: Get subscription debug info
+exports.debugSubscription = functions.https.onCall(async (data, context) => {
   try {
-    console.log('🕐 Running scheduled check for expired subscriptions...');
+    console.log('🐛 Debug subscription data...');
     
-    const now = new Date();
-    
-    // Get all active subscriptions that might be expired
-    const expiredSnapshot = await admin.firestore().collection('users')
-      .where('subscriptionStatus', '==', 'active')
-      .where('subscriptionEndDate', '<=', admin.firestore.Timestamp.fromDate(now))
-      .get();
-    
-    const batch = admin.firestore().batch();
-    let expiredCount = 0;
-    
-    expiredSnapshot.forEach(doc => {
-      const userRef = admin.firestore().collection('users').doc(doc.id);
-      batch.update(userRef, {
-        subscriptionStatus: 'expired',
-        expiredAt: admin.firestore.FieldValue.serverTimestamp(),
-        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-      });
-      expiredCount++;
-    });
-    
-    if (expiredCount > 0) {
-      await batch.commit();
-      console.log(`✅ Updated ${expiredCount} expired subscriptions`);
-    } else {
-      console.log('✅ No expired subscriptions found');
+    // Verify authentication
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
     }
-    
-    return null;
+
+    const userId = context.auth.uid;
+    console.log(`👤 Debug for User ID: ${userId}`);
+
+    // Get all customer data
+    const customerDoc = await admin.firestore()
+      .collection('customers')
+      .doc(userId)
+      .get();
+
+    const customerData = customerDoc.exists ? customerDoc.data() : null;
+
+    // Get all subscriptions
+    const subscriptionsSnapshot = await admin.firestore()
+      .collection('customers')
+      .doc(userId)
+      .collection('subscriptions')
+      .orderBy('created', 'desc')
+      .get();
+
+    const subscriptions = subscriptionsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Get recent checkout sessions
+    const checkoutSessionsSnapshot = await admin.firestore()
+      .collection('customers')
+      .doc(userId)
+      .collection('checkout_sessions')
+      .orderBy('created', 'desc')
+      .limit(5)
+      .get();
+
+    const checkoutSessions = checkoutSessionsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Get recent portal sessions
+    const portalSessionsSnapshot = await admin.firestore()
+      .collection('customers')
+      .doc(userId)
+      .collection('portal_sessions')
+      .orderBy('created_at', 'desc')
+      .limit(3)
+      .get();
+
+    const portalSessions = portalSessionsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    const debugInfo = {
+      userId: userId,
+      timestamp: new Date().toISOString(),
+      domain: DOMAIN,
+      appDomain: APP_DOMAIN,
+      customer: {
+        exists: customerDoc.exists,
+        data: customerData
+      },
+      subscriptions: {
+        count: subscriptions.length,
+        data: subscriptions
+      },
+      checkoutSessions: {
+        count: checkoutSessions.length,
+        recent: checkoutSessions
+      },
+      portalSessions: {
+        count: portalSessions.length,
+        recent: portalSessions
+      },
+      paymentLinks: PAYMENT_LINKS,
+      priceIds: PRICE_IDS
+    };
+
+    console.log('🐛 Debug info compiled');
+    return debugInfo;
+
   } catch (error) {
-    console.error('❌ Error checking expired subscriptions:', error);
-    return null;
+    console.error('❌ Error in debug function:', error);
+    throw new functions.https.HttpsError('internal', `Debug failed: ${error.message}`);
   }
 });
 
-console.log('🚀 Firebase Functions loaded successfully');
+// 🧹 Scheduled: Clean up old sessions (runs daily at 2 AM)
+exports.cleanupOldSessions = functions.pubsub.schedule('0 2 * * *')
+  .timeZone('America/New_York')
+  .onRun(async (context) => {
+    try {
+      console.log('🧹 Starting cleanup of old sessions...');
+      
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 7); // 7 days ago
+      
+      const cutoffTimestamp = admin.firestore.Timestamp.fromDate(cutoffDate);
+      
+      // Get all customers
+      const customersSnapshot = await admin.firestore().collection('customers').get();
+      
+      let totalDeleted = 0;
+      
+      for (const customerDoc of customersSnapshot.docs) {
+        const customerId = customerDoc.id;
+        
+        // Clean checkout sessions
+        const oldCheckoutSessions = await customerDoc.ref
+          .collection('checkout_sessions')
+          .where('created', '<', cutoffTimestamp)
+          .get();
+        
+        // Clean portal sessions
+        const oldPortalSessions = await customerDoc.ref
+          .collection('portal_sessions')
+          .where('created_at', '<', cutoffTimestamp)
+          .get();
+        
+        const batch = admin.firestore().batch();
+        
+        oldCheckoutSessions.docs.forEach(doc => {
+          batch.delete(doc.ref);
+          totalDeleted++;
+        });
+        
+        oldPortalSessions.docs.forEach(doc => {
+          batch.delete(doc.ref);
+          totalDeleted++;
+        });
+        
+        if (oldCheckoutSessions.docs.length > 0 || oldPortalSessions.docs.length > 0) {
+          await batch.commit();
+          console.log(`🧹 Cleaned ${oldCheckoutSessions.docs.length + oldPortalSessions.docs.length} old sessions for customer ${customerId}`);
+        }
+      }
+      
+      console.log(`✅ Cleanup completed. Total sessions deleted: ${totalDeleted}`);
+      
+      // Log cleanup event
+      await admin.firestore()
+        .collection('analytics')
+        .collection('system_events')
+        .add({
+          eventType: 'cleanup_completed',
+          sessionsDeleted: totalDeleted,
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          domain: DOMAIN
+        });
+      
+    } catch (error) {
+      console.error('❌ Error during cleanup:', error);
+    }
+  });
 
+// 📊 Analytics: Get subscription analytics
+exports.getSubscriptionAnalytics = functions.https.onCall(async (data, context) => {
+  try {
+    console.log('📈 Getting subscription analytics...');
+    
+    // Verify authentication (you might want to add admin check)
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+    
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    const thirtyDaysAgoTimestamp = admin.firestore.Timestamp.fromDate(thirtyDaysAgo);
+    
+    // Get all customers
+    const customersSnapshot = await admin.firestore()
+      .collection('customers')
+      .get();
+    
+    let totalCustomers = customersSnapshot.size;
+    let activeSubscriptions = 0;
+    let weeklySubscriptions = 0;
+    let monthlySubscriptions = 0;
+    let recentSignups = 0;
+    let totalRevenue = 0;
+    
+    for (const customerDoc of customersSnapshot.docs) {
+      const customerData = customerDoc.data();
+      
+      // Count recent signups
+      if (customerData.createdAt && customerData.createdAt > thirtyDaysAgoTimestamp) {
+        recentSignups++;
+      }
+      
+      // Get active subscriptions
+      const subscriptionsSnapshot = await customerDoc.ref
+        .collection('subscriptions')
+        .where('status', 'in', ['active', 'trialing'])
+        .get();
+      
+      if (!subscriptionsSnapshot.empty) {
+        activeSubscriptions++;
+        
+        // Count plan types and calculate revenue
+        const subscription = subscriptionsSnapshot.docs[0].data();
+        if (subscription.items && subscription.items.length > 0) {
+          const priceId = subscription.items[0].price.id;
+          const planType = getPlanTypeFromPriceId(priceId);
+          
+          if (planType === 'weekly') {
+            weeklySubscriptions++;
+            totalRevenue += 9.99; // Weekly price
+          } else if (planType === 'monthly') {
+            monthlySubscriptions++;
+            totalRevenue += 26.99; // Monthly price
+          }
+        }
+      }
+    }
+    
+    const analytics = {
+      totalCustomers,
+      activeSubscriptions,
+      weeklySubscriptions,
+      monthlySubscriptions,
+      recentSignups,
+      totalRevenue: Math.round(totalRevenue * 100) / 100, // Round to 2 decimal places
+      conversionRate: totalCustomers > 0 ? Math.round((activeSubscriptions / totalCustomers * 100) * 100) / 100 : 0,
+      averageRevenuePerUser: activeSubscriptions > 0 ? Math.round((totalRevenue / activeSubscriptions) * 100) / 100 : 0,
+      timestamp: now.toISOString(),
+      domain: DOMAIN,
+      paymentLinks: PAYMENT_LINKS
+    };
+    
+    console.log('📈 Analytics compiled:', {
+      totalCustomers: analytics.totalCustomers,
+      activeSubscriptions: analytics.activeSubscriptions,
+      conversionRate: analytics.conversionRate
+    });
+    
+    return analytics;
+    
+  } catch (error) {
+    console.error('❌ Error getting analytics:', error);
+    throw new functions.https.HttpsError('internal', `Failed to get analytics: ${error.message}`);
+  }
+});
+
+// 🎉 Welcome: Send welcome notification when subscription becomes active
+exports.sendWelcomeNotification = functions.firestore
+  .document('customers/{customerId}/subscriptions/{subscriptionId}')
+  .onUpdate(async (change, context) => {
+    try {
+      const before = change.before.data();
+      const after = change.after.data();
+      const customerId = context.params.customerId;
+      const subscriptionId = context.params.subscriptionId;
+      
+      // Check if subscription just became active
+      if (before.status !== 'active' && after.status === 'active') {
+        console.log(`🎉 New active subscription for customer ${customerId}`);
+        
+        // Get customer data
+        const customerDoc = await admin.firestore()
+          .collection('customers')
+          .doc(customerId)
+          .get();
+        
+        const customerData = customerDoc.data();
+        
+        if (customerData && customerData.email) {
+          console.log(`📧 Welcome notification for ${customerData.email}`);
+          
+          // Log the welcome event
+          await admin.firestore()
+            .collection('analytics')
+            .collection('welcome_events')
+            .add({
+              customerId: customerId,
+              email: customerData.email,
+              subscriptionId: subscriptionId,
+              planType: getPlanTypeFromPriceId(after.items?.[0]?.price?.id),
+              timestamp: admin.firestore.FieldValue.serverTimestamp(),
+              domain: DOMAIN
+            });
+          
+          // Here you could integrate with email service like SendGrid
+          // await sendWelcomeEmail(customerData.email, customerData.displayName);
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Error sending welcome notification:', error);
+    }
+  });
+
+// 🔄 Webhook: Handle Stripe webhooks (if needed for additional processing)
+exports.stripeWebhook = functions.https.onRequest((req, res) => {
+  return cors(req, res, async () => {
+    try {
+      console.log('🔄 Stripe webhook received');
+      
+      const event = req.body;
+      console.log(`📨 Event type: ${event.type}`);
+      
+      // Log webhook events for debugging
+      await admin.firestore()
+        .collection('analytics')
+        .collection('webhook_events')
+        .add({
+          eventType: event.type,
+          eventId: event.id,
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          domain: DOMAIN,
+          processed: true
+        });
+      
+      // The Firebase Stripe Extension handles most webhook processing
+      // This is just for additional custom logic if needed
+      
+      res.status(200).json({ received: true });
+      
+    } catch (error) {
+      console.error('❌ Error processing webhook:', error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+});
+
+// 🛠️ Utility Functions
+
+function getPlanTypeFromPriceId(priceId) {
+  if (!priceId) return 'unknown';
+  
+  switch (priceId) {
+    case PRICE_IDS.weekly:
+      return 'weekly';
+    case PRICE_IDS.monthly:
+      return 'monthly';
+    default:
+      console.log(`⚠️ Unknown price ID: ${priceId}`);
+      return 'unknown';
+  }
+}
+
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function sanitizeUserData(userData) {
+  return {
+    email: userData.email || null,
+    displayName: userData.displayName || null,
+    photoURL: userData.photoURL || null,
+    createdAt: userData.createdAt || admin.firestore.FieldValue.serverTimestamp()
+  };
+}
+
+// 📋 Configuration export for testing
+exports.config = {
+  domain: DOMAIN,
+  appDomain: APP_DOMAIN,
+  paymentLinks: PAYMENT_LINKS,
+  priceIds: PRICE_IDS,
+  version: '1.0.0',
+  lastUpdated: new Date().toISOString()
+};
+
+console.log('🚀 Thesis Generator Firebase Functions loaded successfully');
+console.log(`🌐 Domain: ${DOMAIN}`);
+console.log(`📱 App Domain: ${APP_DOMAIN}`);
+console.log('💳 Payment Links configured:', Object.keys(PAYMENT_LINKS));

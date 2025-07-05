@@ -141,112 +141,144 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   }
 
   Widget _buildPdfViewer() {
-    if (_isExporting) {
-      return Container(
-        color: surfaceColor,
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Generating PDF...',
-                  style: GoogleFonts.inter(
-                    color: textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-    if (_pdfFile == null) {
-      return Container(
-        color: surfaceColor,
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.picture_as_pdf,
-                  size: 48,
-                  color: textMuted,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'No PDF generated',
-                  style: GoogleFonts.inter(
-                    color: textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
+  if (_isExporting) {
     return Container(
-      margin: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
+      color: surfaceColor,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: SfPdfViewer.memory(
-          _pdfFile as Uint8List,
-          key: _pdfViewerKey,
-          controller: _pdfViewerController,
-          enableTextSelection: _isEditing,
-          onTextSelectionChanged: _handleTextSelection,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Generating PDF...',
+                style: GoogleFonts.inter(
+                  color: textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+  if (_pdfFile == null) {
+    return Container(
+      color: surfaceColor,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.picture_as_pdf,
+                size: 48,
+                color: textMuted,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'No PDF generated',
+                style: GoogleFonts.inter(
+                  color: textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  // FIX: Wrap PDF viewer in a Theme widget to override dark theme
+  return Container(
+    margin: EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white, // Force white background
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: borderColor),
+      boxShadow: [
+        BoxShadow(
+          color: primaryColor.withOpacity(0.1),
+          blurRadius: 10,
+          spreadRadius: 2,
+        ),
+      ],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Theme(
+        // Override the dark theme for PDF viewer
+        data: ThemeData(
+          brightness: Brightness.light,
+          scaffoldBackgroundColor: Colors.white,
+          canvasColor: Colors.white,
+          cardColor: Colors.white,
+          dialogBackgroundColor: Colors.white,
+          // Use colorScheme instead of deprecated backgroundColor
+          colorScheme: ColorScheme.light(
+            background: Colors.white,
+            surface: Colors.white,
+            onBackground: Colors.black,
+            onSurface: Colors.black,
+          ),
+        ),
+        child: Container(
+          color: Colors.white, // Explicit white background
+          child: SfPdfViewer.memory(
+            _pdfFile as Uint8List,
+            key: _pdfViewerKey,
+            controller: _pdfViewerController,
+            enableTextSelection: _isEditing,
+            onTextSelectionChanged: _handleTextSelection,
+            // Add these properties to ensure proper display
+            canShowScrollHead: true,
+            canShowScrollStatus: true,
+            enableDoubleTapZooming: true,
+            enableDocumentLinkAnnotation: false,
+            canShowHyperlinkDialog: false,
+            // Force light theme for PDF viewer
+            scrollDirection: PdfScrollDirection.vertical,
+            pageLayoutMode: PdfPageLayoutMode.single,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 
   Widget _buildActionButton({
     required VoidCallback onPressed,

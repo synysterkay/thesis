@@ -1016,22 +1016,54 @@ footer {
     color: white;
 }
 
+/* Updated footer social links for app stores */
 .footer-social {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     margin-top: 1rem;
+    align-items: center;
 }
 
 .social-link {
     color: #d1d5db;
     font-size: 1.25rem;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
 }
 
 .social-link:hover {
     color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
 }
+
+.social-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Mobile responsive for app store links */
+@media (max-width: 480px) {
+    .footer-social {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .social-link {
+        justify-content: center;
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
 
 .footer-bottom {
     border-top: 1px solid #374151;
@@ -2399,6 +2431,237 @@ button:disabled {
     visibility: visible !important;
     display: block !important;
 }
+
+
+/* GIF Tutorial Section */
+.gif-tutorial {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.gif-tutorial::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23000" opacity="0.02"/><circle cx="75" cy="75" r="1" fill="%23000" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+}
+
+.gif-container {
+    position: relative;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    background: #f8fafc;
+    z-index: 2;
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gif-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+.tutorial-gif {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 16px;
+    transition: transform 0.3s ease;
+    /* Ensure crisp rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.gif-container:hover .tutorial-gif {
+    transform: scale(1.01);
+}
+
+.gif-overlay {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    padding: 8px 12px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.gif-container:hover .gif-overlay {
+    opacity: 1;
+}
+
+.gif-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.gif-indicator i {
+    font-size: 1rem;
+    color: #2563eb;
+}
+
+/* Loading state for GIF */
+.gif-container.loading {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gif-container.loading::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(37, 99, 235, 0.3);
+    border-top: 3px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .gif-container {
+        max-width: 900px;
+        margin: 0 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .gif-tutorial {
+        padding: 40px 0;
+    }
+    
+    .gif-container {
+        max-width: 100%;
+        margin: 0 1rem;
+        border-radius: 12px;
+    }
+    
+    .tutorial-gif {
+        border-radius: 12px;
+    }
+    
+    .gif-overlay {
+        top: 12px;
+        right: 12px;
+        padding: 6px 10px;
+    }
+    
+    .gif-indicator {
+        font-size: 0.8rem;
+        gap: 4px;
+    }
+    
+    .gif-indicator i {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .gif-tutorial {
+        padding: 30px 0;
+    }
+    
+    .gif-container {
+        margin: 0 0.5rem;
+        border-radius: 8px;
+    }
+    
+    .tutorial-gif {
+        border-radius: 8px;
+    }
+    
+    .gif-overlay {
+        top: 8px;
+        right: 8px;
+        padding: 4px 8px;
+    }
+    
+    .gif-indicator {
+        font-size: 0.75rem;
+    }
+    
+    .gif-indicator i {
+        font-size: 0.8rem;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .gif-container {
+        border: 2px solid #2563eb;
+    }
+    
+    .gif-overlay {
+        background: rgba(0, 0, 0, 0.9);
+        border: 1px solid #2563eb;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .tutorial-gif,
+    .gif-overlay,
+    .gif-container {
+        transition: none;
+    }
+    
+    .gif-container:hover .tutorial-gif {
+        transform: none;
+    }
+    
+    .gif-container:hover {
+        transform: none;
+    }
+    
+    .gif-container.loading::after {
+        animation: none;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .gif-tutorial {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+    
+    .gif-container {
+        background: #334155;
+    }
+    
+    .gif-overlay {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* Ensure GIF doesn't exceed viewport on small screens */
+@media (max-height: 600px) {
+    .gif-container {
+        max-height: 60vh;
+    }
+    
+    .tutorial-gif {
+        max-height: 60vh;
+        object-fit: contain;
+    }
+}
+
 
 /* End of CSS file */
 

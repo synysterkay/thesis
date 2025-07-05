@@ -11,8 +11,6 @@ import 'package:printing/printing.dart';
 import 'dart:typed_data';
 import 'package:media_store_plus/media_store_plus.dart';
 
-
-
 class ExportService {
   String cleanText(String text) {
     return text.replaceAll(RegExp(r'[#*]+'), '').trim();
@@ -38,18 +36,42 @@ class ExportService {
           theme: pw.ThemeData.withFont(
             base: font,
             bold: boldFont,
+          ).copyWith(
+            defaultTextStyle: pw.TextStyle(
+              color: PdfColors.black, // Ensure default text is black
+            ),
           ),
           build: (context) {
             // Wrap content generation in try-catch
             try {
               return [
-                _buildTitlePage(thesis, template),
+                // Add white background container
+                pw.Container(
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.white,
+                  ),
+                  child: pw.Column(
+                    children: [
+                      _buildTitlePage(thesis, template),
+                    ],
+                  ),
+                ),
                 pw.NewPage(),
-                _buildTableOfContents(thesis, template, context),
+                pw.Container(
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.white,
+                  ),
+                  child: _buildTableOfContents(thesis, template, context),
+                ),
                 ..._buildChapters(thesis, template),
                 if (thesis.references.isNotEmpty) ...[
                   pw.NewPage(),
-                  _buildReferences(thesis.references, template),
+                  pw.Container(
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.white,
+                    ),
+                    child: _buildReferences(thesis.references, template),
+                  ),
                 ],
               ];
             } catch (e) {
@@ -77,8 +99,6 @@ class ExportService {
     }
   }
 
-
-
   ThesisTemplate _getTemplate(ThesisTemplateType type) {
     switch (type) {
       case ThesisTemplateType.modern:
@@ -94,7 +114,15 @@ class ExportService {
     return pw.Container(
       alignment: pw.Alignment.centerRight,
       margin: const pw.EdgeInsets.only(bottom: 10),
-      child: pw.Text(cleanText(topic), style: template.subheadingStyle),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+      ),
+      child: pw.Text(
+        cleanText(topic), 
+        style: template.subheadingStyle.copyWith(
+          color: PdfColors.black,
+        ),
+      ),
     );
   }
 
@@ -102,52 +130,100 @@ class ExportService {
     return pw.Container(
       alignment: pw.Alignment.center,
       margin: const pw.EdgeInsets.only(top: 10),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+      ),
       child: pw.Text(
         'Page ${context.pageNumber} of ${context.pagesCount}',
-        style: template.bodyStyle,
+        style: template.bodyStyle.copyWith(
+          color: PdfColors.black,
+        ),
       ),
     );
   }
 
   pw.Widget _buildTitlePage(Thesis thesis, ThesisTemplate template) {
-    return pw.Center(
-      child: pw.Column(
-        mainAxisAlignment: pw.MainAxisAlignment.center,
-        children: [
-          pw.Text(cleanText(thesis.topic), style: template.titleStyle, textAlign: pw.TextAlign.center),
-          pw.SizedBox(height: 40),
-          pw.Text('Writing Style: ${thesis.writingStyle}', style: template.bodyStyle),
-          pw.SizedBox(height: 10),
-          pw.Text('Format: ${thesis.format}', style: template.bodyStyle),
-          pw.SizedBox(height: 40),
-          pw.Text('Generated on: ${DateTime.now().toString().split('.')[0]}', style: template.bodyStyle),
-        ],
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+      ),
+      child: pw.Center(
+        child: pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          children: [
+            pw.Text(
+              cleanText(thesis.topic), 
+              style: template.titleStyle.copyWith(
+                color: template.titleStyle.color ?? PdfColors.black,
+              ), 
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.SizedBox(height: 40),
+            pw.Text(
+              'Writing Style: ${thesis.writingStyle}', 
+              style: template.bodyStyle.copyWith(
+                color: PdfColors.black,
+              ),
+            ),
+            pw.SizedBox(height: 10),
+            pw.Text(
+              'Format: ${thesis.format}', 
+              style: template.bodyStyle.copyWith(
+                color: PdfColors.black,
+              ),
+            ),
+            pw.SizedBox(height: 40),
+            pw.Text(
+              'Generated on: ${DateTime.now().toString().split('.')[0]}', 
+              style: template.bodyStyle.copyWith(
+                color: PdfColors.black,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   pw.Widget _buildTableOfContents(Thesis thesis, ThesisTemplate template, pw.Context context) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text('Table of Contents', style: template.chapterStyle),
-        pw.SizedBox(height: 20),
-        for (var i = 0; i < thesis.chapters.length; i++)
-          pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(vertical: 5),
-            child: pw.Row(
-              children: [
-                pw.Expanded(
-                  child: pw.Text(
-                      '${i + 1}. ${cleanText(thesis.chapters[i].title)}',
-                      style: template.bodyStyle
-                  ),
-                ),
-                pw.Text('${i + 3}', style: template.bodyStyle),
-              ],
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'Table of Contents', 
+            style: template.chapterStyle.copyWith(
+              color: template.chapterStyle.color ?? PdfColors.black,
             ),
           ),
-      ],
+          pw.SizedBox(height: 20),
+          for (var i = 0; i < thesis.chapters.length; i++)
+            pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 5),
+              child: pw.Row(
+                children: [
+                  pw.Expanded(
+                    child: pw.Text(
+                      '${i + 1}. ${cleanText(thesis.chapters[i].title)}',
+                      style: template.bodyStyle.copyWith(
+                        color: PdfColors.black,
+                      ),
+                    ),
+                  ),
+                  pw.Text(
+                    '${i + 3}', 
+                    style: template.bodyStyle.copyWith(
+                      color: PdfColors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -156,52 +232,80 @@ class ExportService {
     for (var chapter in thesis.chapters) {
       widgets.addAll([
         pw.NewPage(),
-        pw.Header(
-          level: 0,
-          child: pw.Text(
-            cleanText(chapter.title),
-            style: template.chapterStyle,
-            textAlign: pw.TextAlign.justify,
+        pw.Container(
+          decoration: pw.BoxDecoration(
+            color: PdfColors.white,
+          ),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Header(
+                level: 0,
+                child: pw.Text(
+                  cleanText(chapter.title),
+                  style: template.chapterStyle.copyWith(
+                    color: template.chapterStyle.color ?? PdfColors.black,
+                  ),
+                  textAlign: pw.TextAlign.justify,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              for (var entry in chapter.subheadings.asMap().entries) ...[
+                pw.Header(
+                  level: 1,
+                  child: pw.Text(
+                    '${entry.key + 1}. ${cleanText(entry.value)}',
+                    style: template.subheadingStyle.copyWith(
+                      color: template.subheadingStyle.color ?? PdfColors.black,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(height: 10),
+                pw.Paragraph(
+                  text: cleanText(chapter.subheadingContents[entry.value] ?? ''),
+                  style: template.bodyStyle.copyWith(
+                    color: PdfColors.black,
+                  ),
+                  textAlign: pw.TextAlign.justify,
+                ),
+                pw.SizedBox(height: 20),
+              ],
+            ],
           ),
         ),
-        pw.SizedBox(height: 20),
-        for (var entry in chapter.subheadings.asMap().entries) ...[
-          pw.Header(
-            level: 1,
-            child: pw.Text(
-              '${entry.key + 1}. ${cleanText(entry.value)}',
-              style: template.subheadingStyle,
-            ),
-          ),
-          pw.SizedBox(height: 10),
-          pw.Paragraph(
-            text: cleanText(chapter.subheadingContents[entry.value] ?? ''),
-            style: template.bodyStyle,
-            textAlign: pw.TextAlign.justify,
-          ),
-          pw.SizedBox(height: 20),
-        ],
       ]);
     }
     return widgets;
   }
 
   pw.Widget _buildReferences(List<String> references, ThesisTemplate template) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text('References', style: template.chapterStyle),
-        pw.SizedBox(height: 20),
-        for (var ref in references)
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(left: 30, bottom: 10),
-            child: pw.Text(
-              cleanText(ref),
-              style: template.bodyStyle,
-              textAlign: pw.TextAlign.justify,
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'References', 
+            style: template.chapterStyle.copyWith(
+              color: template.chapterStyle.color ?? PdfColors.black,
             ),
           ),
-      ],
+          pw.SizedBox(height: 20),
+          for (var ref in references)
+            pw.Padding(
+              padding: const pw.EdgeInsets.only(left: 30, bottom: 10),
+              child: pw.Text(
+                cleanText(ref),
+                style: template.bodyStyle.copyWith(
+                  color: PdfColors.black,
+                ),
+                textAlign: pw.TextAlign.justify,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -297,5 +401,4 @@ class ExportService {
       throw Exception('Failed to save PDF: $e');
     }
   }
-
 }

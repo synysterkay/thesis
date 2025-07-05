@@ -23,6 +23,16 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
   Timer? _messageTimer;
   late AnimationController _pulseController;
 
+  // Updated color scheme to match thesis form screen
+  static const primaryColor = Color(0xFF2563EB);
+  static const secondaryColor = Color(0xFF1D4ED8);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const textMuted = Color(0xFF64748B);
+
   final List<String> _tips = [
     'Our AI is working hard to create quality content',
     'We use multiple AI servers for the best results',
@@ -76,32 +86,23 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withOpacity(0.5),
       child: Center(
         child: Container(
           width: MediaQuery.of(context).size.width * 0.85,
           padding: EdgeInsets.all(24),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF1A1A1A),
-                Color(0xFF2D2D2D),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
             boxShadow: [
               BoxShadow(
-                color: Color(0xFFFF48B0).withOpacity(0.2),
-                blurRadius: 15,
-                spreadRadius: 2,
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, 4),
               ),
             ],
-            border: Border.all(
-              color: Color(0xFFFF48B0).withOpacity(0.3),
-              width: 1.5,
-            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -114,10 +115,10 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
               RichText(
                 text: TextSpan(
                   text: '$_message${'.' * _dots}',
-                  style: GoogleFonts.lato(
+                  style: GoogleFonts.inter(
                     fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    color: textPrimary,
                   ),
                 ),
                 textAlign: TextAlign.center,
@@ -135,9 +136,9 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
                   key: ValueKey<int>(_tipIndex),
                   text: TextSpan(
                     text: _tips[_tipIndex],
-                    style: GoogleFonts.lato(
+                    style: GoogleFonts.inter(
                       fontSize: 15,
-                      color: Colors.white70,
+                      color: textSecondary,
                     ),
                   ),
                   textAlign: TextAlign.center,
@@ -170,12 +171,7 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
           width: 70,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [
-                Color(0xFFFF48B0).withOpacity(0.5),
-                Colors.transparent,
-              ],
-            ),
+            color: primaryColor.withOpacity(0.1),
           ),
         ).animate(controller: _pulseController)
             .scale(begin: Offset(0.9, 0.9), end: Offset(1.1, 1.1)),
@@ -185,9 +181,9 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
           height: 50,
           width: 50,
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF48B0)),
+            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
             strokeWidth: 3,
-            backgroundColor: Colors.grey[800]?.withOpacity(0.3),
+            backgroundColor: borderColor,
           ),
         ),
 
@@ -197,7 +193,7 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
           width: 10,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFFF48B0),
+            color: primaryColor,
           ),
         ),
       ],
@@ -217,7 +213,7 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
               width: 8,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFFF48B0).withOpacity(
+                color: primaryColor.withOpacity(
                     _dots % 5 == index ? 1.0 : 0.3
                 ),
               ),
@@ -239,7 +235,7 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(3),
-            color: Colors.grey[800],
+            color: borderColor,
           ),
           child: Stack(
             children: [
@@ -257,8 +253,8 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
                       borderRadius: BorderRadius.circular(3),
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xFFFF48B0),
-                          Color(0xFF9D4EDD),
+                          primaryColor,
+                          secondaryColor,
                         ],
                       ),
                     ),
@@ -318,7 +314,7 @@ class _ShimmerEffectState extends State<ShimmerEffect> with SingleTickerProvider
               end: Alignment(_animation.value, 0),
               colors: [
                 Colors.white.withOpacity(0),
-                Colors.white.withOpacity(0.3),
+                Colors.white.withOpacity(0.6),
                 Colors.white.withOpacity(0),
               ],
             ),

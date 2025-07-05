@@ -11,7 +11,6 @@ import 'dart:async';
 import '../screens/export_screen.dart';
 import 'thesis_form_screen.dart';
 
-
 class GenerationProgress {
   final String sectionTitle;
   final int completedSections;
@@ -32,9 +31,11 @@ class GenerationProgress {
 
 class OutlineViewerScreen extends ConsumerStatefulWidget {
   const OutlineViewerScreen({super.key});
+
   @override
   _OutlineViewerScreenState createState() => _OutlineViewerScreenState();
 }
+
 class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   final GeminiService _geminiService = GeminiService();
   Map<String, bool> loadingStates = {};
@@ -48,17 +49,26 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   Timer? messageTimer;
   Timer? _countdownTimer;
   Duration _remainingTime = const Duration(minutes: 7);
+
   String get formattedTime {
     final minutes = _remainingTime.inMinutes;
     final seconds = _remainingTime.inSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
-  static const hoverColor = Color(0xFFB5179E);
+
+  // Updated color scheme to match new design
+  static const primaryColor = Color(0xFF2563EB);
+  static const secondaryColor = Color(0xFF1D4ED8);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const textMuted = Color(0xFF64748B);
 
   Timer? _generateAllCountdownTimer;
   Duration _generateAllRemainingTime = const Duration(minutes: 30);
+
   String get generateAllFormattedTime {
     final minutes = _generateAllRemainingTime.inMinutes;
     final seconds = _generateAllRemainingTime.inSeconds % 60;
@@ -66,7 +76,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   final buttonGradient = const LinearGradient(
-    colors: [Color(0xFF9D4EDD), Color(0xFFFF48B0)],
+    colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -82,7 +92,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       'Finalizing structure...',
       'Almost ready...',
     ];
-
   }
 
   @override
@@ -92,13 +101,13 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       _generateInitialContent();
     });
   }
+
   Future<void> _generateInitialContent() async {
     final thesisState = ref.read(thesisStateProvider);
     await thesisState.whenData((thesis) async {
       try {
         int totalSections = 0;
         int completedSections = 0;
-
         for (var chapter in thesis.chapters) {
           if (chapter.title.toLowerCase().contains('introduction') ||
               chapter.title.toLowerCase().contains('conclusion')) {
@@ -156,7 +165,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
             title,
             thesis.writingStyle,
           );
-
           if (content.isNotEmpty && content.length >= 500) {
             break;
           }
@@ -176,7 +184,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
           title,
           content,
         );
-
         setState(() {
           loadingStates[title] = false;
           currentStep = '';
@@ -192,16 +199,22 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     }
   }
 
-
   Widget _buildGenerationSteps() {
     return Container(
       constraints: BoxConstraints(maxHeight: 200),
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black87,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: secondaryColor),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -211,8 +224,8 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
               padding: EdgeInsets.symmetric(vertical: 4),
               child: Text(
                 step,
-                style: GoogleFonts.lato(
-                  color: Colors.white,
+                style: GoogleFonts.inter(
+                  color: textPrimary,
                   fontSize: 16,
                 ),
               ),
@@ -225,13 +238,13 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                     ),
                   ),
                   SizedBox(width: 8),
                   Text(
                     currentStep,
-                    style: GoogleFonts.lato(color: Colors.white, fontSize: 16),
+                    style: GoogleFonts.inter(color: textPrimary, fontSize: 16),
                   ),
                 ],
               ),
@@ -248,14 +261,14 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.black87,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: secondaryColor),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.2),
-            blurRadius: 10,
-            spreadRadius: 2,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -267,7 +280,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
             children: [
               CircularProgressIndicator(
                 value: generateAllProgress / 100,
-                valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                 strokeWidth: 2,
               ),
               SizedBox(width: 16),
@@ -277,18 +290,18 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                   children: [
                     Text(
                       currentlyGenerating,
-                      style: GoogleFonts.lato(
-                        color: Colors.white,
+                      style: GoogleFonts.inter(
+                        color: textPrimary,
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       '${generateAllProgress.toStringAsFixed(0)}%',
-                      style: GoogleFonts.lato(
-                        color: secondaryColor,
+                      style: GoogleFonts.inter(
+                        color: primaryColor,
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -303,10 +316,10 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: secondaryColor),
+        icon: Icon(Icons.arrow_back_ios, color: textPrimary),
         onPressed: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ThesisFormScreen()),
@@ -314,10 +327,10 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       ),
       title: Text(
         'Academic Structure',
-        style: GoogleFonts.lato(
+        style: GoogleFonts.inter(
           fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: secondaryColor,
+          fontWeight: FontWeight.w700,
+          color: textPrimary,
         ),
       ),
       centerTitle: false,
@@ -328,11 +341,23 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
             decoration: BoxDecoration(
               gradient: buttonGradient,
               borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: TextButton.icon(
               icon: Icon(Icons.auto_awesome, color: Colors.white),
-              label: Text('Generate All',
-                  style: GoogleFonts.lato(color: Colors.white)),
+              label: Text(
+                'Generate All',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               onPressed: () => _handleGenerateAll(context),
             ),
           ),
@@ -341,10 +366,10 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
             child: Center(
               child: Text(
                 generateAllFormattedTime,
-                style: GoogleFonts.lato(
+                style: GoogleFonts.inter(
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: secondaryColor,
+                  fontWeight: FontWeight.w600,
+                  color: primaryColor,
                 ),
               ),
             ),
@@ -352,8 +377,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       ],
     );
   }
-
-
 
   Widget _buildSubheadingTile(String chapterTitle, List<String> subheadings,
       String subheading, int chapterIndex, bool isLoading, thesis) {
@@ -369,14 +392,14 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryColor.withOpacity(0.2)),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 8,
-            spreadRadius: 0,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -385,9 +408,10 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
           isIntroduction || isConclusion ?
           '$chapterNumber.0 $chapterTitle' :
           '$chapterNumber.$subheadingNumber $subheading',
-          style: GoogleFonts.lato(
+          style: GoogleFonts.inter(
             fontSize: 16,
-            color: isGenerated ? Colors.white : Colors.grey,
+            color: isGenerated ? textPrimary : textMuted,
+            fontWeight: FontWeight.w500,
           ),
         ),
         leading: Row(
@@ -395,8 +419,8 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
           children: [
             IconButton(
               icon: isGenerated
-                  ? Icon(Icons.check_circle, color: secondaryColor)
-                  : Icon(Icons.circle_outlined, color: Colors.grey),
+                  ? Icon(Icons.check_circle, color: Colors.green)
+                  : Icon(Icons.circle_outlined, color: textMuted),
               onPressed: () {
                 if (!isGenerated) {
                   _handleSubheadingTap(
@@ -411,7 +435,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
               },
             ),
             IconButton(
-              icon: Icon(Icons.refresh, color: secondaryColor),
+              icon: Icon(Icons.refresh, color: primaryColor),
               onPressed: () => _handleRegenerateOutlines(
                 context,
                 chapterTitle,
@@ -428,15 +452,16 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
             ),
           )
-              : Icon(Icons.edit, color: isGenerated ? secondaryColor : Colors.grey),
+              : Icon(Icons.edit, color: isGenerated ? primaryColor : textMuted),
           onPressed: isGenerated
               ? () => _handleSubheadingTap(
             context,
             chapterTitle,
-            isIntroduction || isConclusion ? chapterTitle : subheading,
+            isIntroduction || isConclusion ? chapterTitle
+            : subheading,
             chapterIndex,
             thesis.topic,
             thesis.writingStyle,
@@ -454,31 +479,42 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       String topic,
       ) async {
     setState(() => loadingStates[chapterTitle] = true);
-
     try {
       final newOutlines = await _geminiService.regenerateChapterOutlines(
         topic,
         chapterTitle,
       );
-
       if (newOutlines.isNotEmpty) {
         await ref.read(thesisStateProvider.notifier).updateChapterOutlines(
           chapterIndex,
           newOutlines,
         );
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Outlines regenerated successfully'),
+            content: Text(
+              'Outlines regenerated successfully',
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
             backgroundColor: primaryColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to regenerate outlines: $e'),
+          content: Text(
+            'Failed to regenerate outlines: $e',
+            style: GoogleFonts.inter(color: Colors.white),
+          ),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       );
     } finally {
@@ -490,7 +526,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     if (isGeneratingAll) return;
 
     final thesisState = ref.read(thesisStateProvider);
-
     await thesisState.whenData((thesis) async {
       setState(() {
         isGeneratingAll = true;
@@ -507,7 +542,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
         // Process each chapter
         for (var i = 0; i < thesis.chapters.length; i++) {
           final chapter = thesis.chapters[i];
-
+          
           // Skip References chapter
           if (chapter.title.toLowerCase().contains('references')) {
             continue;
@@ -530,17 +565,14 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                   subheading,
                   thesis.writingStyle,
                 );
-
                 await ref.read(thesisStateProvider.notifier).updateSubheadingContent(
                   i, subheading, content,
                 );
-
                 setState(() {
                   completedSections++;
                   generateAllProgress = (completedSections / totalSections) * 100;
                   generationSteps.add(subheading);
                 });
-
                 await Future.delayed(Duration(seconds: 45));
               } catch (e) {
                 failedSections.add(subheading);
@@ -560,14 +592,34 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
           } else {
             await _retryFailedSections(failedSections, thesis);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${failedSections.length} sections need attention')),
+              SnackBar(
+                content: Text(
+                  '${failedSections.length} sections need attention',
+                  style: GoogleFonts.inter(color: Colors.white),
+                ),
+                backgroundColor: Colors.orange,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             );
           }
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error generating content: ${e.toString()}')),
+            SnackBar(
+              content: Text(
+                'Error generating content: ${e.toString()}',
+                style: GoogleFonts.inter(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           );
         }
       } finally {
@@ -583,16 +635,13 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     });
   }
 
-
-
-
   bool _isSpecialChapter(String title) {
     return title.toLowerCase().contains('introduction') ||
         title.toLowerCase().contains('conclusion');
   }
 
   Future<void> _generateSpecialChapterContent(
-      dynamic  chapter,
+      dynamic chapter,
       int chapterIndex,
       dynamic thesis,
       int completedSections,
@@ -624,7 +673,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   Future<void> _generateRegularChapterContent(
-      dynamic  chapter,
+      dynamic chapter,
       int chapterIndex,
       dynamic thesis,
       int completedSections,
@@ -659,9 +708,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     }
   }
 
-
-
-
   void _cleanupGeneration() {
     if (mounted) {
       setState(() {
@@ -673,7 +719,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     }
   }
 
-
   Future<void> _retryFailedSections(List<String> failedSections, dynamic thesis) async {
     for (var section in failedSections) {
       try {
@@ -682,7 +727,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
           section,
           thesis.writingStyle,
         );
-
         // Update content in thesis state
         final chapterIndex = thesis.chapters.indexWhere((c) => c.title == section);
         if (chapterIndex != -1) {
@@ -697,9 +741,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       }
     }
   }
-
-
-
 
   void _updateGenerationProgress(double progress, String currentItem) {
     setState(() {
@@ -721,16 +762,15 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     return total;
   }
 
-
   List<Widget> _buildChapterContent(dynamic chapter, int chapterIndex, dynamic thesis) {
     if (chapter.title.toLowerCase().contains('references')) {
       return [
         ListTile(
           title: Text(
             'References will be automatically generated',
-            style: GoogleFonts.lato(
+            style: GoogleFonts.inter(
               fontSize: 16,
-              color: Colors.grey,
+              color: textMuted,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -764,8 +804,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     }).toList();
   }
 
-
-
   Future<void> _handleSubheadingTap(
       BuildContext context,
       String chapterTitle,
@@ -793,6 +831,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     }
 
     setState(() => loadingStates[subheading] = true);
+
     try {
       final content = await _geminiService.generateChapterContent(
         topic,
@@ -821,7 +860,17 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to generate content: $e')),
+        SnackBar(
+          content: Text(
+            'Failed to generate content: $e',
+            style: GoogleFonts.inter(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
       );
     } finally {
       setState(() => loadingStates[subheading] = false);
@@ -839,7 +888,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     });
   }
 
-
   void startCountdown() {
     _remainingTime = const Duration(minutes: 7);
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -854,7 +902,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       }
     });
   }
-
 
   void startGenerateAllCountdown() {
     _generateAllRemainingTime = const Duration(minutes: 30);
@@ -872,13 +919,21 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   void _handleExport(BuildContext context) {
-
     final thesisState = ref.read(thesisStateProvider);
-
     thesisState.whenData((thesis) {
       if (thesis == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No thesis data available')),
+          SnackBar(
+            content: Text(
+              'No thesis data available',
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         );
         return;
       }
@@ -886,7 +941,17 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       // Check if generation is complete
       if (isGeneratingAll) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please wait for generation to complete')),
+          SnackBar(
+            content: Text(
+              'Please wait for generation to complete',
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         );
         return;
       }
@@ -894,7 +959,6 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       // Validate content before navigation
       bool isComplete = true;
       String missingSection = '';
-
       for (var chapter in thesis.chapters) {
         if (chapter.title.toLowerCase().contains('references')) continue;
 
@@ -925,7 +989,15 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Missing content for: $missingSection'),
+            content: Text(
+              'Missing content for: $missingSection',
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             duration: Duration(seconds: 3),
           ),
         );
@@ -933,14 +1005,12 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final thesisState = ref.watch(thesisStateProvider);
 
-
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: surfaceColor,
       appBar: _buildAppBar(),
       body: Stack(
         children: [
@@ -949,7 +1019,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.black, Colors.grey[900]!],
+                colors: [surfaceColor, backgroundColor],
               ),
             ),
             child: thesisState.when(
@@ -962,14 +1032,14 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                   return Container(
                     margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
+                      color: backgroundColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: primaryColor.withOpacity(0.3)),
+                      border: Border.all(color: borderColor),
                       boxShadow: [
                         BoxShadow(
-                          color: primaryColor.withOpacity(0.1),
+                          color: Colors.black.withOpacity(0.04),
                           blurRadius: 8,
-                          spreadRadius: 0,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -979,10 +1049,10 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                           Expanded(
                             child: Text(
                               'Chapter ${chapterNumber}. ${chapter.title}',
-                              style: GoogleFonts.lato(
+                              style: GoogleFonts.inter(
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -994,10 +1064,10 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
+                                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                                 ),
                               )
-                                  : Icon(Icons.refresh, color: secondaryColor),
+                                  : Icon(Icons.refresh, color: primaryColor),
                               onPressed: () => _handleRegenerateOutlines(
                                 context,
                                 chapter.title,
@@ -1007,16 +1077,68 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                             ),
                         ],
                       ),
-                      collapsedIconColor: secondaryColor,
-                      iconColor: secondaryColor,
+                      collapsedIconColor: primaryColor,
+                      iconColor: primaryColor,
                       children: _buildChapterContent(chapter, index, thesis),
                     ),
                   ).animate().fadeIn(delay: (index * 100).ms).slideY();
                 },
               ),
               error: (error, stack) => Center(
-                child: Text('Error: $error',
-                    style: GoogleFonts.lato(color: secondaryColor)),
+                child: Container(
+                  margin: EdgeInsets.all(32),
+                  padding: EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 48,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Error: $error',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => ref.refresh(thesisStateProvider),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Retry',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               loading: () {
                 if (_countdownTimer == null) {
@@ -1025,35 +1147,53 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                     startLoadingMessages();
                   });
                 }
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        formattedTime,
-                        style: GoogleFonts.lato(
-                          color: secondaryColor,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ).animate().fadeIn(),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Text(
-                          loadingMessages[currentMessageIndex],
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.lato(
-                            color: Colors.white,
-                            fontSize: 16,
+                return Container(
+                  color: surfaceColor,
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: borderColor),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                      ).animate().fadeIn(),
-                    ],
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            formattedTime,
+                            style: GoogleFonts.inter(
+                              color: primaryColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ).animate().fadeIn(),
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: Text(
+                              loadingMessages[currentMessageIndex],
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                color: textPrimary,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ).animate().fadeIn(),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },
@@ -1074,6 +1214,32 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
               child: _buildGenerationStatus(),
             ),
         ],
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: buttonGradient,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: () => _handleExport(context),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          icon: Icon(Icons.download, color: Colors.white),
+          label: Text(
+            'Export',
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

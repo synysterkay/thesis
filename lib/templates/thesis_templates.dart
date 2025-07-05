@@ -39,22 +39,26 @@ class ThesisTemplate {
       titleStyle: pw.TextStyle(
         fontSize: 28,
         color: PdfColors.blue800,
-        font: pw.Font.helvetica(),
+        fontWeight: pw.FontWeight.bold,
       ),
       chapterStyle: pw.TextStyle(
         fontSize: 20,
         color: PdfColors.blue600,
+        fontWeight: pw.FontWeight.bold,
       ),
       subheadingStyle: pw.TextStyle(
         fontSize: 16,
         color: PdfColors.blue500,
+        fontWeight: pw.FontWeight.bold,
       ),
       bodyStyle: pw.TextStyle(
         fontSize: 12,
+        color: PdfColors.black, // Explicitly set text color to black
         lineSpacing: 1.5,
       ),
       backgroundBuilder: (context) => pw.Container(
         decoration: pw.BoxDecoration(
+          color: PdfColors.white, // Explicitly set background to white
           border: pw.Border(
             top: pw.BorderSide(width: 2, color: PdfColors.blue800),
           ),
@@ -62,29 +66,34 @@ class ThesisTemplate {
       ),
     );
   }
+
   static ThesisTemplate classic() {
     return ThesisTemplate(
       name: 'Classic Research',
       pageFormat: PdfPageFormat.a4,
       titleStyle: pw.TextStyle(
         fontSize: 24,
-        font: pw.Font.timesBold(),
+        color: PdfColors.black, // Explicitly set text color to black
+        fontWeight: pw.FontWeight.bold,
       ),
       chapterStyle: pw.TextStyle(
         fontSize: 18,
-        font: pw.Font.timesBold(),
+        color: PdfColors.black, // Explicitly set text color to black
+        fontWeight: pw.FontWeight.bold,
       ),
       subheadingStyle: pw.TextStyle(
         fontSize: 14,
-        font: pw.Font.timesBold(),
+        color: PdfColors.black, // Explicitly set text color to black
+        fontWeight: pw.FontWeight.bold,
       ),
       bodyStyle: pw.TextStyle(
         fontSize: 12,
+        color: PdfColors.black, // Explicitly set text color to black
         lineSpacing: 2.0,
-        font: pw.Font.times(),
       ),
       backgroundBuilder: (context) => pw.Container(
         decoration: pw.BoxDecoration(
+          color: PdfColors.white, // Explicitly set background to white
           border: pw.Border.all(
             width: 0.5,
             color: PdfColors.grey300,
@@ -93,34 +102,38 @@ class ThesisTemplate {
       ),
     );
   }
+
   static ThesisTemplate minimal() {
     return ThesisTemplate(
       name: 'Minimal',
       pageFormat: PdfPageFormat.a4,
       titleStyle: pw.TextStyle(
         fontSize: 24,
-        color: PdfColors.black,
-        font: pw.Font.courierBold(),
+        color: PdfColors.black, // Explicitly set text color to black
+        fontWeight: pw.FontWeight.bold,
       ),
       chapterStyle: pw.TextStyle(
         fontSize: 18,
-        color: PdfColors.black,
-        font: pw.Font.courierBold(),
+        color: PdfColors.black, // Explicitly set text color to black
+        fontWeight: pw.FontWeight.bold,
       ),
       subheadingStyle: pw.TextStyle(
         fontSize: 14,
-        color: PdfColors.black,
-        font: pw.Font.courierBold(),
+        color: PdfColors.black, // Explicitly set text color to black
+        fontWeight: pw.FontWeight.bold,
       ),
       bodyStyle: pw.TextStyle(
         fontSize: 12,
-        color: PdfColors.black,
+        color: PdfColors.black, // Explicitly set text color to black
         lineSpacing: 1.5,
-        font: pw.Font.courier(),
       ),
       includeHeader: false,
       includeFooter: false,
-      backgroundBuilder: null,
+      backgroundBuilder: (context) => pw.Container(
+        decoration: pw.BoxDecoration(
+          color: PdfColors.white, // Explicitly set background to white
+        ),
+      ),
     );
   }
 }

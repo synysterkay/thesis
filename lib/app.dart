@@ -32,6 +32,8 @@ import 'providers/auth_provider.dart';
 import 'providers/subscription_provider.dart';
 // Widgets
 import 'widgets/protected_route.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 // Only import html for web-specific functionality
 import 'package:universal_html/html.dart' as html show window, document;
@@ -51,6 +53,12 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
       theme: _buildAppTheme(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: analytics),
       ],
@@ -324,10 +332,10 @@ class _NotFoundScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/initialization',
-                  (route) => false,
+                      (route) => false,
                 );
               },
-                          icon: const Icon(Icons.home),
+              icon: const Icon(Icons.home),
               label: const Text('Go to App'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF9D4EDD),
@@ -347,7 +355,7 @@ class _NotFoundScreen extends StatelessWidget {
                   // Fallback: try to navigate within the app
                   Navigator.of(context).pushNamedAndRemoveUntil(
                     '/initialization',
-                    (route) => false,
+                        (route) => false,
                   );
                 }
               },
@@ -454,7 +462,7 @@ class AppNavigation {
   static void navigateAndClearStack(BuildContext context, String routeName) {
     Navigator.of(context).pushNamedAndRemoveUntil(
       routeName,
-      (route) => false,
+          (route) => false,
     );
   }
 

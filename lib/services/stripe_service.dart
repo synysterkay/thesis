@@ -5,12 +5,12 @@ import 'dart:convert';
 
 class StripeService {
   // Stripe Payment Links (replace with your actual payment links)
-  static const String weeklyPaymentLink = 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01';
-  static const String monthlyPaymentLink = 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02';
+  static const String weeklyPaymentLink = 'https://buy.stripe.com/eVqbJ1eah4hnaJh8GzfrW03';
+  static const String monthlyPaymentLink = 'https://buy.stripe.com/00weVd9U16pveZx8GzfrW04';
   
   // Your price IDs for reference
-  static const String weeklyPriceId = 'price_1RbhGMEHyyRHgrPiSXQFnnrT';
-  static const String monthlyPriceId = 'price_1RbhH1EHyyRHgrPiijEs1rTB';
+  static const String weeklyPriceId = 'price_1RhTG7EHyyRHgrPiZ7CpZvyK';
+  static const String monthlyPriceId = 'price_1RhTHGEHyyRHgrPix1W508C8';
 
   // Firebase instances
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

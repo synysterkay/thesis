@@ -683,7 +683,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '\$9.99',
+                    '\$6',
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w700,
@@ -721,7 +721,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Unlimited thesis generator access'),
-              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Advanced AI essay writer models (GPT-4)'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Advanced AI essay writer models'),
               _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'All citation formats for AI written essays'),
               _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Priority AI essay generator processing'),
               _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Email support for thesis statement generator'),
@@ -815,7 +815,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '\$26.99',
+                        '\$11',
                         style: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.w700,
@@ -852,12 +852,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Everything in Weekly AI Essay Writer'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Premium thesis statement generator models'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Advanced editing tools for AI written essays'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Plagiarism checker for AI essay generator content'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Priority support for thesis sentence generator'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Collaboration features for paper writer AI'),
+                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Unlimited thesis generator access'),
+                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Advanced AI essay writer models'),
+                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'All citation formats for AI written essays'),
+                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Priority AI essay generator processing'),
+                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Email support for thesis statement generator'),
+                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Export AI essay writer content to PDF & Word'),
                 ],
               ),
 

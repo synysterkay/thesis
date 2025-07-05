@@ -39,6 +39,15 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isDirty = false;
 
+  // Updated color scheme to match thesis form screen
+  static const primaryColor = Color(0xFF2563EB);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const textMuted = Color(0xFF64748B);
+
   @override
   void initState() {
     super.initState();
@@ -57,12 +66,12 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: surfaceColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Color(0xFF2E2E2E)),
+          icon: Icon(Icons.arrow_back_ios, color: textPrimary),
           onPressed: () => _handleBack(context),
         ),
         title: Column(
@@ -70,24 +79,24 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
           children: [
             Text(
               widget.chapterTitle,
-              style: GoogleFonts.lato(
+              style: GoogleFonts.inter(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2E2E2E),
+                fontWeight: FontWeight.w600,
+                color: textPrimary,
               ),
             ),
             Text(
               widget.subheading,
-              style: GoogleFonts.lato(
+              style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: textSecondary,
               ),
             ),
           ],
         ),
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: Color(0xFF2E2E2E)),
+            icon: Icon(Icons.more_vert, color: textPrimary),
             itemBuilder: (BuildContext context) => [
               PopupMenuItem<String>(
                 value: 'report',
@@ -95,7 +104,7 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
                   children: [
                     Icon(Icons.flag_outlined, color: Colors.red[700], size: 20),
                     SizedBox(width: 8),
-                    Text('Report Content', style: GoogleFonts.lato()),
+                    Text('Report Content', style: GoogleFonts.inter()),
                   ],
                 ),
               ),
@@ -108,7 +117,7 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
           ),
           _isDirty
               ? IconButton(
-            icon: Icon(Icons.save, color: Color(0xFF2196F3)),
+            icon: Icon(Icons.save, color: primaryColor),
             onPressed: _saveContent,
           ).animate().fadeIn()
               : SizedBox.shrink(),
@@ -118,12 +127,12 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: backgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: Offset(0, 2),
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -168,13 +177,14 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
             child: Container(
               margin: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: Offset(0, 4),
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -204,16 +214,45 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Unsaved Changes', style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
-          content:
-          Text('Do you want to save your progress?', style: GoogleFonts.lato()),
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: borderColor),
+          ),
+          title: Text(
+            'Unsaved Changes',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              color: textPrimary,
+            ),
+          ),
+          content: Text(
+            'Do you want to save your progress?',
+            style: GoogleFonts.inter(color: textSecondary),
+          ),
           actions: [
             TextButton(
-              child: Text('Discard', style: GoogleFonts.lato(color: Colors.grey)),
+              child: Text(
+                'Discard',
+                style: GoogleFonts.inter(color: textMuted),
+              ),
               onPressed: () => Navigator.of(context).pop(true),
             ),
-            TextButton(
-              child: Text('Save', style: GoogleFonts.lato(color: Color(0xFF2196F3))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Save',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               onPressed: () {
                 _saveContent();
                 Navigator.of(context).pop(true);
@@ -237,18 +276,47 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Report Content', style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: borderColor),
+        ),
+        title: Text(
+          'Report Content',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            color: textPrimary,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Please describe the issue with this content:', style: GoogleFonts.lato()),
+            Text(
+              'Please describe the issue with this content:',
+              style: GoogleFonts.inter(color: textSecondary),
+            ),
             SizedBox(height: 16),
             TextField(
               controller: reportController,
               maxLines: 3,
+              style: GoogleFonts.inter(color: textPrimary),
               decoration: InputDecoration(
                 hintText: 'Enter your concern...',
-                border: OutlineInputBorder(),
+                hintStyle: GoogleFonts.inter(color: textMuted),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: primaryColor, width: 2),
+                ),
+                filled: true,
+                fillColor: backgroundColor,
                 contentPadding: EdgeInsets.all(12),
               ),
             ),
@@ -256,13 +324,27 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
         ),
         actions: [
           TextButton(
-            child: Text('Cancel',
-                style: GoogleFonts.lato(color: Colors.grey)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(color: textMuted),
+            ),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          TextButton(
-            child: Text('Submit',
-                style: GoogleFonts.lato(color: Colors.red[700])),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[700],
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Submit',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             onPressed: () {
               _submitReport(reportController.text);
               Navigator.of(context).pop();
@@ -276,9 +358,15 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   void _submitReport(String reportText) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Report submitted successfully',
-            style: GoogleFonts.lato(color: Colors.white)),
+        content: Text(
+          'Report submitted successfully',
+          style: GoogleFonts.inter(color: Colors.white),
+        ),
         backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
         duration: Duration(seconds: 2),
       ),
     );
@@ -293,8 +381,15 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
     setState(() => _isDirty = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Progress saved', style: GoogleFonts.lato()),
-        backgroundColor: Color(0xFF2196F3),
+        content: Text(
+          'Progress saved',
+          style: GoogleFonts.inter(color: Colors.white),
+        ),
+        backgroundColor: primaryColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }

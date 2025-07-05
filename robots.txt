@@ -1,28 +1,15 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
-Sitemap: https://thesisgenerator.tech/sitemap.xml
+# Important: Allow all main content
+Allow: /index.html
+Allow: /app.html
+Allow: /privacy.html
+Allow: /terms.html
+Allow: /cookies.html
+Allow: /academic-integrity.html
 
-
-
-# Allow all major search engines
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Slurp
-Allow: /
-
-# Disallow admin/private areas (if any)
-Disallow: /admin/
-Disallow: /private/
-Disallow: /.git/
-Disallow: /node_modules/
-
-# Allow important files
+# Allow static resources
 Allow: /css/
 Allow: /js/
 Allow: /images/
@@ -31,6 +18,18 @@ Allow: /*.js
 Allow: /*.png
 Allow: /*.jpg
 Allow: /*.svg
+Allow: /*.ico
 
-# Crawl delay (optional - be nice to servers)
+# Disallow admin/private areas
+Disallow: /admin/
+Disallow: /private/
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /.env
+Disallow: /config/
+
+# Sitemap location
+Sitemap: https://thesisgenerator.tech/sitemap.xml
+
+# Crawl delay
 Crawl-delay: 1

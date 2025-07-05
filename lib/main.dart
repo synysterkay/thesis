@@ -241,7 +241,7 @@ void main() {
 
     // For web, always start with initialization screen
     // For mobile, use splash screen or initialization screen
-    final String initialRoute = kIsWeb ? '/initialization' : '/';
+    final String initialRoute = '/initialization';
 
     print('✅ App initialization completed');
     print('📱 Platform: ${kIsWeb ? 'Web' : 'Mobile'}');

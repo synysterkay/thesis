@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/review_service.dart';
 import 'package:flutter/services.dart';
 import '../widgets/loading_overlay.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'api_key_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html show window; // Only for web
@@ -31,11 +30,18 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   final ReviewService _reviewService = ReviewService();
   int _generateClickCount = 0;
 
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
+  // Updated color scheme to match landing page
+  static const primaryColor = Color(0xFF2563EB);
+  static const secondaryColor = Color(0xFF1D4ED8);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const textMuted = Color(0xFF64748B);
 
   final buttonGradient = const LinearGradient(
-    colors: [Color(0xFF9D4EDD), Color(0xFFFF48B0)],
+    colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -44,8 +50,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   void initState() {
     super.initState();
   }
-
-
 
   Future<void> _showCustomReviewDialog() async {
     final reviewService = ReviewService();
@@ -60,46 +64,55 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
           backgroundColor: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey[900],
+              color: backgroundColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: primaryColor.withOpacity(0.3)),
+              border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
-                  color: primaryColor.withOpacity(0.2),
-                  blurRadius: 10,
-                  spreadRadius: 2,
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.star_rounded,
-                  color: secondaryColor,
-                  size: 48,
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  child: const Icon(
+                    Icons.star_rounded,
+                    color: primaryColor,
+                    size: 32,
+                  ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Text(
                   'Enjoying Thesis Generator?',
-                  style: GoogleFonts.lato(
-                    color: Colors.white,
+                  style: GoogleFonts.inter(
+                    color: textPrimary,
                     fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Your review helps us improve!',
-                  style: GoogleFonts.lato(
-                    color: Colors.white70,
+                  style: GoogleFonts.inter(
+                    color: textSecondary,
                     fontSize: 16,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -107,30 +120,27 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         'Maybe Later',
-                        style: GoogleFonts.lato(color: Colors.white70),
+                        style: GoogleFonts.inter(color: textMuted),
                       ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: buttonGradient,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          await reviewService.openStoreListing();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await reviewService.openStoreListing();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          'Rate Now',
-                          style: GoogleFonts.lato(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      child: Text(
+                        'Rate Now',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -145,123 +155,120 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   }
 
   Future<bool> _handleBackPress() async {
-  if (kIsWeb) {
-    // For web, show a simple confirmation and redirect to landing page
-    final shouldLeave = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: primaryColor.withOpacity(0.3)),
-        ),
-        title: Text(
-          'Leave Thesis Generator?',
-          style: GoogleFonts.lato(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+    if (kIsWeb) {
+      final shouldLeave = await showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => AlertDialog(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: borderColor),
           ),
-        ),
-        content: Text(
-          'Your progress will be lost. Are you sure you want to leave?',
-          style: GoogleFonts.lato(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Stay',
-              style: GoogleFonts.lato(color: Colors.white70),
+          title: Text(
+            'Leave Thesis Generator?',
+            style: GoogleFonts.inter(
+              color: textPrimary,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: buttonGradient,
-              borderRadius: BorderRadius.circular(8),
+          content: Text(
+            'Your progress will be lost. Are you sure you want to leave?',
+            style: GoogleFonts.inter(color: textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Stay',
+                style: GoogleFonts.inter(color: textMuted),
+              ),
             ),
-            child: TextButton(
+            ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: Text(
                 'Leave',
-                style: GoogleFonts.lato(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldLeave == true) {
-      // Redirect to landing page
-      if (kIsWeb) {
-        html.window.location.href = '/';
+          ],
+        ),
+      );
+      if (shouldLeave == true) {
+        if (kIsWeb) {
+          html.window.location.href = '/';
+        }
       }
-    }
-    return false;
-  } else {
-    // For mobile, show the review dialog as before
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: primaryColor.withOpacity(0.3)),
-        ),
-        title: Text(
-          'We Value Your Feedback',
-          style: GoogleFonts.lato(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+      return false;
+    } else {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: borderColor),
           ),
-        ),
-        content: Text(
-          'Would you like to rate our app before leaving?',
-          style: GoogleFonts.lato(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              SystemNavigator.pop();
-            },
-            child: Text(
-              'No, Exit',
-              style: GoogleFonts.lato(color: Colors.white70),
+          title: Text(
+            'We Value Your Feedback',
+            style: GoogleFonts.inter(
+              color: textPrimary,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: buttonGradient,
-              borderRadius: BorderRadius.circular(8),
+          content: Text(
+            'Would you like to rate our app before leaving?',
+            style: GoogleFonts.inter(color: textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                SystemNavigator.pop();
+              },
+              child: Text(
+                'No, Exit',
+                style: GoogleFonts.inter(color: textMuted),
+              ),
             ),
-            child: TextButton(
+            ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _reviewService.openStoreListing();
                 SystemNavigator.pop();
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: Text(
                 'Rate App',
-                style: GoogleFonts.lato(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-    return false;
+          ],
+        ),
+      );
+      return false;
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -271,31 +278,23 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
         return false;
       },
       child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.black, Colors.grey[900]!],
-            ),
-          ),
-          child: SafeArea(
-            child: Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 24),
-                  _buildTopicField(),
-                  const SizedBox(height: 24),
-                  if (!_chaptersGenerated)
-                    _buildGenerateButton()
-                  else
-                    ..._buildGeneratedContent(),
-                ].animate(interval: 100.ms).fadeIn().slideY(),
-              ),
+        backgroundColor: surfaceColor,
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildTopicField(),
+                const SizedBox(height: 24),
+                if (!_chaptersGenerated)
+                  _buildGenerateButton()
+                else
+                  ..._buildGeneratedContent(),
+              ].animate(interval: 100.ms).fadeIn().slideY(),
             ),
           ),
         ),
@@ -303,91 +302,107 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
     );
   }
 
- Widget _buildHeader() {
-  return Row(
-    children: [
-      // 🔥 Only show back button on mobile platforms
-      if (!kIsWeb)
-        IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: _handleBackPress,
-        ).animate().fadeIn(delay: 200.ms),
-      
-      // 🔥 For web, add some left padding to balance the layout
-      if (kIsWeb)
-        const SizedBox(width: 48), // Same width as IconButton to maintain balance
-      
-      Expanded(
-        child: Text(
-          'Create Thesis',
-          style: GoogleFonts.lato(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          textAlign: TextAlign.center,
-        ).animate().fadeIn(delay: 300.ms),
-      ),
-      
-      // API Key button with enhanced styling and animation
-      Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: buttonGradient,
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.3),
-              blurRadius: 8,
-              spreadRadius: -2,
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        if (!kIsWeb)
+          Container(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor),
             ),
-          ],
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: textPrimary, size: 20),
+              onPressed: _handleBackPress,
+            ),
+          ).animate().fadeIn(delay: 200.ms),
+        
+        if (kIsWeb)
+          const SizedBox(width: 48),
+        
+        Expanded(
+          child: Text(
+            'Create Thesis',
+            style: GoogleFonts.inter(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
+            textAlign: TextAlign.center,
+          ).animate().fadeIn(delay: 300.ms),
         ),
-        child: IconButton(
-          key: const Key('api-key-button'),
-          icon: const Icon(Icons.key, color: Colors.white),
-          onPressed: _showApiKeyDialog,
-          tooltip: kIsWeb 
-            ? 'Use Your Own API Key for Faster Generation' 
-            : 'Use Your Own API',
-        ),
-      )
-        .animate(
-          onPlay: (controller) => controller.repeat(reverse: true, min: 0.0, max: 1.0),
-        )
-        .fadeIn(delay: 200.ms)
-        .then(delay: 500.ms)
-        .shimmer(duration: 1500.ms, curve: Curves.easeInOut)
-        .then(delay: 1000.ms)
-        .scale(
-          duration: 400.ms,
-          begin: const Offset(1.0, 1.0),
-          end: const Offset(1.1, 1.1),
-        ),
-    ],
-  );
-}
-
-
-
-
+        
+        Container(
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withOpacity(0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            key: const Key('api-key-button'),
+            icon: const Icon(Icons.key, color: Colors.white, size: 20),
+            onPressed: _showApiKeyDialog,
+            tooltip: kIsWeb 
+              ? 'Use Your Own API Key for Faster Generation' 
+              : 'Use Your Own API',
+          ),
+        ).animate().fadeIn(delay: 200.ms),
+      ],
+    );
+  }
 
   void _showApiKeyDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Use Your Own API'),
-        content: const Text('Use your own API for fast generation—it’s free!'),
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: borderColor),
+        ),
+        title: Text(
+          'Use Your Own API',
+          style: GoogleFonts.inter(
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Use your own API for fast generation—its free!',
+          style: GoogleFonts.inter(color: textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(color: textMuted),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, '/apiKey');
             },
-            child: const Text('Set Up'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Set Up',
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
@@ -397,36 +412,62 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   Widget _buildTopicField() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryColor.withOpacity(0.3)),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 8,
-            spreadRadius: 0,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: TextFormField(
         controller: _topicController,
         key: const Key('thesis-topic-field'),
-        style: GoogleFonts.lato(color: Colors.white),
+        style: GoogleFonts.inter(
+          color: textPrimary,
+          fontSize: 16,
+        ),
         decoration: InputDecoration(
           labelText: 'Research Topic',
           hintText: 'Enter your research topic',
-          labelStyle: GoogleFonts.lato(color: secondaryColor),
+          labelStyle: GoogleFonts.inter(
+            color: primaryColor,
+            fontWeight: FontWeight.w500,
+          ),
+          hintStyle: GoogleFonts.inter(
+            color: textMuted,
+            fontSize: 14,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: primaryColor),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: primaryColor.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: secondaryColor),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: primaryColor, width: 2),
+          ),
+          filled: true,
+          fillColor: backgroundColor,
+          contentPadding: const EdgeInsets.all(16),
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.lightbulb_outline,
+              color: primaryColor,
+              size: 20,
+            ),
           ),
         ),
         validator: (value) => value?.isEmpty ?? true ? 'Please enter a topic' : null,
@@ -437,7 +478,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
   Widget _buildGenerateButton() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         gradient: buttonGradient,
         boxShadow: [
           BoxShadow(
@@ -452,16 +493,16 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          padding: EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: Text(
           'Create Sections',
-          style: GoogleFonts.lato(
+          style: GoogleFonts.inter(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
@@ -471,19 +512,51 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
 
   List<Widget> _buildGeneratedContent() {
     return [
-      Text(
-        'Created Sections',
-        style: GoogleFonts.lato(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.list_alt,
+                color: primaryColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Created Sections',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: textPrimary,
+              ),
+            ),
+          ],
         ),
       ),
-      SizedBox(height: 16),
+      const SizedBox(height: 16),
       ..._buildChapterFields(),
-      SizedBox(height: 24),
+      const SizedBox(height: 24),
       _buildDropdowns(),
-      SizedBox(height: 24),
+      const SizedBox(height: 24),
       _buildSubmitButton(),
     ];
   }
@@ -493,16 +566,16 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
       int idx = entry.key;
       var controller = entry.value;
       return Container(
-        margin: EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: primaryColor.withOpacity(0.3)),
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
-              spreadRadius: 0,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -512,29 +585,63 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
               child: TextFormField(
                 controller: controller,
                 key: Key('chapter-field-$idx'),
-                style: GoogleFonts.lato(color: Colors.white),
+                style: GoogleFonts.inter(
+                  color: textPrimary,
+                  fontSize: 14,
+                ),
                 decoration: InputDecoration(
                   labelText: 'Section ${idx + 1}',
-                  labelStyle: GoogleFonts.lato(color: secondaryColor),
+                  labelStyle: GoogleFonts.inter(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: primaryColor),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: primaryColor.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: secondaryColor),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: primaryColor, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: backgroundColor,
+                  contentPadding: const EdgeInsets.all(12),
+                  prefixIcon: Container(
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '${idx + 1}',
+                      style: GoogleFonts.inter(
+                        color: primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
                 validator: (value) => value?.isEmpty ?? true ? 'Please enter section title' : null,
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.remove_circle_outline, color: secondaryColor),
-              onPressed: () => _removeChapter(idx),
+            Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.remove_circle_outline, color: Colors.red, size: 20),
+                onPressed: () => _removeChapter(idx),
+              ),
             ),
           ],
         ),
@@ -547,86 +654,124 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: primaryColor.withOpacity(0.3)),
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
             boxShadow: [
               BoxShadow(
-                color: primaryColor.withOpacity(0.1),
+                color: Colors.black.withOpacity(0.04),
                 blurRadius: 8,
-                spreadRadius: 0,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: DropdownButtonFormField<String>(
             key: const Key('writing-style-dropdown'),
             value: _selectedStyle,
-            dropdownColor: Colors.grey[900],
-            style: GoogleFonts.lato(color: Colors.white),
+            dropdownColor: backgroundColor,
+            style: GoogleFonts.inter(color: textPrimary),
             decoration: InputDecoration(
               labelText: 'Academic Style',
-              labelStyle: GoogleFonts.lato(color: secondaryColor),
+              labelStyle: GoogleFonts.inter(
+                color: primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: primaryColor),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: primaryColor.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: secondaryColor),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: primaryColor, width: 2),
+              ),
+              filled: true,
+              fillColor: backgroundColor,
+              contentPadding: const EdgeInsets.all(16),
+              prefixIcon: Container(
+                margin: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.style,
+                  color: primaryColor,
+                  size: 16,
+                ),
               ),
             ),
             items: ['Academic', 'Technical', 'Analytical'].map((style) {
               return DropdownMenuItem(
-                  value: style,
-                  child: Text(style, style: GoogleFonts.lato(color: Colors.white))
+                value: style,
+                child: Text(style, style: GoogleFonts.inter(color: textPrimary)),
               );
             }).toList(),
             onChanged: (value) => setState(() => _selectedStyle = value!),
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: primaryColor.withOpacity(0.3)),
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
             boxShadow: [
               BoxShadow(
-                color: primaryColor.withOpacity(0.1),
+                color: Colors.black.withOpacity(0.04),
                 blurRadius: 8,
-                spreadRadius: 0,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: DropdownButtonFormField<String>(
             key: const Key('format-dropdown'),
             value: _selectedFormat,
-            dropdownColor: Colors.grey[900],
-            style: GoogleFonts.lato(color: Colors.white),
+            dropdownColor: backgroundColor,
+            style: GoogleFonts.inter(color: textPrimary),
             decoration: InputDecoration(
               labelText: 'Format',
-              labelStyle: GoogleFonts.lato(color: secondaryColor),
+              labelStyle: GoogleFonts.inter(
+                color: primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: primaryColor),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: primaryColor.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: secondaryColor),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: primaryColor, width: 2),
+              ),
+              filled: true,
+              fillColor: backgroundColor,
+              contentPadding: const EdgeInsets.all(16),
+              prefixIcon: Container(
+                margin: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.format_quote,
+                  color: primaryColor,
+                  size: 16,
+                ),
               ),
             ),
             items: ['APA', 'MLA', 'Chicago'].map((format) {
               return DropdownMenuItem(
-                  value: format,
-                  child: Text(format, style: GoogleFonts.lato(color: Colors.white))
+                value: format,
+                child: Text(format, style: GoogleFonts.inter(color: textPrimary)),
               );
             }).toList(),
             onChanged: (value) => setState(() => _selectedFormat = value!),
@@ -638,50 +783,48 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
 
   Widget _buildSubmitButton() {
     return Container(
-        decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-    gradient: buttonGradient,
-    boxShadow: [
-    BoxShadow(
-    color: primaryColor.withOpacity(0.3),
-    blurRadius: 12,
-    spreadRadius: -2,
-    ),
-    ],
-    ),
-    child: ElevatedButton(
-    onPressed: _submitForm,
-    style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.transparent,
-    shadowColor: Colors.transparent,
-    padding: EdgeInsets.symmetric(vertical: 16),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(16),
-    ),
-    ),
-    child: Text(
-      'Create Structure',
-    style: GoogleFonts.lato(
-    fontSize: 16,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    ),
-    ),
-    ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: buttonGradient,
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.3),
+            blurRadius: 12,
+            spreadRadius: -2,
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _submitForm,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          'Create Structure',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 
+  // ORIGINAL FUNCTIONALITY - UNCHANGED
   Future<void> _generateChapters() async {
     if (_topicController.text.isEmpty) return;
-
     final prefs = await SharedPreferences.getInstance();
     _generateClickCount = (prefs.getInt('generate_click_count') ?? 0) + 1;
     await prefs.setInt('generate_click_count', _generateClickCount);
-
     if (_generateClickCount == 2) {
       await _showCustomReviewDialog();
     }
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -689,13 +832,10 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
         initialMessage: 'Generating chapters',
       ),
     );
-
     try {
       final geminiService = ref.read(geminiServiceProvider);
       final suggestedChapters = await geminiService.suggestChapters(_topicController.text);
-
       Navigator.of(context).pop();
-
       setState(() {
         _chapterControllers = suggestedChapters
             .map((chapter) => TextEditingController(text: chapter))
@@ -704,7 +844,6 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
       });
     } catch (e) {
       Navigator.of(context).pop();
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to generate chapters: $e')),

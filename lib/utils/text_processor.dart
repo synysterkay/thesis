@@ -19,4 +19,3 @@ class TextProcessor {
     return processedLines.join('\n');
   }
 }
-

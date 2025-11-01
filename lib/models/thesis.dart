@@ -20,12 +20,32 @@ class Thesis {
   });
 
   factory Thesis.fromJson(Map<String, dynamic> json) {
+    List<Chapter> chaptersList = [];
+
+    // Handle both List and Map chapter structures
+    final chaptersData = json['chapters'];
+    if (chaptersData is List) {
+      // Old format: chapters is a List
+      chaptersList = chaptersData
+          .map((chapter) => Chapter.fromJson(chapter as Map<String, dynamic>))
+          .toList();
+    } else if (chaptersData is Map<String, dynamic>) {
+      // New format: chapters is a Map with numeric keys
+      final sortedKeys = chaptersData.keys
+          .where((key) => int.tryParse(key) != null)
+          .toList()
+        ..sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+
+      chaptersList = sortedKeys
+          .map((key) =>
+              Chapter.fromJson(chaptersData[key] as Map<String, dynamic>))
+          .toList();
+    }
+
     return Thesis(
       id: json['id'] as String,
       topic: json['topic'] as String,
-      chapters: (json['chapters'] as List)
-          .map((chapter) => Chapter.fromJson(chapter as Map<String, dynamic>))
-          .toList(),
+      chapters: chaptersList,
       writingStyle: json['writingStyle'] as String,
       targetLength: json['targetLength'] as int,
       format: json['format'] as String,
@@ -34,14 +54,14 @@ class Thesis {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'topic': topic,
-    'chapters': chapters.map((c) => c.toJson()).toList(),
-    'writingStyle': writingStyle,
-    'targetLength': targetLength,
-    'format': format,
-    'references': references,
-  };
+        'id': id,
+        'topic': topic,
+        'chapters': chapters.map((c) => c.toJson()).toList(),
+        'writingStyle': writingStyle,
+        'targetLength': targetLength,
+        'format': format,
+        'references': references,
+      };
 
   Thesis copyWith({
     String? id,

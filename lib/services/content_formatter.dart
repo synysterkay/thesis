@@ -11,7 +11,9 @@ class ContentFormatter {
 
   static void applyFigureCaption(QuillController controller) {
     final sizeAttribute = Attribute.fromKeyValue('size', '10.0');
-    controller.replaceText(controller.selection.baseOffset, 0, '\nFigure X: ', null);
-    controller.formatText(controller.selection.baseOffset - 10, 10, sizeAttribute);
+    controller.replaceText(
+        controller.selection.baseOffset, 0, '\nFigure X: ', null);
+    controller.formatText(
+        controller.selection.baseOffset - 10, 10, sizeAttribute);
   }
 }

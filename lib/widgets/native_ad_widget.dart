@@ -10,7 +10,8 @@ class NativeAdWidget extends StatefulWidget {
   State<NativeAdWidget> createState() => _NativeAdWidgetState();
 }
 
-class _NativeAdWidgetState extends State<NativeAdWidget> with SingleTickerProviderStateMixin {
+class _NativeAdWidgetState extends State<NativeAdWidget>
+    with SingleTickerProviderStateMixin {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
   late AnimationController _animationController;
@@ -38,7 +39,8 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with SingleTickerProvid
       vsync: this,
     )..repeat();
 
-    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(_animationController);
+    _animation =
+        Tween<double>(begin: -1.0, end: 2.0).animate(_animationController);
   }
 
   void _loadAd() {

@@ -12,7 +12,8 @@ abstract class BaseSubscriptionService {
   Future<List<ProductDetails>> getProducts();
 
   // Update this method signature to include the optional BuildContext parameter
-  Future<void> purchaseSubscription(ProductDetails product, [BuildContext? context]);
+  Future<void> purchaseSubscription(ProductDetails product,
+      [BuildContext? context]);
 
   Future<bool> isSubscribed();
 

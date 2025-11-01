@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/thesis.dart';  // Add this import
+import '../models/thesis.dart'; // Add this import
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -19,8 +19,7 @@ class FirestoreService {
         .doc(userId)
         .collection('theses')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => Thesis.fromJson(doc.data()))
-        .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Thesis.fromJson(doc.data())).toList());
   }
 }

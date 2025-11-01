@@ -11,12 +11,19 @@ class OnboardingScreen1 extends StatefulWidget {
   State<OnboardingScreen1> createState() => _OnboardingScreen1State();
 }
 
-class _OnboardingScreen1State extends State<OnboardingScreen1> with SingleTickerProviderStateMixin {
+class _OnboardingScreen1State extends State<OnboardingScreen1>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
-  // App colors
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
+  // Updated color scheme to match app design
+  static const primaryColor = Color(0xFF2563EB);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const textMuted = Color(0xFF64748B);
+  static const accentColor = Color(0xFF10B981);
 
   @override
   void initState() {
@@ -36,273 +43,279 @@ class _OnboardingScreen1State extends State<OnboardingScreen1> with SingleTicker
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black,
-              Colors.grey[900]!,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  Row(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border:
+                            Border.all(color: primaryColor.withOpacity(0.2)),
+                      ),
+                      child: Icon(
+                        Icons.auto_stories,
+                        color: primaryColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "AI Thesis Generator",
+                      style: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
+                const SizedBox(height: 40),
+                Text(
+                  "Humanized AI-Powered\nThesis Creation",
+                  style: GoogleFonts.inter(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: textPrimary,
+                    height: 1.2,
+                  ),
+                )
+                    .animate()
+                    .fadeIn(delay: const Duration(milliseconds: 300))
+                    .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
+                const SizedBox(height: 16),
+                Text(
+                  "Undetectable AI Excellence",
+                  style: GoogleFonts.inter(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: accentColor,
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+                    .animate()
+                    .fadeIn(delay: const Duration(milliseconds: 400))
+                    .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
+                const SizedBox(height: 24),
+                Text(
+                  "Generate professional academic theses with humanized AI content that's completely undetectable. Complete with charts, tables, and visual elements for maximum academic impact.",
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: textSecondary,
+                    height: 1.5,
+                  ),
+                ).animate().fadeIn(delay: const Duration(milliseconds: 500)),
+                const SizedBox(height: 40),
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.35,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.auto_stories,
-                          color: primaryColor,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "AI Thesis",
-                        style: GoogleFonts.lato(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor,
-                        ),
-                      ),
-                    ],
-                  ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
-                  const SizedBox(height: 40),
-                  Text(
-                    "AI-Powered Thesis Generator",
-                    style: GoogleFonts.lato(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ).animate()
-                      .fadeIn(delay: const Duration(milliseconds: 300))
-                      .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Academic Excellence",
-                    style: GoogleFonts.lato(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
-                      color: secondaryColor,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ).animate()
-                      .fadeIn(delay: const Duration(milliseconds: 400))
-                      .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
-                  const SizedBox(height: 24),
-                  Text(
-                    "We create personalized thesis content tailored to your subject, academic level, and research goals.",
-                    style: GoogleFonts.lato(
-                      fontSize: 16,
-                      color: Colors.grey[400],
-                      height: 1.5,
-                    ),
-                  ).animate().fadeIn(delay: const Duration(milliseconds: 500)),
-                  const SizedBox(height: 40),
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.35,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        ...List.generate(20, (index) {
-                          final size = 8.0 + (index % 3) * 4.0;
-                          return AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (context, child) {
-                              final value = (_animationController.value + (index / 20)) % 1.0;
-                              final x = math.sin(value * math.pi * 2) * 120;
-                              final y = math.cos(value * math.pi * 2) * 120;
+                      ...List.generate(15, (index) {
+                        final size = 6.0 + (index % 3) * 3.0;
+                        return AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (context, child) {
+                            final value =
+                                (_animationController.value + (index / 15)) %
+                                    1.0;
+                            final x = math.sin(value * math.pi * 2) * 100;
+                            final y = math.cos(value * math.pi * 2) * 100;
 
-                              return Positioned(
-                                left: MediaQuery.of(context).size.width / 2 - 24 + x,
-                                top: 100 + y,
-                                child: Container(
-                                  width: size,
-                                  height: size,
+                            return Positioned(
+                              left: MediaQuery.of(context).size.width / 2 -
+                                  24 +
+                                  x,
+                              top: 100 + y,
+                              child: Container(
+                                width: size,
+                                height: size,
+                                decoration: BoxDecoration(
+                                  color: Color.lerp(
+                                    primaryColor,
+                                    accentColor,
+                                    (index % 5) / 5,
+                                  )!
+                                      .withOpacity(0.3),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: backgroundColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: primaryColor.withOpacity(0.2),
+                                  width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primaryColor.withOpacity(0.15),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.psychology,
+                              color: primaryColor,
+                              size: 40,
+                            ),
+                          )
+                              .animate()
+                              .fadeIn(delay: const Duration(milliseconds: 600))
+                              .scale(
+                                begin: const Offset(0.5, 0.5),
+                                end: const Offset(1.0, 1.0),
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.elasticOut,
+                              ),
+                          const SizedBox(height: 20),
+                          ...[
+                            "Humanized Content",
+                            "Charts & Tables",
+                            "Undetectable AI"
+                          ]
+                              .map((feature) {
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: Color.lerp(
-                                      primaryColor,
-                                      secondaryColor,
-                                      (index % 5) / 5,
-                                    )!.withOpacity(0.6),
-                                    shape: BoxShape.circle,
+                                    color: surfaceColor,
+                                    borderRadius: BorderRadius.circular(30),
+                                    border: Border.all(color: borderColor),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: primaryColor.withOpacity(0.3),
+                                        color: primaryColor.withOpacity(0.08),
                                         blurRadius: 10,
-                                        spreadRadius: 2,
+                                        offset: const Offset(0, 4),
                                       ),
                                     ],
                                   ),
-                                ),
-                              );
-                            },
-                          );
-                        }),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: primaryColor.withOpacity(0.2),
-                                    blurRadius: 20,
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.psychology,
-                                color: primaryColor,
-                                size: 40,
-                              ),
-                            ).animate()
-                                .fadeIn(delay: const Duration(milliseconds: 600))
-                                .scale(
-                              begin: const Offset(0.5, 0.5),
-                              end: const Offset(1.0, 1.0),
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.elasticOut,
-                            ),
-                            const SizedBox(height: 20),
-                            ...["Professional", "Academic", "Customizable"].map((feature) {
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.6),
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primaryColor.withOpacity(0.2),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
+                                  child: Text(
+                                    feature,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: textPrimary,
                                     ),
-                                  ],
-                                ),
-                                child: Text(
-                                  feature,
-                                  style: GoogleFonts.lato(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
                                   ),
-                                ),
-                              );
-                            }).toList().animate(
-                              interval: 100.ms,
-                            ).fadeIn(
-                              delay: const Duration(milliseconds: 700),
-                            ).moveY(
-                              begin: 20,
-                              end: 0,
-                              delay: const Duration(milliseconds: 700),
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeOutQuad,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(3, (index) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        height: 10,
-                        width: index == 0 ? 24 : 10,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: index == 0
-                              ? primaryColor
-                              : Colors.grey[700],
-                        ),
-                      ).animate().fadeIn(
-                        delay: Duration(milliseconds: 900 + (index * 100)),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      gradient: LinearGradient(
-                        colors: [primaryColor, secondaryColor],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryColor.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const OnboardingScreen2(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.transparent,
-                        minimumSize: const Size(double.infinity, 56),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Continue",
-                            style: GoogleFonts.lato(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.arrow_forward,
-                            size: 20,
-                          ),
+                                );
+                              })
+                              .toList()
+                              .animate(
+                                interval: 100.ms,
+                              )
+                              .fadeIn(
+                                delay: const Duration(milliseconds: 700),
+                              )
+                              .moveY(
+                                begin: 20,
+                                end: 0,
+                                delay: const Duration(milliseconds: 700),
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeOutQuad,
+                              ),
                         ],
                       ),
-                    ),
-                  ).animate()
-                      .fadeIn(delay: const Duration(milliseconds: 1000))
-                      .shimmer(
-                    delay: const Duration(milliseconds: 1500),
-                    duration: const Duration(milliseconds: 1500),
+                    ],
                   ),
-                  const SizedBox(height: 32),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(3, (index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: 10,
+                      width: index == 0 ? 24 : 10,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: index == 0 ? primaryColor : borderColor,
+                      ),
+                    ).animate().fadeIn(
+                          delay: Duration(milliseconds: 900 + (index * 100)),
+                        );
+                  }),
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: LinearGradient(
+                      colors: [primaryColor, Color(0xFF1D4ED8)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const OnboardingScreen2(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Continue",
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.arrow_forward,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                    .animate()
+                    .fadeIn(delay: const Duration(milliseconds: 1000))
+                    .shimmer(
+                      delay: const Duration(milliseconds: 1500),
+                      duration: const Duration(milliseconds: 1500),
+                    ),
+                const SizedBox(height: 32),
+              ],
             ),
           ),
         ),

@@ -42,8 +42,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
     try {
       // Small delay to allow providers to initialize
-       await Future.delayed(const Duration(milliseconds: 100));
-      
+      await Future.delayed(const Duration(milliseconds: 100));
+
       if (!mounted) return;
 
       setState(() => _isCheckingAuth = false);
@@ -56,9 +56,9 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
   void _navigateToSignIn() {
     if (_hasNavigated || !mounted) return;
-    
+
     setState(() => _hasNavigated = true);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && context.mounted) {
         Navigator.of(context).pushReplacementNamed('/signin');
@@ -68,9 +68,9 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
   void _navigateToPaywall() {
     if (_hasNavigated || !mounted) return;
-    
+
     setState(() => _hasNavigated = true);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && context.mounted) {
         Navigator.of(context).pushReplacementNamed('/paywall');
@@ -102,7 +102,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                     height: 40,
                     child: CircularProgressIndicator(
                       strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
                     ),
                   ),
                   Container(
@@ -190,7 +191,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
@@ -276,7 +278,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                 onPressed: () async {
                   try {
                     final authService = ref.read(authServiceProvider);
-                    final subscriptionActions = ref.read(subscriptionActionsProvider);
+                    final subscriptionActions =
+                        ref.read(subscriptionActionsProvider);
 
                     await subscriptionActions.handleSignOut();
                     await authService.signOut();
@@ -287,9 +290,7 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                   } catch (e) {
                     if (mounted && context.mounted) {
                       AppErrorHandler.showErrorSnackBar(
-                        context, 
-                        'Sign out failed: ${e.toString()}'
-                      );
+                          context, 'Sign out failed: ${e.toString()}');
                     }
                   }
                 },
@@ -299,7 +300,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
                 icon: const Icon(Icons.logout),
                 label: const Text('Sign Out & Retry'),
@@ -356,14 +358,13 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
                 message: 'Failed to verify subscription: ${error.toString()}',
                 onRetry: () async {
                   try {
-                    final subscriptionActions = ref.read(subscriptionActionsProvider);
+                    final subscriptionActions =
+                        ref.read(subscriptionActionsProvider);
                     await subscriptionActions.refreshSubscriptionStatus();
                   } catch (e) {
                     if (mounted && context.mounted) {
                       AppErrorHandler.showErrorSnackBar(
-                        context, 
-                        'Refresh failed: ${e.toString()}'
-                      );
+                          context, 'Refresh failed: ${e.toString()}');
                     }
                   }
                 },
@@ -380,7 +381,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
               // User doesn't have active subscription
               if (!status.isActive) {
                 _navigateToPaywall();
-                return _buildLoadingScreen(message: 'Redirecting to subscription...');
+                return _buildLoadingScreen(
+                    message: 'Redirecting to subscription...');
               }
 
               // All checks passed - show protected content
@@ -419,7 +421,7 @@ class SubscriptionProtectedRoute extends ProtectedRoute {
 mixin RouteGuardMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   bool get requiresAuth => true;
   bool get requiresSubscription => false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -521,7 +523,8 @@ class RouteProtection {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
                 child: Text(actionLabel),
               ),
@@ -532,4 +535,3 @@ class RouteProtection {
     );
   }
 }
-

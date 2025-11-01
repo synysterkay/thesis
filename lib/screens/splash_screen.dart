@@ -22,11 +22,11 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       // Add a small delay for splash effect
       await Future.delayed(const Duration(seconds: 1));
-      
+
       // Check if first time user (web-safe)
       final prefs = await SharedPreferences.getInstance();
       final isFirstTime = prefs.getBool('first_time') ?? true;
-      
+
       if (mounted) {
         if (isFirstTime) {
           // For web, skip onboarding and go directly to thesis form
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
               // Fallback for unsupported platforms
               isIOS = false;
             }
-            
+
             if (isIOS) {
               Navigator.pushReplacementNamed(context, '/onboarding1');
             } else {
@@ -96,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // App Title
             const Text(
               'Thesis Generator',
@@ -107,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Subtitle
             const Text(
               'AI-Powered Academic Writing',
@@ -117,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 48),
-            
+
             // Loading Indicator
             const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9D4EDD)),

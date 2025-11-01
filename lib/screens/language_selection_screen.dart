@@ -20,10 +20,12 @@ class LanguageSelectionScreen extends ConsumerStatefulWidget {
   const LanguageSelectionScreen({super.key});
 
   @override
-  ConsumerState<LanguageSelectionScreen> createState() => _LanguageSelectionScreenState();
+  ConsumerState<LanguageSelectionScreen> createState() =>
+      _LanguageSelectionScreenState();
 }
 
-class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScreen> {
+class _LanguageSelectionScreenState
+    extends ConsumerState<LanguageSelectionScreen> {
   bool _isSubscribed = false;
   bool get _shouldShowAds => !kIsWeb && !Platform.isIOS && !_isSubscribed;
 
@@ -104,7 +106,8 @@ class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScree
             child: IconButton(
               icon: Icon(
                 Icons.check,
-                color: Colors.white.withOpacity(selectedIndex != null ? 1 : 0.6),
+                color:
+                    Colors.white.withOpacity(selectedIndex != null ? 1 : 0.6),
               ),
               onPressed: selectedIndex != null ? _onLanguageConfirmed : null,
             ),
@@ -143,7 +146,8 @@ class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScree
             trailing: Radio(
               value: index,
               groupValue: selectedIndex,
-              onChanged: (value) => setState(() => selectedIndex = value as int),
+              onChanged: (value) =>
+                  setState(() => selectedIndex = value as int),
               activeColor: secondaryColor,
             ),
           ),
@@ -158,7 +162,9 @@ class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScree
         final selectedLanguage = languages[selectedIndex!];
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('language_code', selectedLanguage.code);
-        ref.read(localeProvider.notifier).setLocale(selectedLanguage.code.split('_')[0]);
+        ref
+            .read(localeProvider.notifier)
+            .setLocale(selectedLanguage.code.split('_')[0]);
         await PlatformLanguageService.setLanguage(selectedLanguage.code);
         final isSubscribed = prefs.getBool('isSubscribed') ?? false;
 
@@ -182,5 +188,4 @@ class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScree
       }
     }
   }
-
 }

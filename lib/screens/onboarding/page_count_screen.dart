@@ -16,9 +16,14 @@ class _PageCountScreenState extends State<PageCountScreen> {
   final FocusNode _pageFocusNode = FocusNode();
   bool _isInputValid = false;
 
-  // App colors
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
+  // Updated color scheme to match app design
+  static const primaryColor = Color(0xFF2563EB);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const accentColor = Color(0xFF10B981);
 
   // Predefined page count options
   final List<int> _quickPageOptions = [10, 20, 30, 50, 100];
@@ -97,7 +102,9 @@ class _PageCountScreenState extends State<PageCountScreen> {
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.left,
-                      ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
+                      )
+                          .animate()
+                          .fadeIn(delay: const Duration(milliseconds: 200)),
 
                       const SizedBox(height: 16),
 
@@ -109,7 +116,9 @@ class _PageCountScreenState extends State<PageCountScreen> {
                           color: Colors.grey[400],
                         ),
                         textAlign: TextAlign.left,
-                      ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
+                      )
+                          .animate()
+                          .fadeIn(delay: const Duration(milliseconds: 300)),
 
                       const SizedBox(height: 50),
 
@@ -135,13 +144,15 @@ class _PageCountScreenState extends State<PageCountScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
-                            ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
+                            ).animate().fadeIn(
+                                delay: const Duration(milliseconds: 400)),
 
                             const SizedBox(height: 12),
 
                             // Custom page input field
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 5),
                               decoration: BoxDecoration(
                                 color: Colors.grey[900],
                                 borderRadius: BorderRadius.circular(16),
@@ -194,7 +205,8 @@ class _PageCountScreenState extends State<PageCountScreen> {
                                   ),
                                 ],
                               ),
-                            ).animate().fadeIn(delay: const Duration(milliseconds: 500)),
+                            ).animate().fadeIn(
+                                delay: const Duration(milliseconds: 500)),
                           ],
                         ),
                       ),
@@ -210,7 +222,9 @@ class _PageCountScreenState extends State<PageCountScreen> {
                           fontStyle: FontStyle.italic,
                         ),
                         textAlign: TextAlign.center,
-                      ).animate().fadeIn(delay: const Duration(milliseconds: 800)),
+                      )
+                          .animate()
+                          .fadeIn(delay: const Duration(milliseconds: 800)),
 
                       const SizedBox(height: 24),
                     ],
@@ -225,28 +239,31 @@ class _PageCountScreenState extends State<PageCountScreen> {
                           borderRadius: BorderRadius.circular(28),
                           gradient: LinearGradient(
                             colors: _isInputValid
-                                ? [primaryColor, secondaryColor]
+                                ? [primaryColor, Color(0xFF1D4ED8)]
                                 : [Colors.grey[700]!, Colors.grey[800]!],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          boxShadow: _isInputValid ? [
-                            BoxShadow(
-                              color: primaryColor.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ] : [],
+                          boxShadow: _isInputValid
+                              ? [
+                                  BoxShadow(
+                                    color: primaryColor.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                              : [],
                         ),
                         child: ElevatedButton(
                           onPressed: _isInputValid
                               ? () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const ProcessingScreen(),
-                              ),
-                            );
-                          }
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProcessingScreen(),
+                                    ),
+                                  );
+                                }
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
@@ -267,7 +284,9 @@ class _PageCountScreenState extends State<PageCountScreen> {
                             ),
                           ),
                         ),
-                      ).animate().fadeIn(delay: const Duration(milliseconds: 900)),
+                      )
+                          .animate()
+                          .fadeIn(delay: const Duration(milliseconds: 900)),
 
                       const SizedBox(height: 32),
                     ],
@@ -280,6 +299,4 @@ class _PageCountScreenState extends State<PageCountScreen> {
       ),
     );
   }
-
 }
-

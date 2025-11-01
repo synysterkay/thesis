@@ -5,7 +5,6 @@ import 'dart:io' show Platform;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 
-
 class RatingDialog extends StatefulWidget {
   final VoidCallback onDismiss;
 
@@ -33,12 +32,7 @@ class _RatingDialogState extends State<RatingDialog> {
 
     // Close the dialog
     Navigator.pop(context);
-
-
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +95,8 @@ class _RatingDialogState extends State<RatingDialog> {
                   onPressed: _rating > 0 ? () => _handleRating(_rating) : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: secondaryColor,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                   child: Text(
                     'Submit',

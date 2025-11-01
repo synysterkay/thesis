@@ -18,10 +18,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get smartContent => 'स्मार्ट सामग्री निर्माण';
 
   @override
-  String get onboardDescription2 => 'स्वचालित रूप से सुव्यवस्थित अध्याय और सामग्री तैयार करें';
+  String get onboardDescription2 =>
+      'स्वचालित रूप से सुव्यवस्थित अध्याय और सामग्री तैयार करें';
 
   @override
-  String get onboardDescription3 => 'अपनी थीसिस को पेशेवर PDF प्रारूप में निर्यात करें';
+  String get onboardDescription3 =>
+      'अपनी थीसिस को पेशेवर PDF प्रारूप में निर्यात करें';
 
   @override
   String get easyExport => 'PDF में आसान निर्यात';
@@ -42,7 +44,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unsavedChanges => 'असुरक्षित परिवर्तन';
 
   @override
-  String get saveChangesQuestion => 'क्या आप अपने परिवर्तनों को सहेजना चाहते हैं?';
+  String get saveChangesQuestion =>
+      'क्या आप अपने परिवर्तनों को सहेजना चाहते हैं?';
 
   @override
   String get discard => 'छोड़ें';
@@ -81,7 +84,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get exportAsPdf => 'PDF के रूप में निर्यात करें';
 
   @override
-  String get exportDescription => 'आपकी थीसिस PDF फ़ाइल के रूप में निर्यात की जाएगी और डाउनलोड फ़ोल्डर में सहेजी जाएगी।';
+  String get exportDescription =>
+      'आपकी थीसिस PDF फ़ाइल के रूप में निर्यात की जाएगी और डाउनलोड फ़ोल्डर में सहेजी जाएगी।';
 
   @override
   String pdfSavedToDownloads(String path) {
@@ -103,10 +107,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get generateAll => 'सभी उत्पन्न करें';
 
   @override
-  String get pleaseCompleteAllSections => 'निर्यात करने से पहले कृपया सभी खंड पूरे करें';
+  String get pleaseCompleteAllSections =>
+      'निर्यात करने से पहले कृपया सभी खंड पूरे करें';
 
   @override
-  String get generatedSuccessfully => 'सफलतापूर्वक उत्पन्न! निर्यात करने के लिए PDF पर क्लिक करें';
+  String get generatedSuccessfully =>
+      'सफलतापूर्वक उत्पन्न! निर्यात करने के लिए PDF पर क्लिक करें';
 
   @override
   String errorGeneratingContent(Object error) {
@@ -131,10 +137,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get loadingMessage4 => 'आपके शोध ढांचे को व्यवस्थित कर रहे हैं...';
 
   @override
-  String get loadingMessage5 => 'आपकी थीसिस के लिए एक मजबूत आधार बना रहे हैं...';
+  String get loadingMessage5 =>
+      'आपकी थीसिस के लिए एक मजबूत आधार बना रहे हैं...';
 
   @override
-  String get loadingMessage6 => 'बस थोड़ी देर और, आपकी रूपरेखा को अंतिम रूप दे रहे हैं...';
+  String get loadingMessage6 =>
+      'बस थोड़ी देर और, आपकी रूपरेखा को अंतिम रूप दे रहे हैं...';
 
   @override
   String get createThesis => 'थीसिस बनाएं';
@@ -188,7 +196,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get generatingContent => 'सामग्री उत्पन्न हो रही है...';
 
   @override
-  String get pleaseCompleteAllChapters => 'कृपया सभी अध्यायों के शीर्षक पूरे करें';
+  String get pleaseCompleteAllChapters =>
+      'कृपया सभी अध्यायों के शीर्षक पूरे करें';
 
   @override
   String get requiredChaptersMissing => 'परिचय और निष्कर्ष अध्याय आवश्यक हैं';

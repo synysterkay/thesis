@@ -13,41 +13,46 @@ class AcademicLevelScreen extends StatefulWidget {
 class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
   String? selectedLevel;
 
-  // App colors
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
+  // Updated color scheme to match app design
+  static const primaryColor = Color(0xFF2563EB);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const accentColor = Color(0xFF10B981);
 
   final List<AcademicOption> academicOptions = [
     AcademicOption(
       title: "Undergraduate",
       icon: Icons.school_outlined,
-      color: Color(0xFF42A5F5),
-      description: "Bachelor's level thesis or research paper",
+      color: Color(0xFF2563EB),
+      description: "Bachelor's level with humanized AI content & visuals",
     ),
     AcademicOption(
       title: "Master's",
       icon: Icons.school,
-      color: Color(0xFFE91E63),
-      description: "Advanced research with deeper analysis",
+      color: Color(0xFFEC4899),
+      description: "Advanced research with charts, tables & data analysis",
     ),
     AcademicOption(
       title: "Doctoral",
       icon: Icons.psychology,
-      color: Color(0xFF66BB6A),
-      description: "PhD level with original research contribution",
+      color: Color(0xFF10B981),
+      description: "PhD level with comprehensive visuals & undetectable AI",
     ),
     AcademicOption(
       title: "Research Paper",
       icon: Icons.article,
-      color: Color(0xFFFFCA28),
-      description: "Academic paper for publication or coursework",
+      color: Color(0xFFF59E0B),
+      description: "Academic paper with professional formatting & graphs",
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -99,28 +104,30 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
                   borderRadius: BorderRadius.circular(28),
                   gradient: LinearGradient(
                     colors: selectedLevel != null
-                        ? [primaryColor, secondaryColor]
+                        ? [primaryColor, Color(0xFF1D4ED8)]
                         : [Colors.grey[700]!, Colors.grey[800]!],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  boxShadow: selectedLevel != null ? [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ] : [],
+                  boxShadow: selectedLevel != null
+                      ? [
+                          BoxShadow(
+                            color: primaryColor.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: ElevatedButton(
                   onPressed: selectedLevel != null
                       ? () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const PageCountScreen(),
-                      ),
-                    );
-                  }
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const PageCountScreen(),
+                            ),
+                          );
+                        }
                       : null, // Button disabled if no option selected
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
@@ -166,26 +173,27 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: isSelected
               ? [
-            BoxShadow(
-              color: option.color.withOpacity(0.3),
-              blurRadius: 8,
-              offset: Offset(0, 4),
-              spreadRadius: 1,
-            )
-          ]
+                  BoxShadow(
+                    color: option.color.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                    spreadRadius: 1,
+                  )
+                ]
               : [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            )
-          ],
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  )
+                ],
         ),
         child: AnimatedContainer(
           duration: Duration(milliseconds: 300),
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isSelected ? option.color.withOpacity(0.2) : Colors.grey[900],
+            color:
+                isSelected ? option.color.withOpacity(0.2) : Colors.grey[900],
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected ? option.color : Colors.grey[800]!,
@@ -250,25 +258,28 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
                 ),
                 child: isSelected
                     ? Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 16,
-                )
+                        Icons.check,
+                        color: Colors.white,
+                        size: 16,
+                      )
                     : null,
               ),
             ],
           ),
         ),
-      ).animate().fadeIn(
-        delay: Duration(milliseconds: 400 + (index * 100)),
-        duration: Duration(milliseconds: 400),
-      ).slideY(
-        begin: 0.2,
-        end: 0,
-        delay: Duration(milliseconds: 400 + (index * 100)),
-        duration: Duration(milliseconds: 400),
-        curve: Curves.easeOutQuad,
-      ),
+      )
+          .animate()
+          .fadeIn(
+            delay: Duration(milliseconds: 400 + (index * 100)),
+            duration: Duration(milliseconds: 400),
+          )
+          .slideY(
+            begin: 0.2,
+            end: 0,
+            delay: Duration(milliseconds: 400 + (index * 100)),
+            duration: Duration(milliseconds: 400),
+            curve: Curves.easeOutQuad,
+          ),
     );
   }
 }

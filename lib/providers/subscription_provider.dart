@@ -99,7 +99,7 @@ class SubscriptionService {
   }
 
   String getSubscriptionUrl() {
-    return _stripeService.getPaymentLink('monthly');
+    return _stripeService.getPaymentLink('pro');
   }
 }
 
@@ -113,28 +113,34 @@ class SubscriptionActions {
     await _stripeService.refreshSubscriptionStatus();
   }
 
-  /// Get weekly payment link
-  String getWeeklyPaymentLink() {
-    return _stripeService.getPaymentLinkWithTracking('weekly');
+  /// Get pro payment link
+  String getProPaymentLink() {
+    return _stripeService.getPaymentLinkWithTracking('pro');
   }
 
-  /// Get monthly payment link
+  /// Get monthly payment link (alias for pro)
   String getMonthlyPaymentLink() {
-    return _stripeService.getPaymentLinkWithTracking('monthly');
+    return _stripeService.getPaymentLinkWithTracking('pro');
   }
 
-  Future<String> createWeeklySubscription() async {
+  /// Get weekly payment link (alias for pro)
+  String getWeeklyPaymentLink() {
+    return _stripeService.getPaymentLinkWithTracking('pro');
+  }
+
+  Future<String> createProSubscription() async {
     try {
       // Option 1: Use checkout session (requires Stripe Extension setup)
       return await _stripeService.createCheckoutSession(
-        priceId: StripeService.weeklyPriceId,
-        successUrl: '${Uri.base.origin}/thesis-form?session_id={CHECKOUT_SESSION_ID}',
+        priceId: StripeService.proPriceId,
+        successUrl:
+            '${Uri.base.origin}/thesis-form?session_id={CHECKOUT_SESSION_ID}',
         cancelUrl: '${Uri.base.origin}/paywall',
       );
     } catch (e) {
       print('❌ Checkout session failed, falling back to payment link: $e');
       // Option 2: Fallback to payment link
-      return getWeeklyPaymentLink();
+      return getProPaymentLink();
     }
   }
 
@@ -142,19 +148,21 @@ class SubscriptionActions {
     try {
       // Option 1: Use checkout session (requires Stripe Extension setup)
       return await _stripeService.createCheckoutSession(
-        priceId: StripeService.monthlyPriceId,
-        successUrl: '${Uri.base.origin}/thesis-form?session_id={CHECKOUT_SESSION_ID}',
+        priceId: StripeService.proPriceId,
+        successUrl:
+            '${Uri.base.origin}/thesis-form?session_id={CHECKOUT_SESSION_ID}',
         cancelUrl: '${Uri.base.origin}/paywall',
       );
     } catch (e) {
       print('❌ Checkout session failed, falling back to payment link: $e');
       // Option 2: Fallback to payment link
-      return getMonthlyPaymentLink();
+      return getProPaymentLink();
     }
   }
 
   Future<String> getCustomerPortalUrl() async {
-    return await _stripeService.getCustomerPortalUrl('${Uri.base.origin}/paywall');
+    return await _stripeService
+        .getCustomerPortalUrl('${Uri.base.origin}/paywall');
   }
 
   Future<void> handleSignOut() async {
@@ -167,7 +175,7 @@ class SubscriptionActions {
   }
 
   String getSubscriptionUrl() {
-    return _stripeService.getPaymentLink('monthly');
+    return _stripeService.getPaymentLink('pro');
   }
 
   /// Debug method to check subscription setup

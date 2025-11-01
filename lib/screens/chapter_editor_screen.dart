@@ -56,7 +56,13 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
         : '${widget.initialContent}\n';
 
     _controller = QuillController.basic();
-    _controller.document = Document.fromJson([{"insert": content}]);
+    // Set document with black text color to ensure visibility on white background
+    _controller.document = Document.fromJson([
+      {
+        "insert": content,
+        "attributes": {"color": "#000000"}
+      }
+    ]);
 
     _controller.changes.listen((event) {
       setState(() => _isDirty = true);
@@ -117,9 +123,9 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
           ),
           _isDirty
               ? IconButton(
-            icon: Icon(Icons.save, color: primaryColor),
-            onPressed: _saveContent,
-          ).animate().fadeIn()
+                  icon: Icon(Icons.save, color: primaryColor),
+                  onPressed: _saveContent,
+                ).animate().fadeIn()
               : SizedBox.shrink(),
         ],
       ),
@@ -188,18 +194,28 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
                   ),
                 ],
               ),
-              child: QuillEditor(
-                controller: _controller,
-                focusNode: _focusNode,
-                scrollController: _scrollController,
-                config: QuillEditorConfig(
-                  autoFocus: false,
-                  padding: EdgeInsets.all(16),
-                  showCursor: true,
-                  enableInteractiveSelection: true,
-                  expands: false,
-                  scrollable: true,
-                  placeholder: 'Begin your practice here...',
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  textTheme: Theme.of(context).textTheme.copyWith(
+                        bodyMedium: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                ),
+                child: QuillEditor(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  scrollController: _scrollController,
+                  config: QuillEditorConfig(
+                    autoFocus: false,
+                    padding: EdgeInsets.all(16),
+                    showCursor: true,
+                    enableInteractiveSelection: true,
+                    expands: false,
+                    scrollable: true,
+                    placeholder: 'Begin your practice here...',
+                  ),
                 ),
               ),
             ),
@@ -375,9 +391,9 @@ class _ChapterEditorScreenState extends ConsumerState<ChapterEditorScreen> {
   void _saveContent() {
     final plainText = _controller.document.toPlainText();
     ref.read(thesisStateProvider.notifier).updateChapter(
-      widget.chapterIndex,
-      plainText,
-    );
+          widget.chapterIndex,
+          plainText,
+        );
     setState(() => _isDirty = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

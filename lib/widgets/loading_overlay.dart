@@ -15,7 +15,8 @@ class LoadingOverlay extends StatefulWidget {
   _LoadingOverlayState createState() => _LoadingOverlayState();
 }
 
-class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProviderStateMixin {
+class _LoadingOverlayState extends State<LoadingOverlay>
+    with SingleTickerProviderStateMixin {
   late String _message;
   int _dots = 0;
   int _tipIndex = 0;
@@ -122,7 +123,8 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
                   ),
                 ),
                 textAlign: TextAlign.center,
-              ).animate()
+              )
+                  .animate()
                   .fadeIn(duration: 300.ms)
                   .then(delay: 200.ms)
                   .slide(begin: Offset(0, 0.2), duration: 400.ms),
@@ -154,7 +156,8 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
               _buildStylishProgressIndicator(),
             ],
           ),
-        ).animate()
+        )
+            .animate()
             .scale(duration: 400.ms, curve: Curves.easeOutBack)
             .fadeIn(duration: 300.ms),
       ),
@@ -173,7 +176,8 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
             shape: BoxShape.circle,
             color: primaryColor.withOpacity(0.1),
           ),
-        ).animate(controller: _pulseController)
+        )
+            .animate(controller: _pulseController)
             .scale(begin: Offset(0.9, 0.9), end: Offset(1.1, 1.1)),
 
         // Spinner
@@ -213,17 +217,17 @@ class _LoadingOverlayState extends State<LoadingOverlay> with SingleTickerProvid
               width: 8,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: primaryColor.withOpacity(
-                    _dots % 5 == index ? 1.0 : 0.3
-                ),
+                color: primaryColor.withOpacity(_dots % 5 == index ? 1.0 : 0.3),
               ),
-            ).animate(
-              target: _dots % 5 == index ? 1 : 0,
-            ).scale(
-              begin: Offset(1, 1),
-              end: Offset(1.3, 1.3),
-              duration: 300.ms,
-            );
+            )
+                .animate(
+                  target: _dots % 5 == index ? 1 : 0,
+                )
+                .scale(
+                  begin: Offset(1, 1),
+                  end: Offset(1.3, 1.3),
+                  duration: 300.ms,
+                );
           }),
         ),
 
@@ -280,7 +284,8 @@ class ShimmerEffect extends StatefulWidget {
   _ShimmerEffectState createState() => _ShimmerEffectState();
 }
 
-class _ShimmerEffectState extends State<ShimmerEffect> with SingleTickerProviderStateMixin {
+class _ShimmerEffectState extends State<ShimmerEffect>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 

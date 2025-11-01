@@ -56,7 +56,8 @@ class ThesisFormattingToolbar extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.subtitles),
                 tooltip: 'Subheading Style',
-                onPressed: () => ThesisFormatting.applySubheadingStyle(controller),
+                onPressed: () =>
+                    ThesisFormatting.applySubheadingStyle(controller),
               ),
               IconButton(
                 icon: const Icon(Icons.table_chart),
@@ -71,7 +72,8 @@ class ThesisFormattingToolbar extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.image),
                 tooltip: 'Figure Caption',
-                onPressed: () => ContentFormatter.applyFigureCaption(controller),
+                onPressed: () =>
+                    ContentFormatter.applyFigureCaption(controller),
               ),
             ],
           ),

@@ -46,12 +46,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       if (user != null && mounted) {
         Navigator.of(context).pushReplacementNamed('/initialization');
-        
+
         if (mounted) {
-          AppErrorHandler.showSuccessSnackBar(
-              context,
-              _isSignIn ? 'Welcome back!' : 'Account created successfully!'
-          );
+          AppErrorHandler.showSuccessSnackBar(context,
+              _isSignIn ? 'Welcome back!' : 'Account created successfully!');
         }
       }
     } catch (e) {
@@ -67,7 +65,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   Future<void> _handleGoogleSignIn() async {
     if (_isLoading) return;
-    
+
     setState(() => _isLoading = true);
 
     try {
@@ -76,7 +74,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       if (user != null && mounted) {
         Navigator.of(context).pushReplacementNamed('/initialization');
-        
+
         if (mounted) {
           AppErrorHandler.showSuccessSnackBar(context, 'Welcome!');
         }
@@ -94,7 +92,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   Future<void> _handleForgotPassword() async {
     if (_emailController.text.trim().isEmpty) {
-      AppErrorHandler.showErrorSnackBar(context, 'Please enter your email address');
+      AppErrorHandler.showErrorSnackBar(
+          context, 'Please enter your email address');
       return;
     }
 
@@ -104,9 +103,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       if (mounted) {
         AppErrorHandler.showSuccessSnackBar(
-            context,
-            'Password reset email sent! Check your inbox.'
-        );
+            context, 'Password reset email sent! Check your inbox.');
       }
     } catch (e) {
       if (mounted) {
@@ -149,7 +146,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       children: [
                         // Hero Badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
                             color: const Color(0xFFEFF6FF),
                             borderRadius: BorderRadius.circular(50),
@@ -198,14 +196,15 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             ],
                           ),
                           child: Icon(
-                            PhosphorIcons.graduationCap(PhosphorIconsStyle.regular),
+                            PhosphorIcons.graduationCap(
+                                PhosphorIconsStyle.regular),
                             size: 40,
                             color: Colors.white,
                           ),
                         ),
 
                         const SizedBox(height: 24),
-                        
+
                         // Title
                         Text(
                           'Thesis Generator & AI Essay Writer',
@@ -219,7 +218,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),
-                        
+
                         // Subtitle
                         Text(
                           'Generate complete, professionally written theses and AI-generated essays in minutes',
@@ -256,7 +255,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           color: const Color(0xFF4285F4),
                         ),
                         label: Text(
-                          _isSignIn ? 'Continue with Google' : 'Sign up with Google',
+                          _isSignIn
+                              ? 'Continue with Google'
+                              : 'Sign up with Google',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -271,7 +272,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     // Divider
                     Row(
                       children: [
-                        Expanded(child: Divider(color: const Color(0xFFE2E8F0))),
+                        Expanded(
+                            child: Divider(color: const Color(0xFFE2E8F0))),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Text(
@@ -283,7 +285,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             ),
                           ),
                         ),
-                        Expanded(child: Divider(color: const Color(0xFFE2E8F0))),
+                        Expanded(
+                            child: Divider(color: const Color(0xFFE2E8F0))),
                       ],
                     ),
 
@@ -302,28 +305,37 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             child: GestureDetector(
                               onTap: () => setState(() => _isSignIn = true),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 decoration: BoxDecoration(
-                                                              gradient: _isSignIn 
+                                  gradient: _isSignIn
                                       ? const LinearGradient(
-                                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                                          colors: [
+                                            Color(0xFF2563EB),
+                                            Color(0xFF1D4ED8)
+                                          ],
                                         )
                                       : null,
                                   borderRadius: BorderRadius.circular(16),
-                                  boxShadow: _isSignIn ? [
-                                    BoxShadow(
-                                      color: const Color(0xFF2563EB).withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ] : null,
+                                  boxShadow: _isSignIn
+                                      ? [
+                                          BoxShadow(
+                                            color: const Color(0xFF2563EB)
+                                                .withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
                                 ),
                                 child: Text(
                                   'Sign In',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
-                                    color: _isSignIn ? Colors.white : const Color(0xFF6B7280),
+                                    color: _isSignIn
+                                        ? Colors.white
+                                        : const Color(0xFF6B7280),
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -334,28 +346,37 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             child: GestureDetector(
                               onTap: () => setState(() => _isSignIn = false),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 decoration: BoxDecoration(
-                                  gradient: !_isSignIn 
+                                  gradient: !_isSignIn
                                       ? const LinearGradient(
-                                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                                          colors: [
+                                            Color(0xFF2563EB),
+                                            Color(0xFF1D4ED8)
+                                          ],
                                         )
                                       : null,
                                   borderRadius: BorderRadius.circular(16),
-                                  boxShadow: !_isSignIn ? [
-                                    BoxShadow(
-                                      color: const Color(0xFF2563EB).withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ] : null,
+                                  boxShadow: !_isSignIn
+                                      ? [
+                                          BoxShadow(
+                                            color: const Color(0xFF2563EB)
+                                                .withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
                                 ),
                                 child: Text(
                                   'Sign Up',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
-                                    color: !_isSignIn ? Colors.white : const Color(0xFF6B7280),
+                                    color: !_isSignIn
+                                        ? Colors.white
+                                        : const Color(0xFF6B7280),
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -385,7 +406,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               labelText: 'Email Address',
                               hintText: 'Enter your email',
                               prefixIcon: Icon(
-                                PhosphorIcons.envelope(PhosphorIconsStyle.regular),
+                                PhosphorIcons.envelope(
+                                    PhosphorIconsStyle.regular),
                                 color: const Color(0xFF6B7280),
                                 size: 20,
                               ),
@@ -393,35 +415,42 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               fillColor: const Color(0xFFF8FAFC),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFFE2E8F0)),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFFE2E8F0)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFF2563EB), width: 2),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFDC2626)),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFFDC2626)),
                               ),
-                              labelStyle: const TextStyle(color: Color(0xFF6B7280)),
-                              hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+                              labelStyle:
+                                  const TextStyle(color: Color(0xFF6B7280)),
+                              hintStyle:
+                                  const TextStyle(color: Color(0xFF9CA3AF)),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter your email';
                               }
-                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                  .hasMatch(value)) {
                                 return 'Please enter a valid email';
                               }
                               return null;
                             },
                           ),
                           const SizedBox(height: 20),
-                          
+
                           // Password field
                           TextFormField(
                             controller: _passwordController,
@@ -440,34 +469,43 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword 
-                                      ? PhosphorIcons.eye(PhosphorIconsStyle.regular)
-                                      : PhosphorIcons.eyeSlash(PhosphorIconsStyle.regular),
+                                  _obscurePassword
+                                      ? PhosphorIcons.eye(
+                                          PhosphorIconsStyle.regular)
+                                      : PhosphorIcons.eyeSlash(
+                                          PhosphorIconsStyle.regular),
                                   color: const Color(0xFF6B7280),
                                   size: 20,
                                 ),
-                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword),
                               ),
                               filled: true,
                               fillColor: const Color(0xFFF8FAFC),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFFE2E8F0)),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFFE2E8F0)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFF2563EB), width: 2),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFDC2626)),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFFDC2626)),
                               ),
-                              labelStyle: const TextStyle(color: Color(0xFF6B7280)),
-                              hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+                              labelStyle:
+                                  const TextStyle(color: Color(0xFF6B7280)),
+                              hintStyle:
+                                  const TextStyle(color: Color(0xFF9CA3AF)),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -499,7 +537,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ).copyWith(
-                          backgroundColor: MaterialStateProperty.resolveWith((states) {
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith((states) {
                             if (states.contains(MaterialState.disabled)) {
                               return const Color(0xFFE5E7EB);
                             }
@@ -508,20 +547,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ),
                         child: _isLoading
                             ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : Text(
-                          _isSignIn ? 'Sign In to AI Essay Writer' : 'Create AI Essay Writer Account',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                                _isSignIn
+                                    ? 'Sign In to AI Essay Writer'
+                                    : 'Create AI Essay Writer Account',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
 
@@ -582,10 +623,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             runSpacing: 16,
                             alignment: WrapAlignment.center,
                             children: [
-                              _buildFeatureItem(PhosphorIcons.robot(PhosphorIconsStyle.regular), 'AI Essay Generator'),
-                              _buildFeatureItem(PhosphorIcons.book(PhosphorIconsStyle.regular), 'Thesis Statement Generator'),
-                              _buildFeatureItem(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'Instant AI Written Essays'),
-                              _buildFeatureItem(PhosphorIcons.shield(PhosphorIconsStyle.regular), 'Secure & Private'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.robot(
+                                      PhosphorIconsStyle.regular),
+                                  'AI Essay Generator'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.book(
+                                      PhosphorIconsStyle.regular),
+                                  'Thesis Statement Generator'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.lightning(
+                                      PhosphorIconsStyle.regular),
+                                  'Instant AI Written Essays'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.shield(
+                                      PhosphorIconsStyle.regular),
+                                  'Secure & Private'),
                             ],
                           ),
                         ],
@@ -634,4 +687,3 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     );
   }
 }
-

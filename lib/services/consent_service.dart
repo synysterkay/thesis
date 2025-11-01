@@ -6,28 +6,28 @@ class ConsentService {
 
     ConsentInformation.instance.requestConsentInfoUpdate(
       params,
-          () async {
+      () async {
         var status = await ConsentInformation.instance.getConsentStatus();
         if (status == ConsentStatus.required) {
           loadForm();
         }
       },
-          (error) => print('Consent info request error: ${error.message}'),
+      (error) => print('Consent info request error: ${error.message}'),
     );
   }
 
   void loadForm() {
     ConsentForm.loadConsentForm(
-          (ConsentForm consentForm) async {
+      (ConsentForm consentForm) async {
         consentForm.show(
-              (FormError? formError) {
+          (FormError? formError) {
             if (formError != null) {
               loadForm();
             }
           },
         );
       },
-          (error) => print('Error loading consent form: ${error.message}'),
+      (error) => print('Error loading consent form: ${error.message}'),
     );
   }
 }

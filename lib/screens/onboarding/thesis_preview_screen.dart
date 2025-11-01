@@ -6,253 +6,285 @@ import 'thesis_details_screen.dart';
 class ThesisPreviewScreen extends StatelessWidget {
   const ThesisPreviewScreen({Key? key}) : super(key: key);
 
-  // App colors
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
+  // Modern color scheme for conversion-focused design
+  static const primaryColor = Color(0xFF2563EB);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF64748B);
+  static const accentColor = Color(0xFF10B981);
+  static const warningColor = Color(0xFFEF4444);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black,
-              Color(0xFF1A1A1A),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 40),
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
 
-                // Headline
-                Text(
-                  "Your Thesis Will Be Ready",
-                  style: GoogleFonts.lato(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
-
-                const SizedBox(height: 16),
-
-                // Subheadline
-                Text(
-                  "Academic Excellence Awaits",
-                  style: GoogleFonts.lato(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: primaryColor,
-                  ),
-                ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
-
-                const SizedBox(height: 24),
-
-                // Copy text
-                Text(
-                  "We will create a comprehensive, well-structured thesis that meets academic standards and showcases your research topic effectively.",
-                  style: GoogleFonts.lato(
-                    fontSize: 16,
-                    color: Colors.grey[400],
-                    height: 1.5,
-                  ),
-                ).animate().fadeIn(delay: const Duration(milliseconds: 600)),
-
-                const SizedBox(height: 40),
-
-                // Thesis preview cards
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _buildThesisSection(
-                          "Structured Framework",
-                          "Clear introduction, methodology, results, and conclusion sections",
-                          Icons.view_agenda,
-                          Colors.blue,
-                          0,
-                        ),
-
-                        _buildThesisSection(
-                          "Research Integration",
-                          "Seamlessly incorporates relevant academic sources and citations",
-                          Icons.search,
-                          primaryColor,
-                          1,
-                        ),
-
-                        _buildThesisSection(
-                          "Academic Language",
-                          "Professional scholarly tone appropriate for your academic level",
-                          Icons.spellcheck,
-                          Colors.green,
-                          2,
-                        ),
-
-                        _buildThesisSection(
-                          "Original Content",
-                          "100% unique content that passes plagiarism checks",
-                          Icons.verified_user,
-                          Colors.amber,
-                          3,
-                        ),
-                      ],
-                    ),
-                  ),
+              // Compelling headline
+              Text(
+                "Your AI Thesis is Ready\nto Impress Professors",
+                style: GoogleFonts.inter(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: textPrimary,
+                  height: 1.2,
                 ),
+              ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
 
-                // CTA Button
-                Container(
-                  margin: const EdgeInsets.only(bottom: 32),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    gradient: LinearGradient(
-                      colors: [primaryColor, secondaryColor],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              const SizedBox(height: 16),
+
+              // Value proposition
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      accentColor.withOpacity(0.1),
+                      primaryColor.withOpacity(0.1)
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accentColor.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.verified, color: accentColor, size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "100% Undetectable AI • Professional Charts & Tables",
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: accentColor,
+                        ),
+                      ),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryColor.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                  ],
+                ),
+              ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
+
+              const SizedBox(height: 32),
+
+              // What you get preview
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "What You Get:",
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildFeatureCard(
+                        icon: Icons.auto_graph,
+                        title: "Professional Data Visualization",
+                        description:
+                            "Charts, graphs, and tables that make your research stand out",
+                        color: primaryColor,
+                        delay: 600,
+                      ),
+                      _buildFeatureCard(
+                        icon: Icons.psychology,
+                        title: "Humanized AI Writing",
+                        description:
+                            "Undetectable by any AI detection software - guaranteed",
+                        color: accentColor,
+                        delay: 800,
+                      ),
+                      _buildFeatureCard(
+                        icon: Icons.school,
+                        title: "Academic Excellence",
+                        description:
+                            "Perfect citations, formatting, and scholarly tone",
+                        color: Color(0xFF8B5CF6),
+                        delay: 1000,
+                      ),
+                      _buildFeatureCard(
+                        icon: Icons.speed,
+                        title: "Instant Generation",
+                        description:
+                            "Complete thesis ready in minutes, not months",
+                        color: warningColor,
+                        delay: 1200,
                       ),
                     ],
                   ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ThesisDetailsScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
+                ),
+              ),
+
+              // Urgency + CTA
+              Container(
+                margin: const EdgeInsets.only(bottom: 32),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: warningColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border:
+                            Border.all(color: warningColor.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.access_time,
+                              color: warningColor, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Limited Time: Start Your Thesis Now",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: warningColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(28),
+                        gradient: LinearGradient(
+                          colors: [primaryColor, Color(0xFF1D4ED8)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ThesisDetailsScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          shadowColor: Colors.transparent,
+                          minimumSize: const Size(double.infinity, 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Create My Humanized Thesis",
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.arrow_forward, size: 20),
+                          ],
+                        ),
                       ),
                     ),
-                    child: Text(
-                      "Let's get Started",
-                      style: GoogleFonts.lato(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ).animate().fadeIn(delay: const Duration(milliseconds: 1200)),
-              ],
-            ),
+                  ],
+                ),
+              ).animate().fadeIn(delay: const Duration(milliseconds: 1400)),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildThesisSection(String title, String description, IconData icon, Color color, int index) {
+  Widget _buildFeatureCard({
+    required IconData icon,
+    required String title,
+    required String description,
+    required Color color,
+    required int delay,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            // Decorative side accent
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(
-                width: 6,
-                color: color,
-              ),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-
-            // Card content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 20, 20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Icon
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: color,
-                      size: 28,
-                    ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textPrimary,
                   ),
-
-                  const SizedBox(width: 16),
-
-                  // Text content
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: GoogleFonts.lato(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          description,
-                          style: GoogleFonts.lato(
-                            fontSize: 14,
-                            color: Colors.grey[400],
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: textSecondary,
+                    height: 1.4,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ).animate().fadeIn(
-      delay: Duration(milliseconds: 800 + (index * 100)),
-      duration: const Duration(milliseconds: 400),
-    ).slideY(
-      begin: 0.2,
-      end: 0,
-      delay: Duration(milliseconds: 800 + (index * 100)),
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutQuad,
-    );
+    ).animate().fadeIn(delay: Duration(milliseconds: delay)).slideX(
+          begin: 0.3,
+          end: 0,
+          delay: Duration(milliseconds: delay),
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutQuad,
+        );
   }
 }

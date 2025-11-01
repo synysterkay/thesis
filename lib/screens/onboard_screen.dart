@@ -19,13 +19,17 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
-  static const hoverColor = Color(0xFFB5179E);
+  // Updated color scheme to match app design
+  static const primaryColor = Color(0xFF2563EB);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
+  static const accentColor = Color(0xFF10B981);
   late List<Map<String, String>> pages;
 
   final Gradient buttonGradient = const LinearGradient(
-    colors: [Color(0xFF9D4EDD), Color(0xFFFF48B0)],
+    colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -35,18 +39,21 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
     super.didChangeDependencies();
     pages = [
       {
-        'title': 'Academic Writing Assistant',
-        'description': 'Create professional academic thesis with AI assistance',
+        'title': 'Humanized AI Academic Writing',
+        'description':
+            'Create undetectable AI-powered thesis with professional charts and tables',
         'image': 'assets/onboard1.jpg',
       },
       {
-        'title': 'Smart Learning Framework',
-        'description': 'Generate well-structured chapters and content automatically',
+        'title': 'Visual Data Excellence',
+        'description':
+            'Generate well-structured content with comprehensive charts, graphs, and visual data',
         'image': 'assets/onboard2.jpg',
       },
       {
-        'title': 'Easy Export In PDF',
-        'description': 'Export your thesis in professional PDF format',
+        'title': 'Professional PDF Export',
+        'description':
+            'Export your humanized thesis with charts & tables in professional PDF format',
         'image': 'assets/onboard3.jpg',
       },
     ];
@@ -73,63 +80,65 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.grey[900]!],
-          ),
-        ),
-        child: SafeArea(
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: pages.length,
-            onPageChanged: (int page) {
-              setState(() => _currentPage = page);
-            },
-            itemBuilder: (context, index) => _buildPage(pages[index]),
-          ),
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: pages.length,
+          onPageChanged: (int page) {
+            setState(() => _currentPage = page);
+          },
+          itemBuilder: (context, index) => _buildPage(pages[index]),
         ),
       ),
     );
   }
 
   Widget _buildPage(Map<String, String> page) {
-
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
               Text(
                 page['title']!,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                style: GoogleFonts.inter(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ).animate().fadeIn(),
               const SizedBox(height: 16),
+              Text(
+                page['description']!,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  color: textSecondary,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ).animate().fadeIn(delay: 100.ms),
+              const SizedBox(height: 32),
               Container(
                 width: 320,
                 height: 240,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
+                  color: surfaceColor,
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withOpacity(0.08),
                       blurRadius: 20,
-                      offset: const Offset(0, 10),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
                   child: Image.asset(page['image']!, fit: BoxFit.cover),
                 ),
               ).animate().fadeIn().scale(),
@@ -140,7 +149,7 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
                   Row(
                     children: List.generate(
                       pages.length,
-                          (index) => Container(
+                      (index) => Container(
                         margin: const EdgeInsets.only(right: 8),
                         height: 8,
                         width: _currentPage == index ? 24 : 8,
@@ -149,41 +158,48 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
                           gradient: _currentPage == index
                               ? buttonGradient
                               : LinearGradient(
-                            colors: [Colors.grey[800]!, Colors.grey[800]!],
-                          ),
+                                  colors: [
+                                    const Color(0xFFCBD5E1),
+                                    const Color(0xFFCBD5E1)
+                                  ],
+                                ),
                         ),
                       ),
                     ),
                   ),
-                  TextButton(
-                      onPressed: _currentPage == pages.length - 1
-                          ? _finishOnboarding
-                          : () {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: _currentPage == pages.length - 1
-                          ? ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return buttonGradient.createShader(bounds);
+                  ElevatedButton(
+                    onPressed: _currentPage == pages.length - 1
+                        ? _finishOnboarding
+                        : () {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                            );
                           },
-                          child: Text(
-                            'Start Learning',
-                            style: GoogleFonts.notoSans(
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          )
-                      )
-                          : Text(
-                        'Next',
-                        style: GoogleFonts.notoSans(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: buttonGradient,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      child: Text(
+                        _currentPage == pages.length - 1
+                            ? 'Start Creating'
+                            : 'Next',
+                        style: GoogleFonts.inter(
                           fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
-                      )
+                      ),
+                    ),
                   ),
                 ],
               ),

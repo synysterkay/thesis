@@ -16,7 +16,8 @@ class AndroidSubscriptionDialog extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _AndroidSubscriptionDialogState createState() => _AndroidSubscriptionDialogState();
+  _AndroidSubscriptionDialogState createState() =>
+      _AndroidSubscriptionDialogState();
 }
 
 class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
@@ -240,24 +241,34 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTermItem('Thesis Generator Premium offers unlimited thesis generation, advanced writing styles, and priority support'),
-              _buildTermItem('Monthly subscription provides 30 days of premium access for ${_getMonthlyPrice()}'),
-              _buildTermItem('Yearly subscription provides 365 days of premium access for ${_getYearlyPrice()}'),
-              _buildTermItem('Payment will be charged to your Google Play account at confirmation of purchase'),
-              _buildTermItem('Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period'),
-              _buildTermItem('Account will be charged for renewal within 24 hours prior to the end of the current period'),
-              _buildTermItem('You can manage and cancel your subscriptions by going to your account settings on the Google Play Store'),
-              _buildTermItem('Any unused portion of a free trial period will be forfeited when purchasing a subscription'),
+              _buildTermItem(
+                  'Thesis Generator Premium offers unlimited thesis generation, advanced writing styles, and priority support'),
+              _buildTermItem(
+                  'Monthly subscription provides 30 days of premium access for ${_getMonthlyPrice()}'),
+              _buildTermItem(
+                  'Yearly subscription provides 365 days of premium access for ${_getYearlyPrice()}'),
+              _buildTermItem(
+                  'Payment will be charged to your Google Play account at confirmation of purchase'),
+              _buildTermItem(
+                  'Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period'),
+              _buildTermItem(
+                  'Account will be charged for renewal within 24 hours prior to the end of the current period'),
+              _buildTermItem(
+                  'You can manage and cancel your subscriptions by going to your account settings on the Google Play Store'),
+              _buildTermItem(
+                  'Any unused portion of a free trial period will be forfeited when purchasing a subscription'),
               SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildLinkButton('Privacy Policy', 'https://sites.google.com/view/thesis-generator'),
+                  _buildLinkButton('Privacy Policy',
+                      'https://sites.google.com/view/thesis-generator'),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
                     child: Text('•', style: TextStyle(color: Colors.white60)),
                   ),
-                  _buildLinkButton('Terms of Use', 'https://sites.google.com/view/thesis-generator'),
+                  _buildLinkButton('Terms of Use',
+                      'https://sites.google.com/view/thesis-generator'),
                 ],
               ),
             ],
@@ -370,11 +381,11 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
     }
 
     final monthlyProduct = widget.products.firstWhere(
-          (product) => product.id == StoreProducts.monthlySubAndroid,
+      (product) => product.id == StoreProducts.monthlySubAndroid,
     );
 
     final yearlyProduct = widget.products.firstWhere(
-          (product) => product.id == StoreProducts.yearlySubAndroid,
+      (product) => product.id == StoreProducts.yearlySubAndroid,
     );
 
     return Container(
@@ -385,14 +396,16 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
             child: _buildSubscriptionOption(
               monthlyProduct,
               'Monthly',
-              isSelected: _selectedSubscriptionType == StoreProducts.monthlySubAndroid,
+              isSelected:
+                  _selectedSubscriptionType == StoreProducts.monthlySubAndroid,
             ),
           ),
           Expanded(
             child: _buildSubscriptionOption(
               yearlyProduct,
               'Yearly',
-              isSelected: _selectedSubscriptionType == StoreProducts.yearlySubAndroid,
+              isSelected:
+                  _selectedSubscriptionType == StoreProducts.yearlySubAndroid,
               isBestValue: true,
             ),
           ),
@@ -402,11 +415,11 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
   }
 
   Widget _buildSubscriptionOption(
-      ProductDetails product,
-      String period, {
-        required bool isSelected,
-        bool isBestValue = false,
-      }) {
+    ProductDetails product,
+    String period, {
+    required bool isSelected,
+    bool isBestValue = false,
+  }) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
@@ -416,86 +429,88 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
           color: Color(0xFFFF48B0),
           width: 2,
         ),
-        boxShadow: isSelected ? [
-          BoxShadow(
-            color: Color(0xFFFF48B0).withOpacity(0.3),
-            blurRadius: 8,
-            spreadRadius: 2,
-          )
-        ] : [],
+        boxShadow: isSelected
+            ? [
+                BoxShadow(
+                  color: Color(0xFFFF48B0).withOpacity(0.3),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                )
+              ]
+            : [],
       ),
       child: Stack(
-          children: [
+        children: [
           if (isBestValue)
-      Positioned(
-      top: 0,
-      right: 0,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.amber,
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(10),
-            bottomLeft: Radius.circular(10),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.amber,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'BEST VALUE',
+                  style: GoogleFonts.urbanist(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          InkWell(
+            onTap: () => setState(() {
+              _selectedSubscriptionType = product.id;
+            }),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Text(
+                    period,
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '${product.price}',
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    period == 'Monthly' ? '30 days access' : '365 days access',
+                    style: GoogleFonts.urbanist(
+                      color: isSelected ? Colors.white70 : Colors.white54,
+                      fontSize: 12,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    _getSavingsText(product),
+                    style: GoogleFonts.urbanist(
+                      color: isSelected ? Colors.white : Color(0xFFFF48B0),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: Text(
-          'BEST VALUE',
-          style: GoogleFonts.urbanist(
-            color: Colors.black,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    ),
-    InkWell(
-    onTap: () => setState(() {
-    _selectedSubscriptionType = product.id;
-    }),
-    child: Padding(
-    padding: EdgeInsets.all(16),
-    child: Column(
-    children: [
-    Text(
-    period,
-    style: GoogleFonts.urbanist(
-    color: Colors.white,
-    fontSize: 18,
-    fontWeight: FontWeight.bold,
-    ),
-    ),
-    SizedBox(height: 4),
-      Text(
-        '${product.price}',
-        style: GoogleFonts.urbanist(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      SizedBox(height: 4),
-      Text(
-        period == 'Monthly' ? '30 days access' : '365 days access',
-        style: GoogleFonts.urbanist(
-          color: isSelected ? Colors.white70 : Colors.white54,
-          fontSize: 12,
-        ),
-      ),
-      SizedBox(height: 4),
-      Text(
-        _getSavingsText(product),
-        style: GoogleFonts.urbanist(
-          color: isSelected ? Colors.white : Color(0xFFFF48B0),
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    ],
-    ),
-    ),
-    ),
-          ],
+        ],
       ),
     );
   }
@@ -519,7 +534,9 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
         } catch (e) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Unable to process subscription. Please try again.')),
+            SnackBar(
+                content:
+                    Text('Unable to process subscription. Please try again.')),
           );
         }
       },
@@ -562,7 +579,7 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
   String _getMonthlyPrice() {
     try {
       final monthlyProduct = widget.products.firstWhere(
-            (product) => product.id == StoreProducts.monthlySubAndroid,
+        (product) => product.id == StoreProducts.monthlySubAndroid,
       );
       return monthlyProduct.price;
     } catch (e) {
@@ -573,7 +590,7 @@ class _AndroidSubscriptionDialogState extends State<AndroidSubscriptionDialog> {
   String _getYearlyPrice() {
     try {
       final yearlyProduct = widget.products.firstWhere(
-            (product) => product.id == StoreProducts.yearlySubAndroid,
+        (product) => product.id == StoreProducts.yearlySubAndroid,
       );
       return yearlyProduct.price;
     } catch (e) {

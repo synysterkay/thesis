@@ -20,8 +20,8 @@ import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:appsflyer_sdk/appsflyer_sdk.dart';
 import 'providers/analytics_provider.dart';
 import 'services/navigation_service.dart';
-import 'services/gemini_service.dart';
-import 'providers/gemini_provider.dart';
+import 'services/deepseek_service.dart';
+import 'providers/deepseek_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -32,7 +32,8 @@ class InitializationException implements Exception {
   final dynamic originalError;
   InitializationException(this.message, this.originalError);
   @override
-  String toString() => 'InitializationException: $message\nOriginal error: $originalError';
+  String toString() =>
+      'InitializationException: $message\nOriginal error: $originalError';
 }
 
 late FirebaseAnalytics analytics;
@@ -51,8 +52,7 @@ Future<void> initializeAppsFlyer() async {
     await appsflyerSdk.initSdk(
         registerConversionDataCallback: true,
         registerOnAppOpenAttributionCallback: true,
-        registerOnDeepLinkingCallback: true
-    );
+        registerOnDeepLinkingCallback: true);
     print("✅ AppsFlyer SDK initialized successfully");
     appsflyerSdk.onInstallConversionData((res) {
       print("📊 Conversion data: $res");
@@ -111,7 +111,9 @@ Future<void> _initializeHiveBox() async {
           await Hive.openBox(boxName);
           return;
         } catch (finalError) {
-          throw InitializationException('Failed to initialize Hive storage after multiple attempts', finalError);
+          throw InitializationException(
+              'Failed to initialize Hive storage after multiple attempts',
+              finalError);
         }
       }
       await Future.delayed(const Duration(seconds: 1));
@@ -129,7 +131,9 @@ Future<void> initializeServices() async {
     final savedLanguage = prefs.getString('language_code');
     if (savedLanguage != null) {
       final container = ProviderContainer();
-      container.read(localeProvider.notifier).setLocale(savedLanguage.split('_')[0]);
+      container
+          .read(localeProvider.notifier)
+          .setLocale(savedLanguage.split('_')[0]);
     }
 
     print('✅ Core services initialized successfully');
@@ -148,17 +152,17 @@ Future<void> initializeAds() async {
     final params = ConsentRequestParameters();
     ConsentInformation.instance.requestConsentInfoUpdate(
       params,
-          () async {
+      () async {
         if (await ConsentInformation.instance.isConsentFormAvailable()) {
           ConsentForm.loadConsentForm(
-                (ConsentForm consentForm) async {
+            (ConsentForm consentForm) async {
               consentForm.show((FormError? formError) {});
             },
-                (error) => print('Consent form error: $error'),
+            (error) => print('Consent form error: $error'),
           );
         }
       },
-          (error) => print('Consent info update error: $error'),
+      (error) => print('Consent info update error: $error'),
     );
 
     MobileAds.instance.updateRequestConfiguration(
@@ -204,10 +208,11 @@ void main() {
 
     if (!kIsWeb) {
       try {
-        // Initialize GeminiService
-        final geminiService = GeminiService();
-        await geminiService.initializeRemoteConfig();
-        overrides.add(geminiServiceProvider.overrideWithValue(geminiService));
+        // Initialize DeepSeekService
+        final deepseekService = DeepSeekService();
+        await deepseekService.initializeRemoteConfig();
+        overrides
+            .add(deepseekServiceProvider.overrideWithValue(deepseekService));
 
         // Initialize Firebase Analytics
         analytics = FirebaseAnalytics.instance;

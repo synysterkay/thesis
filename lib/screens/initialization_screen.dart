@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
-import '../app.dart';
 
 class InitializationScreen extends ConsumerStatefulWidget {
   const InitializationScreen({super.key});
 
   @override
-  ConsumerState<InitializationScreen> createState() => _InitializationScreenState();
+  ConsumerState<InitializationScreen> createState() =>
+      _InitializationScreenState();
 }
 
 class _InitializationScreenState extends ConsumerState<InitializationScreen>
@@ -44,7 +43,6 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     'Finalizing AI essay writer setup'
   ];
 
-  int _messageIndex = 0;
   bool _hasNavigated = false;
 
   @override
@@ -116,10 +114,12 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     try {
       // Step 1: Initial setup
       await Future.delayed(const Duration(milliseconds: 800));
+      if (!mounted || _hasNavigated) return;
       _updateMessage(1);
 
       // Step 2: Check authentication
       await Future.delayed(const Duration(milliseconds: 1000));
+      if (!mounted || _hasNavigated) return;
       final authState = ref.read(authStateProvider);
 
       await authState.when(
@@ -205,10 +205,17 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
         },
       );
     } catch (e) {
+      print('❌ Initialization error: $e');
       if (mounted && !_hasNavigated) {
         _hasNavigated = true;
         if (context.mounted) {
-          AppErrorHandler.showErrorSnackBar(context, 'Initialization failed: ${e.toString()}');
+          // Use a simpler error display
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Initialization failed. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
         await _navigateToScreen('/signin');
       }
@@ -216,9 +223,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
   }
 
   void _updateMessage(int index) {
-    if (mounted && index < _loadingMessages.length) {
+    if (mounted && index < _loadingMessages.length && !_hasNavigated) {
       setState(() {
-        _messageIndex = index;
         _currentMessage = _loadingMessages[index];
         _currentTip = _loadingTips[index];
       });
@@ -247,7 +253,7 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final isDesktop = screenWidth > 768;
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: AnimatedBuilder(
@@ -280,17 +286,20 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                         children: [
                           // Hero Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: const Color(0xFFEFF6FF),
                               borderRadius: BorderRadius.circular(50),
-                              border: Border.all(color: const Color(0xFFDBEAFE)),
+                              border:
+                                  Border.all(color: const Color(0xFFDBEAFE)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  PhosphorIcons.robot(PhosphorIconsStyle.regular),
+                                  PhosphorIcons.robot(
+                                      PhosphorIconsStyle.regular),
                                   size: 16,
                                   color: const Color(0xFF2563EB),
                                 ),
@@ -325,7 +334,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                                         borderRadius: BorderRadius.circular(30),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(0xFF2563EB).withOpacity(0.3),
+                                            color: const Color(0xFF2563EB)
+                                                .withOpacity(0.3),
                                             blurRadius: 20,
                                             spreadRadius: 0,
                                             offset: const Offset(0, 10),
@@ -337,13 +347,17 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                                         child: Container(
                                           decoration: const BoxDecoration(
                                             gradient: LinearGradient(
-                                              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                                              colors: [
+                                                Color(0xFF2563EB),
+                                                Color(0xFF1D4ED8)
+                                              ],
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight,
                                             ),
                                           ),
                                           child: Icon(
-                                            PhosphorIcons.graduationCap(PhosphorIconsStyle.regular),
+                                            PhosphorIcons.graduationCap(
+                                                PhosphorIconsStyle.regular),
                                             size: 60,
                                             color: Colors.white,
                                           ),
@@ -393,10 +407,22 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                             runSpacing: 16,
                             alignment: WrapAlignment.center,
                             children: [
-                              _buildFeatureItem(PhosphorIcons.robot(PhosphorIconsStyle.regular), 'AI Essay Generator'),
-                              _buildFeatureItem(PhosphorIcons.book(PhosphorIconsStyle.regular), 'Thesis Statement Generator'),
-                              _buildFeatureItem(PhosphorIcons.pencil(PhosphorIconsStyle.regular), 'Paper Writer AI'),
-                              _buildFeatureItem(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'AI Write Essay Instantly'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.robot(
+                                      PhosphorIconsStyle.regular),
+                                  'AI Essay Generator'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.book(
+                                      PhosphorIconsStyle.regular),
+                                  'Thesis Statement Generator'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.pencil(
+                                      PhosphorIconsStyle.regular),
+                                  'Paper Writer AI'),
+                              _buildFeatureItem(
+                                  PhosphorIcons.lightning(
+                                      PhosphorIconsStyle.regular),
+                                  'AI Write Essay Instantly'),
                             ],
                           ),
 
@@ -409,7 +435,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                             decoration: BoxDecoration(
                               color: const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border:
+                                  Border.all(color: const Color(0xFFE2E8F0)),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.05),
@@ -427,7 +454,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                                   height: 50,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 3,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF2563EB)),
                                   ),
                                 ),
                                 // Center icon
@@ -446,7 +474,7 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                           const SizedBox(height: 32),
 
                           // Loading text with animation
-                                                  AnimatedSwitcher(
+                          AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             child: Text(
                               _currentMessage,
@@ -469,7 +497,8 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                             decoration: BoxDecoration(
                               color: const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border:
+                                  Border.all(color: const Color(0xFFE2E8F0)),
                             ),
                             child: AnimatedBuilder(
                               animation: _progressValue,
@@ -480,7 +509,10 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                                   child: Container(
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
-                                        colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                                        colors: [
+                                          Color(0xFF2563EB),
+                                          Color(0xFF1D4ED8)
+                                        ],
                                       ),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
@@ -515,17 +547,30 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
                             decoration: BoxDecoration(
                               color: const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border:
+                                  Border.all(color: const Color(0xFFE2E8F0)),
                             ),
                             child: Wrap(
                               spacing: isDesktop ? 32 : 16,
                               runSpacing: 16,
                               alignment: WrapAlignment.center,
                               children: [
-                                _buildTrustItem(PhosphorIcons.shield(PhosphorIconsStyle.regular), 'Secure AI Essay Writer'),
-                                _buildTrustItem(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'Instant AI Written Essays'),
-                                _buildTrustItem(PhosphorIcons.graduationCap(PhosphorIconsStyle.regular), 'Academic Quality'),
-                                _buildTrustItem(PhosphorIcons.checkCircle(PhosphorIconsStyle.regular), '7-Day Guarantee'),
+                                _buildTrustItem(
+                                    PhosphorIcons.shield(
+                                        PhosphorIconsStyle.regular),
+                                    'Secure AI Essay Writer'),
+                                _buildTrustItem(
+                                    PhosphorIcons.lightning(
+                                        PhosphorIconsStyle.regular),
+                                    'Instant AI Written Essays'),
+                                _buildTrustItem(
+                                    PhosphorIcons.graduationCap(
+                                        PhosphorIconsStyle.regular),
+                                    'Academic Quality'),
+                                _buildTrustItem(
+                                    PhosphorIcons.checkCircle(
+                                        PhosphorIconsStyle.regular),
+                                    '7-Day Guarantee'),
                               ],
                             ),
                           ),
@@ -597,4 +642,3 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
     );
   }
 }
-

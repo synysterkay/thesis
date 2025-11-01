@@ -11,4 +11,4 @@ class LocaleNotifier extends StateNotifier<Locale> {
   void setLocale(String languageCode) {
     state = Locale(languageCode);
   }
-} 
+}

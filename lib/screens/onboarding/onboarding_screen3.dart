@@ -1,377 +1,380 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'subject_selection_screen.dart';
-import 'dart:math' as math;
+import 'thesis_preview_screen.dart';
 
-class OnboardingScreen3 extends StatefulWidget {
+class OnboardingScreen3 extends StatelessWidget {
   const OnboardingScreen3({Key? key}) : super(key: key);
 
-  @override
-  State<OnboardingScreen3> createState() => _OnboardingScreen3State();
-}
-
-class _OnboardingScreen3State extends State<OnboardingScreen3> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-
-  // App colors
-  static const primaryColor = Color(0xFF9D4EDD);
-  static const secondaryColor = Color(0xFFFF48B0);
-
-  final List<Map<String, dynamic>> _academicFormats = [
-    {'icon': Icons.format_list_numbered, 'text': 'APA Format', 'color': Colors.blue},
-    {'icon': Icons.format_quote, 'text': 'MLA Style', 'color': Colors.green},
-    {'icon': Icons.menu_book, 'text': 'Chicago Style', 'color': Colors.orange},
-    {'icon': Icons.school, 'text': 'Harvard Style', 'color': Colors.purple},
-    {'icon': Icons.description, 'text': 'IEEE Format', 'color': Colors.red},
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
+  // Modern conversion-focused color scheme
+  static const primaryColor = Color(0xFF2563EB);
+  static const backgroundColor = Color(0xFFFFFFFF);
+  static const surfaceColor = Color(0xFFF8FAFC);
+  static const borderColor = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF64748B);
+  static const accentColor = Color(0xFF10B981);
+  static const warningColor = Color(0xFFEF4444);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-        decoration: BoxDecoration(
-        gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-        Colors.black,
-        Colors.grey[900]!,
-        ],
-    ),
-    ),
-    child: SafeArea(
-    child: SingleChildScrollView(
-    child: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    const SizedBox(height: 30),
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
 
-    Text(
-    "Perfect Thesis for",
-    style: GoogleFonts.lato(
-    fontSize: 36,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-    ),
-    ).animate()
-        .fadeIn(delay: const Duration(milliseconds: 300))
-        .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
+              // Progress indicator
+              Row(
+                children: [
+                  _buildProgressDot(true),
+                  _buildProgressLine(true),
+                  _buildProgressDot(true),
+                  _buildProgressLine(true),
+                  _buildProgressDot(true),
+                ],
+              ),
+              
+              const SizedBox(height: 40),
 
-    const SizedBox(height: 8),
-
-    Text(
-    "Every Academic Need",
-    style: GoogleFonts.lato(
-    fontSize: 32,
-    fontWeight: FontWeight.w600,
-    color: secondaryColor,
-    fontStyle: FontStyle.italic,
-    ),
-    ).animate()
-        .fadeIn(delay: const Duration(milliseconds: 400))
-        .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
-
-    const SizedBox(height: 20),
-
-    Text(
-    "Whether it's a bachelor's thesis, master's dissertation, or doctoral research, we've got formats and structures that match your academic requirements.",
-    style: GoogleFonts.lato(
-    fontSize: 16,
-    color: Colors.grey[400],
-    height: 1.5,
-    ),
-    ).animate().fadeIn(delay: const Duration(milliseconds: 500)),
-
-    const SizedBox(height: 30),
-
-    Container(
-    height: MediaQuery.of(context).size.height * 0.4,
-    child: Stack(
-    alignment: Alignment.center,
-    children: [
-    ...List.generate(20, (index) {
-    final size = 8.0 + (index % 4) * 4.0;
-    final isSquare = index % 3 == 0;
-
-    return AnimatedBuilder(
-    animation: _animationController,
-    builder: (context, child) {
-    final value = (_animationController.value + (index / 30)) % 1.0;
-    final fallSpeed = 0.3 + (index % 5) * 0.1;
-    final swayAmount = 50.0 + (index % 3) * 20.0;
-
-    final x = MediaQuery.of(context).size.width / 2 - 150 +
-    (index % 10) * 30.0 +
-        math.sin(value * math.pi * 2) * swayAmount;
-
-    final y = -50 + value * 400 * fallSpeed;
-
-    final angle = value * math.pi * (index % 4);
-
-    return Positioned(
-      left: x,
-      top: y,
-      child: Transform.rotate(
-        angle: angle,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: [
-              primaryColor,
-              secondaryColor,
-              Colors.blue,
-              Colors.purple,
-              Colors.indigo,
-              Colors.teal,
-              Colors.pink,
-            ][index % 7].withOpacity(0.7),
-            shape: isSquare ? BoxShape.rectangle : BoxShape.circle,
-            borderRadius: isSquare ? BorderRadius.circular(2) : null,
-          ),
-        ),
-      ),
-    );
-    },
-    );
-    }),
-
-      Container(
-        width: 280,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: primaryColor.withOpacity(0.3),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.2),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(
-                  Icons.format_align_left,
-                  color: primaryColor,
-                  size: 24,
+              // Final compelling headline
+              Text(
+                "Your Academic Success\nStarts Here",
+                style: GoogleFonts.inter(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: textPrimary,
+                  height: 1.2,
                 ),
-                Text(
-                  "Citation Formats",
-                  style: GoogleFonts.lato(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                Icon(
-                  Icons.more_vert,
-                  color: Colors.grey.shade600,
-                  size: 24,
-                ),
-              ],
-            ),
+              ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            ...List.generate(_academicFormats.length > 3 ? 3 : _academicFormats.length, (index) {
-              final format = _academicFormats[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              // Urgency message
+              Container(
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: format['color'].withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: format['color'].withOpacity(0.3),
-                    width: 1,
+                  gradient: LinearGradient(
+                    colors: [warningColor.withOpacity(0.1), primaryColor.withOpacity(0.1)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: warningColor.withOpacity(0.3)),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    Icon(
-                      format['icon'],
-                      color: format['color'],
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      format['text'],
-                      style: GoogleFonts.lato(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: format['color'].withOpacity(0.5),
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: format['color'].withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                    Row(
+                      children: [
+                        Icon(Icons.access_time, color: warningColor, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Limited Time Offer",
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: warningColor,
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        "Supported",
-                        style: GoogleFonts.lato(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: format['color'],
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Join thousands of students who've already transformed their academic performance",
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: textSecondary,
+                        height: 1.4,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
-              ).animate()
-                  .fadeIn(delay: Duration(milliseconds: 600 + (index * 150)))
-                  .slideX(
-                begin: 0.3,
-                end: 0,
-                delay: Duration(milliseconds: 600 + (index * 150)),
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeOutQuad,
-              );
-            }),
-          ],
-        ),
-      ).animate()
-          .fadeIn(delay: const Duration(milliseconds: 600))
-          .scale(
-        begin: const Offset(0.8, 0.8),
-        end: const Offset(1.0, 1.0),
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutBack,
-      ),
-    ],
-    ),
-    ),
+              ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
 
-      const SizedBox(height: 20),
+              const SizedBox(height: 32),
 
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(3, (index) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            height: 10,
-            width: index == 2 ? 24 : 10,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              color: index == 2
-                  ? primaryColor
-                  : Colors.grey[700],
-            ),
-          ).animate().fadeIn(
-            delay: Duration(milliseconds: 1600 + (index * 100)),
-          );
-        }),
-      ),
+              // Final value proposition
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildFinalBenefit(
+                        icon: Icons.verified_user,
+                        title: "Undetectable AI Technology",
+                        description: "Our advanced humanization ensures your thesis passes all AI detection tools",
+                        guarantee: "100% Guarantee",
+                        color: accentColor,
+                        delay: 600,
+                      ),
+                      
+                      _buildFinalBenefit(
+                        icon: Icons.insert_chart_outlined,
+                        title: "Professional Visual Elements",
+                        description: "Automatic generation of charts, graphs, and data tables that impress professors",
+                        guarantee: "Stand Out Visually",
+                        color: primaryColor,
+                        delay: 800,
+                      ),
+                      
+                      _buildFinalBenefit(
+                        icon: Icons.schedule,
+                        title: "Instant Academic Results",
+                        description: "Generate a complete, publication-ready thesis in minutes, not months",
+                        guarantee: "Save 200+ Hours",
+                        color: Color(0xFF8B5CF6),
+                        delay: 1000,
+                      ),
 
-      const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-      Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            colors: [primaryColor, secondaryColor],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const SubjectSelectionScreen(),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            shadowColor: Colors.transparent,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Get Started",
-                style: GoogleFonts.lato(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                      // Testimonial/Social proof
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: surfaceColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: borderColor),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: List.generate(5, (index) => 
+                                Icon(Icons.star, color: Colors.amber, size: 20),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              '"This app saved my entire semester. The thesis looked so professional with all the charts and data - my professor was amazed!"',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontStyle: FontStyle.italic,
+                                color: textPrimary,
+                                height: 1.4,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "- Sarah M., Harvard Student",
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: primaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ).animate().fadeIn(delay: const Duration(milliseconds: 1200)),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.arrow_forward,
-                size: 20,
-              ),
+
+              // Final CTA with maximum urgency
+              Container(
+                margin: const EdgeInsets.only(bottom: 32),
+                child: Column(
+                  children: [
+                    Text(
+                      "Ready to Transform Your Academic Life?",
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Join 50,000+ successful students worldwide",
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(28),
+                        gradient: LinearGradient(
+                          colors: [primaryColor, Color(0xFF1D4ED8)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ThesisPreviewScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          shadowColor: Colors.transparent,
+                          minimumSize: const Size(double.infinity, 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Start My Humanized Thesis Now",
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.rocket_launch, size: 24),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "🔒 Secure • ⚡ Instant • ✅ Guaranteed",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ).animate().fadeIn(delay: const Duration(milliseconds: 1600)),
             ],
           ),
         ),
-      ).animate()
-          .fadeIn(delay: const Duration(milliseconds: 1700))
-          .shimmer(
-        delay: const Duration(milliseconds: 2000),
-        duration: const Duration(milliseconds: 1500),
       ),
+    );
+  }
 
-      const SizedBox(height: 32),
-    ],
-    ),
-    ),
-    ),
-    ),
-        ),
+  Widget _buildProgressDot(bool isActive) {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: isActive ? primaryColor : borderColor,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
+  Widget _buildProgressLine(bool isActive) {
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        color: isActive ? primaryColor : borderColor,
+      ),
+    );
+  }
+
+  Widget _buildFinalBenefit({
+    required IconData icon,
+    required String title,
+    required String description,
+    required String guarantee,
+    required Color color,
+    required int delay,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color.withOpacity(0.2), color.withOpacity(0.1)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: textSecondary,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    guarantee,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: Duration(milliseconds: delay)).slideX(
+      begin: 0.3,
+      end: 0,
+      delay: Duration(milliseconds: delay),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutQuad,
     );
   }
 }
-

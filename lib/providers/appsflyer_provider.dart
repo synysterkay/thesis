@@ -11,6 +11,7 @@ class AppsFlyerNotifier extends StateNotifier<AppsflyerSdk?> {
   }
 }
 
-final appsflyerNotifierProvider = StateNotifierProvider<AppsFlyerNotifier, AppsflyerSdk?>((ref) {
+final appsflyerNotifierProvider =
+    StateNotifierProvider<AppsFlyerNotifier, AppsflyerSdk?>((ref) {
   return AppsFlyerNotifier();
 });

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class ErrorScreen extends StatelessWidget {
   final String error;
 
@@ -9,8 +8,6 @@ class ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     return MaterialApp(
       home: Scaffold(
         backgroundColor: Colors.white,
@@ -51,7 +48,8 @@ class ErrorScreen extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF2196F3),
-                      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),
                     child: Text(
                       'Retry',

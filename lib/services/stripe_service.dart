@@ -5,12 +5,12 @@ import 'dart:convert';
 
 class StripeService {
   // Stripe Payment Links (replace with your actual payment links)
-  static const String weeklyPaymentLink = 'https://buy.stripe.com/eVqbJ1eah4hnaJh8GzfrW03';
-  static const String monthlyPaymentLink = 'https://buy.stripe.com/00weVd9U16pveZx8GzfrW04';
-  
+  static const String proPaymentLink =
+      'https://buy.stripe.com/6oU14n0jr3dj6t1g91frW05';
+
   // Your price IDs for reference
-  static const String weeklyPriceId = 'price_1RhTG7EHyyRHgrPiZ7CpZvyK';
-  static const String monthlyPriceId = 'price_1RhTHGEHyyRHgrPix1W508C8';
+  static const String proPriceId =
+      'price_pro_plan_id'; // You'll need to get this from Stripe dashboard
 
   // Firebase instances
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -19,10 +19,10 @@ class StripeService {
   /// Get payment link by plan type
   String getPaymentLink(String planType) {
     switch (planType.toLowerCase()) {
-      case 'weekly':
-        return weeklyPaymentLink;
+      case 'pro':
       case 'monthly':
-        return monthlyPaymentLink;
+      case 'weekly':
+        return proPaymentLink;
       default:
         throw Exception('Unknown plan type: $planType');
     }
@@ -48,10 +48,8 @@ class StripeService {
       await ensureCustomerExists();
 
       // Get customer document
-      final customerDoc = await _firestore
-          .collection('customers')
-          .doc(user.uid)
-          .get();
+      final customerDoc =
+          await _firestore.collection('customers').doc(user.uid).get();
 
       if (!customerDoc.exists) {
         print('❌ No customer document found');
@@ -69,24 +67,23 @@ class StripeService {
           .collection('customers')
           .doc(user.uid)
           .collection('subscriptions')
-          .where('status', whereIn: ['active', 'trialing'])
-          .get();
+          .where('status', whereIn: ['active', 'trialing']).get();
 
       if (subscriptionsQuery.docs.isEmpty) {
         print('❌ No active subscriptions found');
-        
+
         // Check if there are any subscriptions at all
         final allSubscriptions = await _firestore
             .collection('customers')
             .doc(user.uid)
             .collection('subscriptions')
             .get();
-            
+
         if (allSubscriptions.docs.isNotEmpty) {
           final lastSub = allSubscriptions.docs.first.data();
           print('📋 Last subscription status: ${lastSub['status']}');
         }
-        
+
         return SubscriptionStatus(
           isActive: false,
           userId: user.uid,
@@ -99,7 +96,7 @@ class StripeService {
       // Get the most recent active subscription
       final subscriptionDoc = subscriptionsQuery.docs.first;
       final subscription = subscriptionDoc.data();
-      
+
       print('✅ Found active subscription: ${subscriptionDoc.id}');
       print('📋 Subscription data: ${subscription.keys.toList()}');
 
@@ -125,7 +122,8 @@ class StripeService {
         }
       }
 
-      print('✅ Subscription details: $planType, status: $status, expires: $currentPeriodEnd');
+      print(
+          '✅ Subscription details: $planType, status: $status, expires: $currentPeriodEnd');
 
       final isActive = status == 'active' || status == 'trialing';
 
@@ -140,7 +138,7 @@ class StripeService {
     } catch (e) {
       print('❌ Error getting subscription status: $e');
       print('📋 Stack trace: ${StackTrace.current}');
-      
+
       // Return error status instead of throwing
       return SubscriptionStatus(
         isActive: false,
@@ -163,7 +161,7 @@ class StripeService {
 
     try {
       print('🛒 Creating checkout session for user: ${user.uid}');
-      
+
       // Ensure customer exists
       await ensureCustomerExists();
 
@@ -189,15 +187,16 @@ class StripeService {
       print('📝 Checkout session document created: ${checkoutSessionRef.id}');
 
       // Wait for the Stripe extension to populate the session URL
-      for (int i = 0; i < 30; i++) { // Increased timeout
+      for (int i = 0; i < 30; i++) {
+        // Increased timeout
         await Future.delayed(const Duration(seconds: 1));
-        
+
         final sessionDoc = await checkoutSessionRef.get();
         final data = sessionDoc.data();
 
         if (data != null) {
           print('📋 Session data keys: ${data.keys.toList()}');
-          
+
           if (data['url'] != null) {
             final url = data['url'] as String;
             print('✅ Checkout URL created: $url');
@@ -210,7 +209,7 @@ class StripeService {
             throw Exception('Checkout session error: $error');
           }
         }
-        
+
         print('⏳ Waiting for checkout session... attempt ${i + 1}/30');
       }
 
@@ -228,10 +227,10 @@ class StripeService {
 
     try {
       print('🔄 Refreshing subscription status for user: ${user.uid}');
-      
+
       // Force refresh by getting fresh data
       await getSubscriptionStatus();
-      
+
       print('✅ Subscription status refreshed');
     } catch (e) {
       print('❌ Error refreshing subscription status: $e');
@@ -262,7 +261,7 @@ class StripeService {
       // Wait for the Stripe extension to populate the URL
       for (int i = 0; i < 20; i++) {
         await Future.delayed(const Duration(seconds: 1));
-        
+
         final sessionDoc = await portalSessionRef.get();
         final data = sessionDoc.data();
 
@@ -279,7 +278,7 @@ class StripeService {
             throw Exception('Portal session error: $error');
           }
         }
-        
+
         print('⏳ Waiting for portal session... attempt ${i + 1}/20');
       }
 
@@ -335,7 +334,7 @@ class StripeService {
 
       if (!customerDoc.exists) {
         print('📝 Creating customer document for user: ${user.uid}');
-        
+
         await customerDocRef.set({
           'email': user.email,
           'displayName': user.displayName,
@@ -362,29 +361,28 @@ class StripeService {
   /// Get plan type from price ID
   String _getPlanTypeFromPriceId(String priceId) {
     switch (priceId) {
-      case weeklyPriceId:
-        return 'weekly';
-      case monthlyPriceId:
-        return 'monthly';
+      case proPriceId:
+        return 'pro';
       default:
         print('⚠️ Unknown price ID: $priceId');
-        return 'unknown';
+        return 'pro'; // Default to pro plan
     }
   }
 
   /// Get payment link with user tracking
-  String getPaymentLinkWithTracking(String planType, {Map<String, String>? metadata}) {
+  String getPaymentLinkWithTracking(String planType,
+      {Map<String, String>? metadata}) {
     final baseUrl = getPaymentLink(planType);
     final user = _auth.currentUser;
-    
+
     if (user == null) return baseUrl;
 
     // Add client_reference_id to track the user
     final uri = Uri.parse(baseUrl);
     final queryParams = Map<String, String>.from(uri.queryParameters);
-    
+
     queryParams['client_reference_id'] = user.uid;
-    
+
     if (metadata != null) {
       metadata.forEach((key, value) {
         queryParams['metadata[$key]'] = value;
@@ -420,10 +418,8 @@ class StripeService {
     if (user == null) return {};
 
     try {
-      final customerDoc = await _firestore
-          .collection('customers')
-          .doc(user.uid)
-          .get();
+      final customerDoc =
+          await _firestore.collection('customers').doc(user.uid).get();
 
       final subscriptionsQuery = await _firestore
           .collection('customers')
@@ -434,14 +430,17 @@ class StripeService {
       return {
         'customerExists': customerDoc.exists,
         'totalSubscriptions': subscriptionsQuery.docs.length,
-        'subscriptions': subscriptionsQuery.docs.map((doc) => {
-          'id': doc.id,
-          'status': doc.data()['status'],
-          'created': doc.data()['created'],
-          'planType': doc.data()['items']?.isNotEmpty == true
-              ? _getPlanTypeFromPriceId(doc.data()['items'][0]['price']['id'])
-              : 'unknown',
-        }).toList(),
+        'subscriptions': subscriptionsQuery.docs
+            .map((doc) => {
+                  'id': doc.id,
+                  'status': doc.data()['status'],
+                  'created': doc.data()['created'],
+                  'planType': doc.data()['items']?.isNotEmpty == true
+                      ? _getPlanTypeFromPriceId(
+                          doc.data()['items'][0]['price']['id'])
+                      : 'unknown',
+                })
+            .toList(),
       };
     } catch (e) {
       print('❌ Error getting subscription analytics: $e');
@@ -482,10 +481,8 @@ class StripeService {
     if (user == null) return null;
 
     try {
-      final customerDoc = await _firestore
-          .collection('customers')
-          .doc(user.uid)
-          .get();
+      final customerDoc =
+          await _firestore.collection('customers').doc(user.uid).get();
 
       return customerDoc.exists ? customerDoc.data() : null;
     } catch (e) {
@@ -501,13 +498,11 @@ class StripeService {
 
     try {
       final result = <String, dynamic>{};
-      
+
       // Check customer document
-      final customerDoc = await _firestore
-          .collection('customers')
-          .doc(user.uid)
-          .get();
-      
+      final customerDoc =
+          await _firestore.collection('customers').doc(user.uid).get();
+
       result['customer_exists'] = customerDoc.exists;
       if (customerDoc.exists) {
         result['customer_data'] = customerDoc.data();
@@ -519,12 +514,14 @@ class StripeService {
           .doc(user.uid)
           .collection('subscriptions')
           .get();
-      
+
       result['subscriptions_count'] = subscriptions.docs.length;
-      result['subscriptions'] = subscriptions.docs.map((doc) => {
-        'id': doc.id,
-        'data': doc.data(),
-      }).toList();
+      result['subscriptions'] = subscriptions.docs
+          .map((doc) => {
+                'id': doc.id,
+                'data': doc.data(),
+              })
+          .toList();
 
       // Check checkout sessions
       final checkoutSessions = await _firestore
@@ -533,12 +530,14 @@ class StripeService {
           .collection('checkout_sessions')
           .limit(5)
           .get();
-      
+
       result['checkout_sessions_count'] = checkoutSessions.docs.length;
-      result['recent_checkout_sessions'] = checkoutSessions.docs.map((doc) => {
-        'id': doc.id,
-        'data': doc.data(),
-      }).toList();
+      result['recent_checkout_sessions'] = checkoutSessions.docs
+          .map((doc) => {
+                'id': doc.id,
+                'data': doc.data(),
+              })
+          .toList();
 
       return result;
     } catch (e) {
@@ -595,7 +594,8 @@ class SubscriptionStatus {
   }
 
   /// Check if subscription is in a good state
-  bool get isHealthy => !status.contains('error') && !status.contains('stream_error');
+  bool get isHealthy =>
+      !status.contains('error') && !status.contains('stream_error');
 
   /// Check if subscription is expired
   bool get isExpired {

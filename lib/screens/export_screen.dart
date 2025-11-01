@@ -3,23 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import '../providers/thesis_provider.dart';
 import '../services/export_service.dart';
+import '../models/thesis.dart';
 import 'dart:io';
 import '../templates/thesis_templates.dart';
-import 'package:thesis_generator/screens/outline_viewer_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:typed_data';
 import 'package:universal_html/html.dart' as html;
 
 class ExportScreen extends ConsumerStatefulWidget {
-  const ExportScreen({super.key});
+  final String? thesisId;
+
+  const ExportScreen({super.key, this.thesisId});
 
   @override
   _ExportScreenState createState() => _ExportScreenState();
@@ -27,19 +25,11 @@ class ExportScreen extends ConsumerStatefulWidget {
 
 class _ExportScreenState extends ConsumerState<ExportScreen> {
   final ExportService _exportService = ExportService();
-  final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
-  final PdfViewerController _pdfViewerController = PdfViewerController();
   ThesisTemplateType _selectedTemplate = ThesisTemplateType.modern;
-  dynamic _pdfFile;
-  bool _isSubscribed = true;
   bool _isExporting = false;
-  bool _isEditing = false;
-  final List<String> _highlightedTexts = [];
-  final List<String> _deletedTexts = [];
-  String? _selectedText;
-  String? _lastActionType;
+  String _exportingFormat = '';
 
-  // Updated color scheme to match new white and blue design
+  // Updated color scheme
   static const primaryColor = Color(0xFF2563EB);
   static const secondaryColor = Color(0xFF1D4ED8);
   static const backgroundColor = Color(0xFFFFFFFF);
@@ -47,37 +37,269 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   static const borderColor = Color(0xFFE2E8F0);
   static const textPrimary = Color(0xFF1A1A1A);
   static const textSecondary = Color(0xFF4A5568);
-  static const textMuted = Color(0xFF64748B);
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await _generateInitialPdf();
-      } catch (e) {
+
+    // Load thesis if thesisId is provided
+    if (widget.thesisId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Error generating PDF: $e',
-                style: GoogleFonts.inter(color: Colors.white),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          ref
+              .read(thesisStateProvider.notifier)
+              .loadThesisById(widget.thesisId!);
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final thesisState = ref.watch(thesisStateProvider);
+
+    return Scaffold(
+      backgroundColor: surfaceColor,
+      appBar: AppBar(
+        backgroundColor: backgroundColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: textPrimary),
+          onPressed: () {
+            // Check if we're in trial mode by examining the current route
+            final currentRoute = ModalRoute.of(context)?.settings.name;
+            final isTrialMode = currentRoute == '/export-trial';
+
+            // Navigate to appropriate outline route based on trial mode
+            Navigator.pushReplacementNamed(
+                context, isTrialMode ? '/outline-trial' : '/outline');
+          },
+        ).animate().fadeIn(delay: 200.ms),
+        title: Text(
+          'Export Thesis',
+          style: GoogleFonts.inter(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: textPrimary,
+          ),
+        ).animate().fadeIn(delay: 300.ms).slideX(),
+        centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+      ),
+      body: thesisState.when(
+        data: (thesis) => _buildExportInterface(thesis),
+        loading: () => _buildLoadingState(),
+        error: (error, stack) => _buildErrorState(error.toString()),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Loading thesis...',
+              style: GoogleFonts.inter(
+                color: textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          );
-        }
-      }
-    });
+            SizedBox(height: 8),
+            Text(
+              'Please wait while we prepare your thesis for export',
+              style: GoogleFonts.inter(
+                color: textSecondary,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.all(32),
+        margin: EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.red.withOpacity(0.2)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Error Loading Thesis',
+              style: GoogleFonts.inter(
+                color: textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              error,
+              style: GoogleFonts.inter(
+                color: textSecondary,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text('Go Back'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportInterface(Thesis thesis) {
+    return Column(
+      children: [
+        _buildTemplateSelector(),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildThesisInfo(thesis),
+                SizedBox(height: 32),
+                _buildExportOptions(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThesisInfo(Thesis thesis) {
+    return Container(
+      padding: EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.school,
+                color: primaryColor,
+                size: 24,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Thesis Information',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          _buildInfoRow('Title', thesis.topic),
+          SizedBox(height: 12),
+          _buildInfoRow('Writing Style', thesis.writingStyle),
+          SizedBox(height: 12),
+          _buildInfoRow('Chapters', '${thesis.chapters.length} chapters'),
+        ],
+      ),
+    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1);
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            '$label:',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: textSecondary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: textPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildTemplateSelector() {
     return Container(
-      height: 80,
+      height: 100,
       padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -88,9 +310,12 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _buildTemplateOption(ThesisTemplateType.modern, 'Modern Academic'),
-          _buildTemplateOption(ThesisTemplateType.classic, 'Classic Research'),
-          _buildTemplateOption(ThesisTemplateType.minimal, 'Minimal'),
+          _buildTemplateOption(ThesisTemplateType.modern, 'Modern\nAcademic'),
+          _buildTemplateOption(ThesisTemplateType.classic, 'Classic\nResearch'),
+          _buildTemplateOption(ThesisTemplateType.minimal, 'Minimal\nClean'),
+          _buildTemplateOption(ThesisTemplateType.ieee, 'IEEE\nStandard'),
+          _buildTemplateOption(ThesisTemplateType.apa, 'APA\nStyle'),
+          _buildTemplateOption(ThesisTemplateType.harvard, 'Harvard\nStyle'),
         ],
       ),
     );
@@ -101,17 +326,18 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     return GestureDetector(
       onTap: () {
         setState(() => _selectedTemplate = type);
-        _generateInitialPdf();
       },
       child: Container(
         width: 120,
         margin: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          gradient: isSelected ? LinearGradient(
-            colors: [primaryColor, secondaryColor],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ) : null,
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [primaryColor, secondaryColor],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
           color: isSelected ? null : surfaceColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -140,523 +366,158 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     );
   }
 
-  Widget _buildPdfViewer() {
-  if (_isExporting) {
-    return Container(
-      color: surfaceColor,
-      child: Center(
-        child: Container(
-          padding: EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Generating PDF...',
-                style: GoogleFonts.inter(
-                  color: textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-  if (_pdfFile == null) {
-    return Container(
-      color: surfaceColor,
-      child: Center(
-        child: Container(
-          padding: EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.picture_as_pdf,
-                size: 48,
-                color: textMuted,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'No PDF generated',
-                style: GoogleFonts.inter(
-                  color: textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-  
-  // FIX: Wrap PDF viewer in a Theme widget to override dark theme
-  return Container(
-    margin: EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white, // Force white background
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: borderColor),
-      boxShadow: [
-        BoxShadow(
-          color: primaryColor.withOpacity(0.1),
-          blurRadius: 10,
-          spreadRadius: 2,
-        ),
-      ],
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Theme(
-        // Override the dark theme for PDF viewer
-        data: ThemeData(
-          brightness: Brightness.light,
-          scaffoldBackgroundColor: Colors.white,
-          canvasColor: Colors.white,
-          cardColor: Colors.white,
-          dialogBackgroundColor: Colors.white,
-          // Use colorScheme instead of deprecated backgroundColor
-          colorScheme: ColorScheme.light(
-            background: Colors.white,
-            surface: Colors.white,
-            onBackground: Colors.black,
-            onSurface: Colors.black,
-          ),
-        ),
-        child: Container(
-          color: Colors.white, // Explicit white background
-          child: SfPdfViewer.memory(
-            _pdfFile as Uint8List,
-            key: _pdfViewerKey,
-            controller: _pdfViewerController,
-            enableTextSelection: _isEditing,
-            onTextSelectionChanged: _handleTextSelection,
-            // Add these properties to ensure proper display
-            canShowScrollHead: true,
-            canShowScrollStatus: true,
-            enableDoubleTapZooming: true,
-            enableDocumentLinkAnnotation: false,
-            canShowHyperlinkDialog: false,
-            // Force light theme for PDF viewer
-            scrollDirection: PdfScrollDirection.vertical,
-            pageLayoutMode: PdfPageLayoutMode.single,
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-
-  Widget _buildActionButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String label,
-    required Color backgroundColor,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        elevation: 0,
-        shadowColor: backgroundColor.withOpacity(0.3),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Colors.white,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _generateInitialPdf() async {
-    setState(() => _isExporting = true);
-    try {
-      final thesisState = ref.read(thesisStateProvider);
-      await thesisState.when(
-        data: (thesis) async {
-          if (thesis != null) {
-            _pdfFile = await _exportService.exportToPdf(
-              thesis,
-              templateType: _selectedTemplate,
-            );
-          } else {
-            throw Exception('No thesis data available');
-          }
-        },
-        loading: () => throw Exception('Loading thesis data...'),
-        error: (error, stack) => throw Exception('Error loading thesis: $error'),
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error generating PDF: $e',
-              style: GoogleFonts.inter(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            duration: Duration(seconds: 5),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isExporting = false);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: surfaceColor,
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: textPrimary),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => OutlineViewerScreen()),
-            );
-          },
-        ).animate().fadeIn(delay: 200.ms),
-        title: Text(
-          'Export Thesis',
+  Widget _buildExportOptions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Export Options',
           style: GoogleFonts.inter(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
             color: textPrimary,
           ),
-        ).animate().fadeIn(delay: 300.ms).slideX(),
-        centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-      ),
-      body: Column(
-        children: [
-          _buildTemplateSelector(),
-          Container(
-            height: 60,
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              border: Border(
-                bottom: BorderSide(color: borderColor),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildToolbarButton(Icons.edit, 'Edit', _toggleEditMode),
-                _buildToolbarButton(Icons.text_fields, 'Add Text', _handleAddText),
-                _buildToolbarButton(Icons.highlight, 'Highlight', _handleHighlight),
-                _buildToolbarButton(Icons.delete, 'Delete', _handleDelete),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _buildPdfViewer(),
-          ),
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              border: Border(
-                top: BorderSide(color: borderColor),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _handleSavePdf,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                      shadowColor: primaryColor.withOpacity(0.3),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.save, size: 20, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text(
-                          'Save PDF',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _handleSharePdf,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: secondaryColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                      shadowColor: secondaryColor.withOpacity(0.3),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.share, size: 20, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text(
-                          'Share',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
+        ).animate().fadeIn(delay: 500.ms),
+        SizedBox(height: 20),
+        GridView.count(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          childAspectRatio: 1.2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          children: [
+            _buildExportCard(
+              title: 'PDF',
+              subtitle: '',
+              icon: Icons.picture_as_pdf,
+              color: primaryColor,
+              onTap: () => _handleExportPdf(),
+            ).animate().fadeIn(delay: 600.ms).scale(delay: 600.ms),
+            _buildExportCard(
+              title: 'Share',
+              subtitle: '',
+              icon: Icons.share,
+              color: secondaryColor,
+              onTap: () => _handleSharePdf(),
+            ).animate().fadeIn(delay: 700.ms).scale(delay: 700.ms),
+            _buildExportCard(
+              title: 'DOC',
+              subtitle: '',
+              icon: Icons.description,
+              color: Color(0xFF2563EB),
+              onTap: () => _handleExportDoc(),
+            ).animate().fadeIn(delay: 800.ms).scale(delay: 800.ms),
+            _buildExportCard(
+              title: 'DOCX',
+              subtitle: '',
+              icon: Icons.article,
+              color: Color(0xFF0EA5E9),
+              onTap: () => _handleExportDocx(),
+            ).animate().fadeIn(delay: 900.ms).scale(delay: 900.ms),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildToolbarButton(IconData icon, String tooltip, VoidCallback onPressed) {
-    return Tooltip(
-      message: tooltip,
+  Widget _buildExportCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: _isExporting ? null : onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 4),
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: surfaceColor,
-          borderRadius: BorderRadius.circular(8),
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
+              color: color.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: IconButton(
-          icon: Icon(icon, color: primaryColor),
-          onPressed: onPressed,
-          splashRadius: 24,
-          tooltip: tooltip,
-        ),
-      ),
-    );
-  }
-
-  void _handleAddText() {
-    final textController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: backgroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: borderColor),
-        ),
-        title: Text(
-          'Add Text',
-          style: GoogleFonts.inter(
-            color: textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: TextField(
-          controller: textController,
-          style: GoogleFonts.inter(color: textPrimary),
-          decoration: InputDecoration(
-            hintText: 'Enter text to add',
-            hintStyle: GoogleFonts.inter(color: textMuted),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: borderColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: primaryColor),
-            ),
-            filled: true,
-            fillColor: surfaceColor,
-          ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.inter(color: textMuted),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 32,
+                color: color,
               ),
             ),
-            onPressed: () {
-              if (textController.text.isNotEmpty) {
-                _addTextToPdf(textController.text);
-                Navigator.pop(context);
-              }
-            },
-            child: Text(
-              'Add',
+            SizedBox(height: 12),
+            Text(
+              title,
               style: GoogleFonts.inter(
-                color: Colors.white,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
+                color: textPrimary,
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            if (subtitle.isNotEmpty) ...[
+              SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (_isExporting && _exportingFormat == title)
+              Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  void _toggleEditMode() {
+  // Export handler methods
+  Future<void> _handleExportPdf() async {
     setState(() {
-      _isEditing = !_isEditing;
-      _pdfViewerController.clearSelection();
+      _isExporting = true;
+      _exportingFormat = 'PDF';
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isEditing ? 'Edit mode enabled' : 'Edit mode disabled',
-          style: GoogleFonts.inter(color: Colors.white),
-        ),
-        backgroundColor: primaryColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        duration: Duration(seconds: 1),
-      ),
-    );
-  }
 
-  void _handleTextSelection(PdfTextSelectionChangedDetails details) {
-    if (_isEditing) {
-      setState(() {
-        _selectedText = details.selectedText;
-      });
-    }
-  }
-
-  Future<void> _addTextToPdf(String text) async {
-    if (_pdfFile != null) {
-      setState(() {
-        _pdfViewerController.clearSelection();
-        _pdfViewerKey.currentState?.setState(() {});
-      });
-      _generateInitialPdf();
-    }
-  }
-
-  Future<void> _handleSavePdf() async {
-    if (_pdfFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'No PDF file available to save',
-            style: GoogleFonts.inter(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
-      return;
-    }
     try {
-      setState(() => _isExporting = true);
+      final thesisState = ref.read(thesisStateProvider);
+      if (!thesisState.hasValue || thesisState.value == null) {
+        throw Exception('No thesis data available');
+      }
+
+      final pdfBytes = await _exportService.exportToPdf(
+        thesisState.value!,
+        templateType: _selectedTemplate,
+      );
+
       if (kIsWeb) {
-        final bytes = _pdfFile as Uint8List;
-        final blob = html.Blob([bytes], 'application/pdf');
+        final blob = html.Blob([pdfBytes], 'application/pdf');
         final url = html.Url.createObjectUrlFromBlob(blob);
         final anchor = html.AnchorElement()
           ..href = url
@@ -666,117 +527,190 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         anchor.click();
         html.document.body?.children.remove(anchor);
         html.Url.revokeObjectUrl(url);
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'PDF downloaded successfully',
-                style: GoogleFonts.inter(color: Colors.white),
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
-        }
       } else {
-        final tempDir = await getTemporaryDirectory();
-        final tempFile = File('${tempDir.path}/temp_thesis.pdf');
-        await tempFile.writeAsBytes(_pdfFile as Uint8List);
-        final result = await _exportService.savePdf(tempFile);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                result,
-                style: GoogleFonts.inter(color: Colors.white),
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
-        }
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File(
+            '${directory.path}/thesis_${DateTime.now().millisecondsSinceEpoch}.pdf');
+        await file.writeAsBytes(pdfBytes);
+        await _exportService.savePdf(file);
       }
+
+      _showSuccessMessage('PDF exported successfully');
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error saving PDF: $e',
-              style: GoogleFonts.inter(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
+      _showErrorMessage('Error exporting PDF: $e');
     } finally {
-      setState(() => _isExporting = false);
+      setState(() {
+        _isExporting = false;
+        _exportingFormat = '';
+      });
     }
   }
 
   Future<void> _handleSharePdf() async {
-    if (_pdfFile != null) {
-      try {
-        if (kIsWeb) {
-          final bytes = _pdfFile as Uint8List;
-          final blob = html.Blob([bytes], 'application/pdf');
-          final url = html.Url.createObjectUrlFromBlob(blob);
-          await Share.share(url);
-          html.Url.revokeObjectUrl(url);
-        } else {
-          final directory = await getApplicationDocumentsDirectory();
-          final file = File('${directory.path}/thesis_${DateTime.now().millisecondsSinceEpoch}.pdf');
-          await file.writeAsBytes(_pdfFile);
-          await Share.shareFiles([file.path]);
-        }
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'PDF shared successfully',
-                style: GoogleFonts.inter(color: Colors.white),
-              ),
-              backgroundColor: primaryColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Error sharing PDF: $e',
-                style: GoogleFonts.inter(color: Colors.white),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
+    setState(() {
+      _isExporting = true;
+      _exportingFormat = 'Share';
+    });
+
+    try {
+      final thesisState = ref.read(thesisStateProvider);
+      if (!thesisState.hasValue || thesisState.value == null) {
+        throw Exception('No thesis data available');
+      }
+
+      final pdfBytes = await _exportService.exportToPdf(
+        thesisState.value!,
+        templateType: _selectedTemplate,
+      );
+
+      if (kIsWeb) {
+        final blob = html.Blob([pdfBytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        await Share.share(url);
+        html.Url.revokeObjectUrl(url);
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File(
+            '${directory.path}/thesis_${DateTime.now().millisecondsSinceEpoch}.pdf');
+        await file.writeAsBytes(pdfBytes);
+        await Share.shareFiles([file.path]);
+      }
+
+      _showSuccessMessage('PDF shared successfully');
+    } catch (e) {
+      _showErrorMessage('Error sharing PDF: $e');
+    } finally {
+      setState(() {
+        _isExporting = false;
+        _exportingFormat = '';
+      });
+    }
+  }
+
+  Future<void> _handleExportDoc() async {
+    setState(() {
+      _isExporting = true;
+      _exportingFormat = 'DOC';
+    });
+
+    try {
+      final thesisState = ref.read(thesisStateProvider);
+      if (!thesisState.hasValue || thesisState.value == null) {
+        throw Exception('No thesis data available');
+      }
+
+      await _exportToWordFormat(thesisState.value!, 'doc');
+      _showSuccessMessage('DOC file exported successfully');
+    } catch (e) {
+      _showErrorMessage('Error exporting DOC: $e');
+    } finally {
+      setState(() {
+        _isExporting = false;
+        _exportingFormat = '';
+      });
+    }
+  }
+
+  Future<void> _handleExportDocx() async {
+    setState(() {
+      _isExporting = true;
+      _exportingFormat = 'DOCX';
+    });
+
+    try {
+      final thesisState = ref.read(thesisStateProvider);
+      if (!thesisState.hasValue || thesisState.value == null) {
+        throw Exception('No thesis data available');
+      }
+
+      await _exportToWordFormat(thesisState.value!, 'docx');
+      _showSuccessMessage('DOCX file exported successfully');
+    } catch (e) {
+      _showErrorMessage('Error exporting DOCX: $e');
+    } finally {
+      setState(() {
+        _isExporting = false;
+        _exportingFormat = '';
+      });
+    }
+  }
+
+  Future<void> _exportToWordFormat(Thesis thesis, String format) async {
+    // Create a simple text representation
+    StringBuffer content = StringBuffer();
+
+    // Title page
+    content.writeln('${thesis.topic}\n');
+    content.writeln('Writing Style: ${thesis.writingStyle}');
+    content
+        .writeln('Generated on: ${DateTime.now().toString().split('.')[0]}\n');
+    content.writeln('${'=' * 50}\n');
+
+    // Chapters
+    for (var chapter in thesis.chapters) {
+      content.writeln('${chapter.title.toUpperCase()}\n');
+
+      if (chapter.content.isNotEmpty) {
+        content.writeln('${chapter.content}\n');
+      }
+
+      // Subheadings and their content
+      for (var subheading in chapter.subheadings) {
+        if (chapter.subheadingContents.containsKey(subheading) &&
+            chapter.subheadingContents[subheading]!.isNotEmpty) {
+          content.writeln('${subheading}\n');
+          content.writeln('${chapter.subheadingContents[subheading]!}\n');
         }
       }
+
+      content.writeln('${'=' * 50}\n');
+    }
+
+    final fileName = 'thesis_${DateTime.now().millisecondsSinceEpoch}.$format';
+
+    if (kIsWeb) {
+      final bytes = Uint8List.fromList(content.toString().codeUnits);
+      final blob = html.Blob([bytes], 'application/msword');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement()
+        ..href = url
+        ..style.display = 'none'
+        ..download = fileName;
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      html.document.body?.children.remove(anchor);
+      html.Url.revokeObjectUrl(url);
     } else {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsString(content.toString());
+    }
+  }
+
+  void _showSuccessMessage(String message) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No PDF file available to share',
+            message,
+            style: GoogleFonts.inter(color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
+  }
+
+  void _showErrorMessage(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
             style: GoogleFonts.inter(color: Colors.white),
           ),
           backgroundColor: Colors.red,
@@ -787,110 +721,5 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         ),
       );
     }
-  }
-
-  Future<void> _updatePdfWithHighlights() async {
-    if (_pdfFile != null && _highlightedTexts.isNotEmpty) {
-      setState(() {
-        _pdfViewerController.clearSelection();
-        _pdfViewerKey.currentState?.setState(() {});
-      });
-      _generateInitialPdf();
-    }
-  }
-
-  Future<void> _updatePdfWithDeletions() async {
-    if (_pdfFile != null && _deletedTexts.isNotEmpty) {
-      setState(() {
-        _pdfViewerController.clearSelection();
-        _pdfViewerKey.currentState?.setState(() {});
-      });
-      _generateInitialPdf();
-    }
-  }
-
-  void _handleHighlight() {
-    if (_selectedText != null) {
-      setState(() {
-        _highlightedTexts.add(_selectedText!);
-        _pdfViewerController.clearSelection();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Text highlighted',
-            style: GoogleFonts.inter(color: Colors.white),
-          ),
-          backgroundColor: primaryColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
-      _updatePdfWithHighlights();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Select text to highlight',
-            style: GoogleFonts.inter(color: Colors.white),
-          ),
-          backgroundColor: textMuted,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
-    }
-  }
-
-  void _handleDelete() {
-    if (_selectedText != null) {
-      setState(() {
-        _deletedTexts.add(_selectedText!);
-        _pdfViewerController.clearSelection();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Text deleted',
-            style: GoogleFonts.inter(color: Colors.white),
-          ),
-          backgroundColor: secondaryColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
-      _updatePdfWithDeletions();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Select text to delete',
-            style: GoogleFonts.inter(color: Colors.white),
-          ),
-          backgroundColor: textMuted,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-    _pdfViewerController.dispose();
-    super.dispose();
   }
 }

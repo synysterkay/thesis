@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
@@ -31,7 +32,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1098826060423',
     projectId: 'thesis-generator-web',
     storageBucket: 'thesis-generator-web.firebasestorage.app',
-    iosClientId: '1098826060423-73kddmjuao2m1rsnocpb2goicionifol.apps.googleusercontent.com',
+    iosClientId:
+        '1098826060423-73kddmjuao2m1rsnocpb2goicionifol.apps.googleusercontent.com',
     iosBundleId: 'com.thesis.generator.ai',
   );
 
@@ -44,5 +46,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'thesis-generator-web.firebasestorage.app',
     measurementId: 'G-BY0DNNV0K3',
   );
-
 }

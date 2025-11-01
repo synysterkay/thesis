@@ -18,8 +18,10 @@ class ThesisFormatting {
   static void insertTable(QuillController controller) {
     final document = Document();
     document.insert(0, '\nTable X: \n\n');
-    document.format(document.length - 1, 1, Attribute.fromKeyValue('table', true));
+    document.format(
+        document.length - 1, 1, Attribute.fromKeyValue('table', true));
     document.insert(document.length, 'Source: \n');
-    controller.replaceText(controller.selection.baseOffset, 0, document.toDelta(), null);
+    controller.replaceText(
+        controller.selection.baseOffset, 0, document.toDelta(), null);
   }
 }

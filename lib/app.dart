@@ -4,8 +4,11 @@ import 'services/navigation_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/initialization_screen.dart';
 import 'screens/thesis_form_screen.dart';
+import 'screens/main_navigation_screen.dart';
 import 'screens/outline_viewer_screen.dart';
 import 'screens/export_screen.dart';
+import 'screens/progressive_generation_screen.dart';
+import 'screens/thesis_dashboard_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/language_selection_screen.dart';
 import 'screens/chapter_editor_screen.dart';
@@ -13,7 +16,6 @@ import 'screens/onboard_screen.dart';
 import 'providers/locale_provider.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'providers/analytics_provider.dart';
-import 'screens/api_key_screen.dart';
 // New onboarding screens
 import 'screens/onboarding/onboarding_screen1.dart';
 import 'screens/onboarding/onboarding_screen2.dart';
@@ -36,7 +38,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 // Only import html for web-specific functionality
-import 'package:universal_html/html.dart' as html show window, document;
+import 'package:universal_html/html.dart' as html show window;
 
 class MyApp extends ConsumerWidget {
   final String initialRoute;
@@ -174,64 +176,130 @@ class MyApp extends ConsumerWidget {
       '/language': (context) => const LanguageSelectionScreen(),
       '/onboard': (context) => const OnBoardScreen(),
       '/thesis-form': (context) => const ProtectedRoute(
-        child: ThesisFormScreen(),
-        requiresSubscription: true,
-      ),
-      '/apiKey': (context) => const ProtectedRoute(
-        child: ApiKeyScreen(),
-        requiresSubscription: true,
-      ),
+            child: ThesisFormScreen(),
+            requiresSubscription: true,
+          ),
+      '/thesis-form-trial': (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        return ProtectedRoute(
+          child: ThesisFormScreen(thesisId: args?['thesisId']),
+          requiresSubscription: false, // Free trial access
+        );
+      },
       '/outline': (context) => const ProtectedRoute(
-        child: OutlineViewerScreen(),
-        requiresSubscription: true,
-      ),
+            child: MainNavigationScreen(
+              initialIndex: 1,
+              workflowScreen: 'outline',
+            ),
+            requiresSubscription: true,
+          ),
+      '/outline-trial': (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        return ProtectedRoute(
+          child: MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            workflowScreen: 'outline',
+            thesisId: args?['thesisId'],
+          ),
+          requiresSubscription: false, // Free trial access
+        );
+      },
       '/export': (context) => const ProtectedRoute(
-        child: ExportScreen(),
-        requiresSubscription: true,
-      ),
+            child: MainNavigationScreen(
+              initialIndex: 1,
+              workflowScreen: 'export',
+            ),
+            requiresSubscription: true,
+          ),
+      '/export-trial': (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        return ProtectedRoute(
+          child: MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            workflowScreen: 'export',
+            thesisId: args?['thesisId'],
+          ),
+          requiresSubscription: false, // Free trial access
+        );
+      },
+      '/dashboard': (context) => const ProtectedRoute(
+            child: ThesisDashboardScreen(),
+            requiresSubscription: true,
+          ),
+      '/dashboard-trial': (context) => const ProtectedRoute(
+            child: ThesisDashboardScreen(),
+            requiresSubscription: false, // Free trial access
+          ),
+      '/main-navigation': (context) => const ProtectedRoute(
+            child: MainNavigationScreen(),
+            requiresSubscription: true,
+          ),
+      '/main-navigation-trial': (context) => const ProtectedRoute(
+            child: MainNavigationScreen(isTrialMode: true),
+            requiresSubscription: false, // Free trial access
+          ),
 
       // New onboarding flow routes
       '/onboarding1': (context) => const ProtectedRoute(
-        child: OnboardingScreen1(),
-        requiresSubscription: true,
-      ),
+            child: OnboardingScreen1(),
+            requiresSubscription: true,
+          ),
       '/onboarding2': (context) => const ProtectedRoute(
-        child: OnboardingScreen2(),
-        requiresSubscription: true,
-      ),
+            child: OnboardingScreen2(),
+            requiresSubscription: true,
+          ),
       '/onboarding3': (context) => const ProtectedRoute(
-        child: OnboardingScreen3(),
-        requiresSubscription: true,
-      ),
+            child: OnboardingScreen3(),
+            requiresSubscription: true,
+          ),
       '/subject-selection': (context) => const ProtectedRoute(
-        child: SubjectSelectionScreen(),
-        requiresSubscription: true,
-      ),
+            child: SubjectSelectionScreen(),
+            requiresSubscription: true,
+          ),
       '/academic-level': (context) => const ProtectedRoute(
-        child: AcademicLevelScreen(),
-        requiresSubscription: true,
-      ),
+            child: AcademicLevelScreen(),
+            requiresSubscription: true,
+          ),
       '/page-count': (context) => const ProtectedRoute(
-        child: PageCountScreen(),
-        requiresSubscription: true,
-      ),
+            child: PageCountScreen(),
+            requiresSubscription: true,
+          ),
       '/processing': (context) => const ProtectedRoute(
-        child: ProcessingScreen(),
-        requiresSubscription: true,
-      ),
+            child: ProcessingScreen(),
+            requiresSubscription: true,
+          ),
       '/thesis-preview': (context) => const ProtectedRoute(
-        child: ThesisPreviewScreen(),
-        requiresSubscription: true,
-      ),
+            child: ThesisPreviewScreen(),
+            requiresSubscription: true,
+          ),
       '/thesis-details': (context) => const ProtectedRoute(
-        child: ThesisDetailsScreen(),
-        requiresSubscription: true,
-      ),
+            child: ThesisDetailsScreen(),
+            requiresSubscription: true,
+          ),
     };
   }
 
   /// Handle dynamic routes with parameters
   Route<dynamic>? _handleDynamicRoutes(RouteSettings settings) {
+    // Handle thesis form with trial mode
+    if (settings.name == '/thesis-form') {
+      final args = settings.arguments as Map<String, dynamic>?;
+      final isTrial = args?['isTrial'] == true;
+
+      return MaterialPageRoute(
+        builder: (context) => ProtectedRoute(
+          requiresSubscription: !isTrial, // Skip subscription check for trial
+          child: const ThesisFormScreen(),
+        ),
+        settings: settings,
+      );
+    }
+
     // Handle chapter editor with parameters
     if (settings.name == '/chapter-editor') {
       final args = settings.arguments as Map<String, dynamic>?;
@@ -332,7 +400,7 @@ class _NotFoundScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/initialization',
-                      (route) => false,
+                  (route) => false,
                 );
               },
               icon: const Icon(Icons.home),
@@ -340,7 +408,8 @@ class _NotFoundScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF9D4EDD),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -355,7 +424,7 @@ class _NotFoundScreen extends StatelessWidget {
                   // Fallback: try to navigate within the app
                   Navigator.of(context).pushNamedAndRemoveUntil(
                     '/initialization',
-                        (route) => false,
+                    (route) => false,
                   );
                 }
               },
@@ -390,32 +459,33 @@ class AppConfig {
 
   /// Get supported locales
   static List<Locale> get supportedLocales => const [
-    Locale('en', 'US'),
-    Locale('es'),
-    Locale('fr'),
-    Locale('zh'),
-    Locale('hi'),
-  ];
+        Locale('en', 'US'),
+        Locale('es'),
+        Locale('fr'),
+        Locale('zh'),
+        Locale('hi'),
+      ];
 
   /// Get theme colors
   static Map<String, Color> get themeColors => {
-    'primary': primaryColor,
-    'secondary': secondaryColor,
-    'background': Colors.black,
-    'surface': Colors.grey[900]!,
-    'error': Colors.red[400]!,
-    'onPrimary': Colors.white,
-    'onSecondary': Colors.white,
-    'onBackground': Colors.white,
-    'onSurface': Colors.white,
-    'onError': Colors.white,
-  };
+        'primary': primaryColor,
+        'secondary': secondaryColor,
+        'background': Colors.black,
+        'surface': Colors.grey[900]!,
+        'error': Colors.red[400]!,
+        'onPrimary': Colors.white,
+        'onSecondary': Colors.white,
+        'onBackground': Colors.white,
+        'onSurface': Colors.white,
+        'onError': Colors.white,
+      };
 }
 
 /// Navigation utilities
 class AppNavigation {
   /// Navigate to thesis form with optional parameters
-  static void navigateToThesisForm(BuildContext context, {
+  static void navigateToThesisForm(
+    BuildContext context, {
     String? topic,
     List<String>? chapters,
   }) {
@@ -435,12 +505,12 @@ class AppNavigation {
 
   /// Navigate to chapter editor
   static void navigateToChapterEditor(
-      BuildContext context, {
-        required String chapterTitle,
-        required String subheading,
-        required String initialContent,
-        required int chapterIndex,
-      }) {
+    BuildContext context, {
+    required String chapterTitle,
+    required String subheading,
+    required String initialContent,
+    required int chapterIndex,
+  }) {
     Navigator.pushNamed(
       context,
       '/chapter-editor',
@@ -462,7 +532,7 @@ class AppNavigation {
   static void navigateAndClearStack(BuildContext context, String routeName) {
     Navigator.of(context).pushNamedAndRemoveUntil(
       routeName,
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -475,7 +545,8 @@ class AppNavigation {
 /// Error handling utilities
 class AppErrorHandler {
   /// Handle and log errors
-  static void handleError(dynamic error, StackTrace? stackTrace, {String? context}) {
+  static void handleError(dynamic error, StackTrace? stackTrace,
+      {String? context}) {
     final errorMessage = error.toString();
     final contextInfo = context ?? 'Unknown';
 
@@ -638,33 +709,33 @@ class AppTheme {
 
   /// Get gradient for buttons
   static LinearGradient get buttonGradient => const LinearGradient(
-    colors: [primaryColor, secondaryColor],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+        colors: [primaryColor, secondaryColor],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
 
   /// Get text styles
   static TextStyle get headingStyle => const TextStyle(
-    color: Colors.white,
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-  );
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      );
 
   static TextStyle get subheadingStyle => const TextStyle(
-    color: Colors.white70,
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-  );
+        color: Colors.white70,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      );
 
   static TextStyle get bodyStyle => const TextStyle(
-    color: Colors.white,
-    fontSize: 16,
-  );
+        color: Colors.white,
+        fontSize: 16,
+      );
 
   static TextStyle get captionStyle => const TextStyle(
-    color: Colors.white54,
-    fontSize: 14,
-  );
+        color: Colors.white54,
+        fontSize: 14,
+      );
 
   /// Get input decoration
   static InputDecoration getInputDecoration({
@@ -699,37 +770,37 @@ class AppTheme {
 
   /// Get card decoration
   static BoxDecoration get cardDecoration => BoxDecoration(
-    color: surfaceColor,
-    borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: primaryColor.withOpacity(0.3)),
-    boxShadow: [
-      BoxShadow(
-        color: primaryColor.withOpacity(0.1),
-        blurRadius: 8,
-        spreadRadius: 0,
-      ),
-    ],
-  );
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primaryColor.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.1),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      );
 
   /// Get button style
   static ButtonStyle get primaryButtonStyle => ElevatedButton.styleFrom(
-    backgroundColor: primaryColor,
-    foregroundColor: Colors.white,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-    elevation: 4,
-  );
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        elevation: 4,
+      );
 
   static ButtonStyle get secondaryButtonStyle => OutlinedButton.styleFrom(
-    foregroundColor: primaryColor,
-    side: const BorderSide(color: primaryColor),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-  );
+        foregroundColor: primaryColor,
+        side: const BorderSide(color: primaryColor),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      );
 }
 
 /// Responsive utilities
@@ -762,7 +833,8 @@ class AppResponsive {
   }
 
   /// Get responsive font size
-  static double getResponsiveFontSize(BuildContext context, double baseFontSize) {
+  static double getResponsiveFontSize(
+      BuildContext context, double baseFontSize) {
     if (isMobile(context)) {
       return baseFontSize;
     } else if (isTablet(context)) {
@@ -773,9 +845,9 @@ class AppResponsive {
   }
 
   /// Get responsive width
-  static double getResponsiveWidth(BuildContext context, {double maxWidth = 800}) {
+  static double getResponsiveWidth(BuildContext context,
+      {double maxWidth = 800}) {
     final screenWidth = MediaQuery.of(context).size.width;
     return screenWidth > maxWidth ? maxWidth : screenWidth;
   }
 }
-

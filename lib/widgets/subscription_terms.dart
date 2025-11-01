@@ -25,24 +25,34 @@ class SubscriptionTerms extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16),
-          _buildTermItem('Thesis Generator Premium offers unlimited thesis generation, advanced writing styles, and priority support'),
-          _buildTermItem('Monthly subscription provides 30 days of premium access'),
-          _buildTermItem('Yearly subscription provides 365 days of premium access'),
-          _buildTermItem('Payment will be charged to your Apple ID account at confirmation of purchase'),
-          _buildTermItem('Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period'),
-          _buildTermItem('Account will be charged for renewal within 24 hours prior to the end of the current period'),
-          _buildTermItem('You can manage and cancel your subscriptions by going to your account settings on the App Store'),
-          _buildTermItem('Any unused portion of a free trial period will be forfeited when purchasing a subscription'),
+          _buildTermItem(
+              'Thesis Generator Premium offers unlimited thesis generation, advanced writing styles, and priority support'),
+          _buildTermItem(
+              'Monthly subscription provides 30 days of premium access'),
+          _buildTermItem(
+              'Yearly subscription provides 365 days of premium access'),
+          _buildTermItem(
+              'Payment will be charged to your Apple ID account at confirmation of purchase'),
+          _buildTermItem(
+              'Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period'),
+          _buildTermItem(
+              'Account will be charged for renewal within 24 hours prior to the end of the current period'),
+          _buildTermItem(
+              'You can manage and cancel your subscriptions by going to your account settings on the App Store'),
+          _buildTermItem(
+              'Any unused portion of a free trial period will be forfeited when purchasing a subscription'),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLinkButton('Privacy Policy', 'https://sites.google.com/view/thesis-generator'),
+              _buildLinkButton('Privacy Policy',
+                  'https://sites.google.com/view/thesis-generator'),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Text('•', style: TextStyle(color: Colors.white60)),
               ),
-              _buildLinkButton('Terms of Use', 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula'),
+              _buildLinkButton('Terms of Use',
+                  'https://www.apple.com/legal/internet-services/itunes/dev/stdeula'),
             ],
           ),
           SizedBox(height: 12),

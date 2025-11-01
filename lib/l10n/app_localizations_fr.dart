@@ -12,16 +12,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get welcome => 'Thèse Académique Professionnelle';
 
   @override
-  String get onboardDescription1 => 'Créez des thèses académiques professionnelles avec l\'assistance de l\'IA';
+  String get onboardDescription1 =>
+      'Créez des thèses académiques professionnelles avec l\'assistance de l\'IA';
 
   @override
   String get smartContent => 'Génération Intelligente de Contenu';
 
   @override
-  String get onboardDescription2 => 'Générez automatiquement des chapitres et du contenu bien structurés';
+  String get onboardDescription2 =>
+      'Générez automatiquement des chapitres et du contenu bien structurés';
 
   @override
-  String get onboardDescription3 => 'Exportez votre thèse au format PDF professionnel';
+  String get onboardDescription3 =>
+      'Exportez votre thèse au format PDF professionnel';
 
   @override
   String get easyExport => 'Exportation Facile en PDF';
@@ -42,7 +45,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unsavedChanges => 'Modifications non enregistrées';
 
   @override
-  String get saveChangesQuestion => 'Voulez-vous enregistrer vos modifications ?';
+  String get saveChangesQuestion =>
+      'Voulez-vous enregistrer vos modifications ?';
 
   @override
   String get discard => 'Abandonner';
@@ -51,7 +55,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get save => 'Enregistrer';
 
   @override
-  String get reportContentIssue => 'Veuillez décrire le problème avec ce contenu :';
+  String get reportContentIssue =>
+      'Veuillez décrire le problème avec ce contenu :';
 
   @override
   String get enterConcern => 'Entrez votre préoccupation...';
@@ -81,7 +86,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get exportAsPdf => 'Exporter en PDF';
 
   @override
-  String get exportDescription => 'Votre thèse sera exportée au format PDF et enregistrée dans votre dossier Téléchargements.';
+  String get exportDescription =>
+      'Votre thèse sera exportée au format PDF et enregistrée dans votre dossier Téléchargements.';
 
   @override
   String pdfSavedToDownloads(String path) {
@@ -103,10 +109,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get generateAll => 'Tout Générer';
 
   @override
-  String get pleaseCompleteAllSections => 'Veuillez compléter toutes les sections avant d\'exporter';
+  String get pleaseCompleteAllSections =>
+      'Veuillez compléter toutes les sections avant d\'exporter';
 
   @override
-  String get generatedSuccessfully => 'Génération réussie ! Cliquez sur PDF pour exporter';
+  String get generatedSuccessfully =>
+      'Génération réussie ! Cliquez sur PDF pour exporter';
 
   @override
   String errorGeneratingContent(Object error) {
@@ -131,10 +139,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loadingMessage4 => 'Organisation de votre cadre de recherche...';
 
   @override
-  String get loadingMessage5 => 'Construction d\'une base solide pour votre thèse...';
+  String get loadingMessage5 =>
+      'Construction d\'une base solide pour votre thèse...';
 
   @override
-  String get loadingMessage6 => 'Presque terminé, finalisation de votre plan...';
+  String get loadingMessage6 =>
+      'Presque terminé, finalisation de votre plan...';
 
   @override
   String get createThesis => 'Créer une Thèse';
@@ -172,7 +182,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get generateThesis => 'Générer la Thèse';
 
   @override
-  String get pleaseEnterThesisTopicFirst => 'Veuillez d\'abord entrer un sujet de thèse';
+  String get pleaseEnterThesisTopicFirst =>
+      'Veuillez d\'abord entrer un sujet de thèse';
 
   @override
   String failedToGenerateChapters(Object error) {
@@ -188,16 +199,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get generatingContent => 'Génération du contenu...';
 
   @override
-  String get pleaseCompleteAllChapters => 'Veuillez compléter tous les titres des chapitres';
+  String get pleaseCompleteAllChapters =>
+      'Veuillez compléter tous les titres des chapitres';
 
   @override
-  String get requiredChaptersMissing => 'Les chapitres Introduction et Conclusion sont requis';
+  String get requiredChaptersMissing =>
+      'Les chapitres Introduction et Conclusion sont requis';
 
   @override
   String get openFile => 'Ouvrir le Fichier';
 
   @override
-  String get errorGeneratingOutlines => 'Erreur lors de la Génération des Plans';
+  String get errorGeneratingOutlines =>
+      'Erreur lors de la Génération des Plans';
 
   @override
   String get edit => 'Modifier';

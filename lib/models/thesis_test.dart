@@ -38,8 +38,10 @@ void main() {
       expect(reconstructed.chapters.length, thesis.chapters.length);
       expect(reconstructed.chapters[0].title, thesis.chapters[0].title);
       expect(reconstructed.chapters[0].content, thesis.chapters[0].content);
-      expect(reconstructed.chapters[0].subheadings, thesis.chapters[0].subheadings);
-      expect(reconstructed.chapters[0].subheadingContents, thesis.chapters[0].subheadingContents);
+      expect(reconstructed.chapters[0].subheadings,
+          thesis.chapters[0].subheadings);
+      expect(reconstructed.chapters[0].subheadingContents,
+          thesis.chapters[0].subheadingContents);
     });
   });
 }

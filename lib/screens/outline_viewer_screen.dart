@@ -4,12 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/thesis_provider.dart';
 import '../providers/loading_provider.dart';
-import '../services/navigation_service.dart';
-import '../services/gemini_service.dart';
+import '../providers/subscription_provider.dart';
+import '../services/deepseek_service.dart';
+import '../services/background_generation_service.dart';
+import '../widgets/auto_save_indicator.dart';
 import 'chapter_editor_screen.dart';
+import 'main_navigation_screen.dart';
 import 'dart:async';
-import '../screens/export_screen.dart';
-import 'thesis_form_screen.dart';
 
 class GenerationProgress {
   final String sectionTitle;
@@ -30,14 +31,16 @@ class GenerationProgress {
 }
 
 class OutlineViewerScreen extends ConsumerStatefulWidget {
-  const OutlineViewerScreen({super.key});
+  final String? thesisId;
+
+  const OutlineViewerScreen({super.key, this.thesisId});
 
   @override
   _OutlineViewerScreenState createState() => _OutlineViewerScreenState();
 }
 
 class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
-  final GeminiService _geminiService = GeminiService();
+  final DeepSeekService _deepseekService = DeepSeekService();
   Map<String, bool> loadingStates = {};
   bool isGeneratingAll = false;
   String currentlyGenerating = '';
@@ -57,23 +60,13 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   // Updated color scheme to match new design
-  static const primaryColor = Color(0xFF2563EB);
-  static const secondaryColor = Color(0xFF1D4ED8);
+  static const primaryColor = Color(0xFF6366F1);
   static const backgroundColor = Color(0xFFFFFFFF);
   static const surfaceColor = Color(0xFFF8FAFC);
   static const borderColor = Color(0xFFE2E8F0);
   static const textPrimary = Color(0xFF1A1A1A);
   static const textSecondary = Color(0xFF4A5568);
   static const textMuted = Color(0xFF64748B);
-
-  Timer? _generateAllCountdownTimer;
-  Duration _generateAllRemainingTime = const Duration(minutes: 30);
-
-  String get generateAllFormattedTime {
-    final minutes = _generateAllRemainingTime.inMinutes;
-    final seconds = _generateAllRemainingTime.inSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
 
   final buttonGradient = const LinearGradient(
     colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
@@ -97,109 +90,55 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _generateInitialContent();
-    });
-  }
 
-  Future<void> _generateInitialContent() async {
-    final thesisState = ref.read(thesisStateProvider);
-    await thesisState.whenData((thesis) async {
-      try {
-        int totalSections = 0;
-        int completedSections = 0;
-        for (var chapter in thesis.chapters) {
-          if (chapter.title.toLowerCase().contains('introduction') ||
-              chapter.title.toLowerCase().contains('conclusion')) {
-            totalSections++;
-          } else {
-            totalSections += chapter.subheadings.length;
-          }
-        }
-
-        for (var chapterIndex = 0; chapterIndex < thesis.chapters.length; chapterIndex++) {
-          final chapter = thesis.chapters[chapterIndex];
-          if (chapter.title.toLowerCase().contains('introduction') ||
-              chapter.title.toLowerCase().contains('conclusion')) {
-            await _generateContent(
-                chapter.title,
-                chapterIndex,
-                thesis,
-                completedSections++,
-                totalSections
-            );
-          } else {
-            for (var subheading in chapter.subheadings) {
-              await _generateContent(
-                  subheading,
-                  chapterIndex,
-                  thesis,
-                  completedSections++,
-                  totalSections
-              );
-            }
-          }
-        }
-      } catch (e) {
+    // Load thesis if thesisId is provided
+    if (widget.thesisId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() => currentlyGenerating = '');
+          ref
+              .read(thesisStateProvider.notifier)
+              .loadThesisById(widget.thesisId!);
         }
-      }
-    });
-  }
-
-  Future<void> _generateContent(String title, int chapterIndex, thesis, int completed, int total) async {
-    try {
-      setState(() {
-        loadingStates[title] = true;
-        currentStep = title;
-        generationSteps.add(title);
       });
-
-      // Generate content with retry logic
-      String content = '';
-      for (int attempt = 0; attempt < 3; attempt++) {
-        try {
-          content = await _geminiService.generateChapterContent(
-            thesis.topic,
-            title,
-            thesis.writingStyle,
-          );
-          if (content.isNotEmpty && content.length >= 500) {
-            break;
-          }
-        } catch (e) {
-          print('Attempt $attempt failed: $e');
-          await Future.delayed(Duration(seconds: 30));
-        }
-      }
-
-      if (content.isEmpty) {
-        throw Exception('Failed to generate valid content after multiple attempts');
-      }
-
-      if (mounted && content.isNotEmpty) {
-        await ref.read(thesisStateProvider.notifier).updateSubheadingContent(
-          chapterIndex,
-          title,
-          content,
-        );
-        setState(() {
-          loadingStates[title] = false;
-          currentStep = '';
-        });
-      }
-    } catch (e) {
-      print('Error generating content: $e');
-      setState(() {
-        loadingStates[title] = false;
-        currentStep = '';
-      });
-      throw Exception('Failed to generate content: $e');
     }
+
+    // Show immediate feedback and outline without heavy content generation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        // Show successful loading message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  widget.thesisId != null
+                      ? '✅ Thesis loaded! Continue where you left off'
+                      : '✅ Thesis outline loaded! Auto-save every 30s',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+      // No heavy content generation - outline shows immediately
+      // Content will be generated on-demand when user expands chapters
+    });
   }
 
   Widget _buildGenerationSteps() {
+    final generationState = ref.watch(generationStateProvider);
     return Container(
       constraints: BoxConstraints(maxHeight: 200),
       padding: EdgeInsets.all(16),
@@ -220,17 +159,21 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...generationSteps.map((step) => Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Text(
-                step,
-                style: GoogleFonts.inter(
-                  color: textPrimary,
-                  fontSize: 16,
-                ),
-              ),
-            )).toList(),
-            if (currentStep.isNotEmpty)
+            ...generationState.generationSteps
+                .map((step) => Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        step,
+                        style: GoogleFonts.inter(
+                          color: textPrimary,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ))
+                .toList(),
+            if (generationState.currentStep.isNotEmpty)
               Row(
                 children: [
                   SizedBox(
@@ -242,9 +185,14 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                     ),
                   ),
                   SizedBox(width: 8),
-                  Text(
-                    currentStep,
-                    style: GoogleFonts.inter(color: textPrimary, fontSize: 16),
+                  Expanded(
+                    child: Text(
+                      generationState.currentStep,
+                      style:
+                          GoogleFonts.inter(color: textPrimary, fontSize: 14),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -255,11 +203,12 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   Widget _buildGenerationStatus() {
-    if (currentlyGenerating.isEmpty) return SizedBox.shrink();
+    final generationState = ref.watch(generationStateProvider);
+    if (generationState.currentlyGenerating.isEmpty) return SizedBox.shrink();
 
     return Container(
       padding: EdgeInsets.all(16),
-      margin: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
@@ -276,33 +225,75 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(
-                value: generateAllProgress / 100,
-                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                strokeWidth: 2,
-              ),
+              // Show a pulsing indicator when progress is 0 to indicate loading
+              generationState.progress <= 0
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                      ),
+                    )
+                  : CircularProgressIndicator(
+                      value: generationState.progress / 100,
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                      strokeWidth: 2,
+                    ),
               SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      currentlyGenerating,
+                      generationState.currentlyGenerating,
                       style: GoogleFonts.inter(
                         color: textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${generateAllProgress.toStringAsFixed(0)}%',
-                      style: GoogleFonts.inter(
-                        color: primaryColor,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (generationState.currentStep.isNotEmpty) ...[
+                      SizedBox(height: 4),
+                      Text(
+                        generationState.currentStep,
+                        style: GoogleFonts.inter(
+                          color: textSecondary,
+                          fontSize: 13,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          generationState.progress <= 0
+                              ? 'Starting...'
+                              : '${generationState.progress.toStringAsFixed(0)}%',
+                          style: GoogleFonts.inter(
+                            color: primaryColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (generationState.progress <= 0) ...[
+                          SizedBox(width: 8),
+                          SizedBox(
+                            width: 12,
+                            height: 12,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.5,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(primaryColor),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -315,15 +306,21 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final generationState = ref.watch(generationStateProvider);
     return AppBar(
       backgroundColor: backgroundColor,
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios, color: textPrimary),
-        onPressed: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ThesisFormScreen()),
-        ),
+        onPressed: () {
+          // Check if we're in trial mode by examining the current route
+          final currentRoute = ModalRoute.of(context)?.settings.name;
+          final isTrialMode = currentRoute == '/outline-trial';
+
+          // Navigate back to appropriate thesis form route
+          Navigator.pushReplacementNamed(
+              context, isTrialMode ? '/thesis-form-trial' : '/thesis-form');
+        },
       ),
       title: Text(
         'Academic Structure',
@@ -335,7 +332,25 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       ),
       centerTitle: false,
       actions: [
-        if (!isGeneratingAll)
+        // Auto-save indicator
+        const Padding(
+          padding: EdgeInsets.only(right: 8),
+          child: AutoSaveIndicator(),
+        ),
+        // Dashboard Icon
+        IconButton(
+          icon: Icon(Icons.dashboard_outlined, color: primaryColor),
+          onPressed: () {
+            final currentRoute = ModalRoute.of(context)?.settings.name;
+            final isTrialMode = currentRoute == '/outline-trial';
+            Navigator.pushNamed(
+              context,
+              isTrialMode ? '/dashboard-trial' : '/dashboard',
+            );
+          },
+          tooltip: 'View Dashboard',
+        ),
+        if (!generationState.isGeneratingAll)
           Container(
             margin: EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
@@ -361,13 +376,13 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
               onPressed: () => _handleGenerateAll(context),
             ),
           ),
-        if (isGeneratingAll)
+        if (generationState.isGeneratingAll)
           Expanded(
             child: Center(
               child: Text(
-                generateAllFormattedTime,
+                'Generating...',
                 style: GoogleFonts.inter(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: primaryColor,
                 ),
@@ -381,7 +396,8 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   Widget _buildSubheadingTile(String chapterTitle, List<String> subheadings,
       String subheading, int chapterIndex, bool isLoading, thesis) {
     final notifier = ref.read(thesisStateProvider.notifier);
-    final isGenerated = notifier.isSubheadingGenerated(chapterTitle, subheading);
+    final isGenerated =
+        notifier.isSubheadingGenerated(chapterTitle, subheading);
     final isIntroduction = chapterTitle.toLowerCase().contains('introduction');
     final isConclusion = chapterTitle.toLowerCase().contains('conclusion');
 
@@ -405,37 +421,58 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       ),
       child: ListTile(
         title: Text(
-          isIntroduction || isConclusion ?
-          '$chapterNumber.0 $chapterTitle' :
-          '$chapterNumber.$subheadingNumber $subheading',
+          isIntroduction || isConclusion
+              ? '$chapterNumber.0 $chapterTitle'
+              : '$chapterNumber.$subheadingNumber $subheading',
           style: GoogleFonts.inter(
             fontSize: 16,
-            color: isGenerated ? textPrimary : textMuted,
+            color: isGenerated
+                ? Colors.green.shade700
+                : isLoading
+                    ? primaryColor
+                    : textMuted,
             fontWeight: FontWeight.w500,
           ),
         ),
-        leading: Row(
+        leading: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: isGenerated
+                ? Colors.green.withOpacity(0.1)
+                : isLoading
+                    ? primaryColor.withOpacity(0.1)
+                    : Colors.grey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isGenerated
+                  ? Colors.green
+                  : isLoading
+                      ? primaryColor
+                      : Colors.grey.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: isLoading
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                  ),
+                )
+              : Icon(
+                  isGenerated ? Icons.check_circle : Icons.circle_outlined,
+                  color: isGenerated ? Colors.green : Colors.grey,
+                  size: 18,
+                ),
+        ),
+        trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: isGenerated
-                  ? Icon(Icons.check_circle, color: Colors.green)
-                  : Icon(Icons.circle_outlined, color: textMuted),
-              onPressed: () {
-                if (!isGenerated) {
-                  _handleSubheadingTap(
-                    context,
-                    chapterTitle,
-                    isIntroduction || isConclusion ? chapterTitle : subheading,
-                    chapterIndex,
-                    thesis.topic,
-                    thesis.writingStyle,
-                  );
-                }
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.refresh, color: primaryColor),
+              icon: Icon(Icons.refresh, color: primaryColor, size: 20),
               onPressed: () => _handleRegenerateOutlines(
                 context,
                 chapterTitle,
@@ -443,52 +480,60 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                 thesis.topic,
               ),
             ),
+            IconButton(
+              icon: Icon(
+                Icons.edit,
+                color: isGenerated ? Colors.green : textMuted,
+                size: 20,
+              ),
+              onPressed: isGenerated
+                  ? () => _handleSubheadingTap(
+                        context,
+                        chapterTitle,
+                        isIntroduction || isConclusion
+                            ? chapterTitle
+                            : subheading,
+                        chapterIndex,
+                        thesis.topic,
+                        thesis.writingStyle,
+                      )
+                  : null,
+            ),
           ],
         ),
-        trailing: IconButton(
-          icon: isLoading
-              ? SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-            ),
-          )
-              : Icon(Icons.edit, color: isGenerated ? primaryColor : textMuted),
-          onPressed: isGenerated
-              ? () => _handleSubheadingTap(
-            context,
-            chapterTitle,
-            isIntroduction || isConclusion ? chapterTitle
-            : subheading,
-            chapterIndex,
-            thesis.topic,
-            thesis.writingStyle,
-          )
-              : null,
-        ),
+        onTap: () {
+          if (!isGenerated && !isLoading) {
+            _handleSubheadingTap(
+              context,
+              chapterTitle,
+              isIntroduction || isConclusion ? chapterTitle : subheading,
+              chapterIndex,
+              thesis.topic,
+              thesis.writingStyle,
+            );
+          }
+        },
       ),
     ).animate().fadeIn().slideX();
   }
 
   Future<void> _handleRegenerateOutlines(
-      BuildContext context,
-      String chapterTitle,
-      int chapterIndex,
-      String topic,
-      ) async {
+    BuildContext context,
+    String chapterTitle,
+    int chapterIndex,
+    String topic,
+  ) async {
     setState(() => loadingStates[chapterTitle] = true);
     try {
-      final newOutlines = await _geminiService.regenerateChapterOutlines(
+      final newOutlines = await _deepseekService.regenerateChapterOutlines(
         topic,
         chapterTitle,
       );
       if (newOutlines.isNotEmpty) {
         await ref.read(thesisStateProvider.notifier).updateChapterOutlines(
-          chapterIndex,
-          newOutlines,
-        );
+              chapterIndex,
+              newOutlines,
+            );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -523,230 +568,252 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   Future<void> _handleGenerateAll(BuildContext context) async {
-    if (isGeneratingAll) return;
+    final generationState = ref.read(generationStateProvider);
+    if (generationState.isGeneratingAll) return;
+
+    // Check subscription status before generating all content
+    final subscriptionStatus = ref.read(subscriptionStatusProvider);
+    final isSubscribed = subscriptionStatus.when(
+      data: (status) => status.isActive,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    // Check if user is in trial mode by examining the current route
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    final isTrialMode = currentRoute == '/outline-trial';
+
+    // If not subscribed AND not in trial mode, show paywall
+    if (!isSubscribed && !isTrialMode) {
+      Navigator.pushNamed(context, '/paywall');
+      return;
+    }
 
     final thesisState = ref.read(thesisStateProvider);
     await thesisState.whenData((thesis) async {
-      setState(() {
-        isGeneratingAll = true;
-        currentlyGenerating = 'Generating Content';
-        startGenerateAllCountdown();
-        generationSteps.clear();
-      });
-
       try {
-        int totalSections = _calculateTotalSections(thesis);
-        int completedSections = 0;
-        List<String> failedSections = [];
+        // Show confirmation dialog
+        final confirmed =
+            await _showGenerationConfirmationDialog(context, thesis);
+        if (!confirmed) return;
 
-        // Process each chapter
-        for (var i = 0; i < thesis.chapters.length; i++) {
-          final chapter = thesis.chapters[i];
-          
-          // Skip References chapter
-          if (chapter.title.toLowerCase().contains('references')) {
-            continue;
-          }
+        // Start background generation
+        final jobId = await BackgroundGenerationService.instance
+            .startBackgroundGeneration(thesis);
 
-          setState(() {
-            currentlyGenerating = 'Generating: ${chapter.title}';
-          });
+        print('Started background generation with job ID: $jobId');
 
-          if (_isSpecialChapter(chapter.title)) {
-            await _generateSpecialChapterContent(
-                chapter, i, thesis, ++completedSections, totalSections
-            );
-            await Future.delayed(Duration(seconds: 45));
-          } else {
-            for (var subheading in chapter.subheadings) {
-              try {
-                final content = await _geminiService.retryGenerateContent(
-                  thesis.topic,
-                  subheading,
-                  thesis.writingStyle,
-                );
-                await ref.read(thesisStateProvider.notifier).updateSubheadingContent(
-                  i, subheading, content,
-                );
-                setState(() {
-                  completedSections++;
-                  generateAllProgress = (completedSections / totalSections) * 100;
-                  generationSteps.add(subheading);
-                });
-                await Future.delayed(Duration(seconds: 45));
-              } catch (e) {
-                failedSections.add(subheading);
-                print('Failed to generate $subheading: $e');
-              }
-            }
-          }
-        }
-
-        // Handle completion
+        // Show success message and redirect to history
         if (mounted) {
-          if (failedSections.isEmpty) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => ExportScreen()),
-            );
-          } else {
-            await _retryFailedSections(failedSections, thesis);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${failedSections.length} sections need attention',
-                  style: GoogleFonts.inter(color: Colors.white),
-                ),
-                backgroundColor: Colors.orange,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.rocket_launch, color: Colors.white, size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '🚀 Generation started! Check the History tab to track progress and get notified when complete.',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            );
-          }
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              duration: Duration(seconds: 3),
+            ),
+          );
+
+          // Auto-redirect to history screen after 2 seconds
+          Future.delayed(Duration(seconds: 2), () {
+            if (mounted) {
+              // Navigate to main navigation with history tab selected
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MainNavigationScreen(
+                    isTrialMode: isTrialMode,
+                    initialIndex: 2, // History tab index
+                  ),
+                ),
+              );
+            }
+          });
         }
       } catch (e) {
+        print('Error starting background generation: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Error generating content: ${e.toString()}',
+                'Failed to start generation: $e',
                 style: GoogleFonts.inter(color: Colors.white),
               ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+                  borderRadius: BorderRadius.circular(8)),
             ),
           );
         }
-      } finally {
-        if (mounted) {
-          setState(() {
-            isGeneratingAll = false;
-            currentlyGenerating = '';
-            currentStep = '';
-          });
-          _generateAllCountdownTimer?.cancel();
-        }
       }
     });
   }
 
-  bool _isSpecialChapter(String title) {
-    return title.toLowerCase().contains('introduction') ||
-        title.toLowerCase().contains('conclusion');
+  Future<bool> _showGenerationConfirmationDialog(
+      BuildContext context, dynamic thesis) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Icon
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.rocket_launch,
+                        color: primaryColor,
+                        size: 32,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+
+                    // Title
+                    Text(
+                      'Start Background Generation?',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 12),
+
+                    // Description
+                    Text(
+                      'Your thesis will be generated in the background. You\'ll receive a notification when it\'s complete and can continue working on other projects.',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: textSecondary,
+                        height: 1.4,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8),
+
+                    // Estimated time
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Estimated time: ${_estimateGenerationTime(thesis)} minutes',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: BorderSide(color: borderColor),
+                              ),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: buttonGradient,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                'Start Generation',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ) ??
+        false;
   }
 
-  Future<void> _generateSpecialChapterContent(
-      dynamic chapter,
-      int chapterIndex,
-      dynamic thesis,
-      int completedSections,
-      int totalSections,
-      ) async {
-    setState(() {
-      loadingStates[chapter.title] = true;
-      currentStep = chapter.title;
-    });
-
-    final content = await _geminiService.retryGenerateContent(
-      thesis.topic,
-      chapter.title,
-      thesis.writingStyle,
-    );
-
-    await ref.read(thesisStateProvider.notifier).updateSubheadingContent(
-      chapterIndex,
-      chapter.title,
-      content,
-    );
-
-    setState(() {
-      loadingStates[chapter.title] = false;
-      generationSteps.add(chapter.title);
-    });
-
-    _updateGenerationProgress(completedSections / totalSections, chapter.title);
-  }
-
-  Future<void> _generateRegularChapterContent(
-      dynamic chapter,
-      int chapterIndex,
-      dynamic thesis,
-      int completedSections,
-      int totalSections,
-      ) async {
-    for (var subheading in chapter.subheadings) {
-      if (!mounted) return;
-
-      setState(() {
-        loadingStates[subheading] = true;
-        currentStep = subheading;
-      });
-
-      final content = await _geminiService.retryGenerateContent(
-        thesis.topic,
-        subheading,
-        thesis.writingStyle,
-      );
-
-      await ref.read(thesisStateProvider.notifier).updateSubheadingContent(
-        chapterIndex,
-        subheading,
-        content,
-      );
-
-      setState(() {
-        loadingStates[subheading] = false;
-        generationSteps.add(subheading);
-      });
-
-      _updateGenerationProgress(completedSections / totalSections, subheading);
-    }
-  }
-
-  void _cleanupGeneration() {
-    if (mounted) {
-      setState(() {
-        isGeneratingAll = false;
-        currentlyGenerating = '';
-        currentStep = '';
-      });
-      _generateAllCountdownTimer?.cancel();
-    }
-  }
-
-  Future<void> _retryFailedSections(List<String> failedSections, dynamic thesis) async {
-    for (var section in failedSections) {
-      try {
-        final content = await _geminiService.retryGenerateContent(
-          thesis.topic,
-          section,
-          thesis.writingStyle,
-        );
-        // Update content in thesis state
-        final chapterIndex = thesis.chapters.indexWhere((c) => c.title == section);
-        if (chapterIndex != -1) {
-          await ref.read(thesisStateProvider.notifier).updateSubheadingContent(
-            chapterIndex,
-            section,
-            content,
-          );
-        }
-      } catch (e) {
-        print('Final retry failed for $section: $e');
-      }
-    }
-  }
-
-  void _updateGenerationProgress(double progress, String currentItem) {
-    setState(() {
-      currentStep = currentItem;
-      generateAllProgress = (progress * 100).roundToDouble();
-    });
+  int _estimateGenerationTime(dynamic thesis) {
+    // Calculate estimated time based on number of sections
+    int totalSections = _calculateTotalSections(thesis);
+    return (totalSections * 2)
+        .clamp(5, 45); // 2 minutes per section, 5-45 minutes
   }
 
   int _calculateTotalSections(dynamic thesis) {
@@ -762,7 +829,38 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     return total;
   }
 
-  List<Widget> _buildChapterContent(dynamic chapter, int chapterIndex, dynamic thesis) {
+  // Helper method to calculate chapter completion percentage
+  double _getChapterCompletionPercentage(dynamic chapter, int chapterIndex) {
+    final notifier = ref.read(thesisStateProvider.notifier);
+
+    // For references chapter, always show as complete
+    if (chapter.title.toLowerCase().contains('references')) {
+      return 100.0;
+    }
+
+    // For introduction/conclusion, check if the main content is generated
+    if (chapter.title.toLowerCase().contains('introduction') ||
+        chapter.title.toLowerCase().contains('conclusion')) {
+      return notifier.isSubheadingGenerated(chapter.title, chapter.title)
+          ? 100.0
+          : 0.0;
+    }
+
+    // For regular chapters, calculate based on subheadings
+    if (chapter.subheadings.isEmpty) return 0.0;
+
+    int generatedCount = 0;
+    for (String subheading in chapter.subheadings) {
+      if (notifier.isSubheadingGenerated(chapter.title, subheading)) {
+        generatedCount++;
+      }
+    }
+
+    return (generatedCount / chapter.subheadings.length * 100);
+  }
+
+  List<Widget> _buildChapterContent(
+      dynamic chapter, int chapterIndex, dynamic thesis) {
     if (chapter.title.toLowerCase().contains('references')) {
       return [
         ListTile(
@@ -805,17 +903,19 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   }
 
   Future<void> _handleSubheadingTap(
-      BuildContext context,
-      String chapterTitle,
-      String subheading,
-      int chapterIndex,
-      String topic,
-      String writingStyle,
-      ) async {
-    final existingContent = ref.read(thesisStateProvider.notifier)
+    BuildContext context,
+    String chapterTitle,
+    String subheading,
+    int chapterIndex,
+    String topic,
+    String writingStyle,
+  ) async {
+    final existingContent = ref
+        .read(thesisStateProvider.notifier)
         .getSubheadingContent(chapterIndex, subheading);
 
     if (existingContent != null && existingContent.isNotEmpty) {
+      // Content already exists, go directly to editor
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -830,35 +930,100 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
       return;
     }
 
+    // Check subscription status before generating content
+    final subscriptionStatus = ref.read(subscriptionStatusProvider);
+    final isSubscribed = subscriptionStatus.when(
+      data: (status) => status.isActive,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    // Check if user is in trial mode by examining the current route
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    final isTrialMode = currentRoute == '/outline-trial';
+
+    // If not subscribed AND not in trial mode, show paywall
+    if (!isSubscribed && !isTrialMode) {
+      Navigator.pushNamed(context, '/paywall');
+      return;
+    }
+
+    // Show generating dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Generating Section Content',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Creating content for "$subheading"...',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
     setState(() => loadingStates[subheading] = true);
 
     try {
-      final content = await _geminiService.generateChapterContent(
-        topic,
-        '$chapterTitle - $subheading',
-        writingStyle,
-      );
+      // Use the new generateSectionContent method
+      await ref.read(thesisStateProvider.notifier).generateSectionContent(
+            chapterIndex,
+            subheading,
+          );
 
-      await ref.read(thesisStateProvider.notifier).updateSubheadingContent(
-        chapterIndex,
-        subheading,
-        content,
-      );
+      // Get the generated content
+      final content = ref
+          .read(thesisStateProvider.notifier)
+          .getSubheadingContent(chapterIndex, subheading);
 
+      // Close loading dialog
       if (mounted) {
+        Navigator.of(context).pop();
+
+        // Navigate to editor with generated content
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ChapterEditorScreen(
               chapterTitle: chapterTitle,
               subheading: subheading,
-              initialContent: content,
+              initialContent: content ?? '',
               chapterIndex: chapterIndex,
             ),
           ),
         );
       }
     } catch (e) {
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -882,7 +1047,8 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     messageTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       if (mounted) {
         setState(() {
-          currentMessageIndex = (currentMessageIndex + 1) % loadingMessages.length;
+          currentMessageIndex =
+              (currentMessageIndex + 1) % loadingMessages.length;
         });
       }
     });
@@ -903,111 +1069,10 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
     });
   }
 
-  void startGenerateAllCountdown() {
-    _generateAllRemainingTime = const Duration(minutes: 30);
-    _generateAllCountdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          if (_generateAllRemainingTime.inSeconds > 0) {
-            _generateAllRemainingTime = Duration(seconds: _generateAllRemainingTime.inSeconds - 1);
-          } else {
-            timer.cancel();
-          }
-        });
-      }
-    });
-  }
-
-  void _handleExport(BuildContext context) {
-    final thesisState = ref.read(thesisStateProvider);
-    thesisState.whenData((thesis) {
-      if (thesis == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'No thesis data available',
-              style: GoogleFonts.inter(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-        return;
-      }
-
-      // Check if generation is complete
-      if (isGeneratingAll) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Please wait for generation to complete',
-              style: GoogleFonts.inter(color: Colors.white),
-            ),
-            backgroundColor: Colors.orange,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-        return;
-      }
-
-      // Validate content before navigation
-      bool isComplete = true;
-      String missingSection = '';
-      for (var chapter in thesis.chapters) {
-        if (chapter.title.toLowerCase().contains('references')) continue;
-
-        if (chapter.title.toLowerCase().contains('introduction') ||
-            chapter.title.toLowerCase().contains('conclusion')) {
-          if (chapter.subheadingContents.isEmpty) {
-            isComplete = false;
-            missingSection = chapter.title;
-            break;
-          }
-        } else {
-          for (var subheading in chapter.subheadings) {
-            if (!chapter.subheadingContents.containsKey(subheading) ||
-                chapter.subheadingContents[subheading]?.isEmpty == true) {
-              isComplete = false;
-              missingSection = subheading;
-              break;
-            }
-          }
-        }
-      }
-
-      if (isComplete) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ExportScreen()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Missing content for: $missingSection',
-              style: GoogleFonts.inter(color: Colors.white),
-            ),
-            backgroundColor: Colors.orange,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final thesisState = ref.watch(thesisStateProvider);
+    final generationState = ref.watch(generationStateProvider);
 
     return Scaffold(
       backgroundColor: surfaceColor,
@@ -1044,37 +1109,153 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                       ],
                     ),
                     child: ExpansionTile(
-                      title: Row(
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              'Chapter ${chapterNumber}. ${chapter.title}',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: textPrimary,
+                          Row(
+                            children: [
+                              // Status Icon
+                              Container(
+                                margin: EdgeInsets.only(right: 12),
+                                child: () {
+                                  final percentage =
+                                      _getChapterCompletionPercentage(
+                                          chapter, index);
+                                  final chapterKey = 'chapter_${index}';
+                                  final isGenerating =
+                                      loadingStates[chapterKey] == true;
+
+                                  if (isGenerating) {
+                                    return SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                primaryColor),
+                                      ),
+                                    );
+                                  } else if (percentage >= 100) {
+                                    return Icon(
+                                      Icons.check_circle,
+                                      color: Colors.green,
+                                      size: 20,
+                                    );
+                                  } else if (percentage > 0) {
+                                    return Icon(
+                                      Icons.radio_button_checked,
+                                      color: primaryColor,
+                                      size: 20,
+                                    );
+                                  } else {
+                                    return Icon(
+                                      Icons.radio_button_unchecked,
+                                      color: textMuted,
+                                      size: 20,
+                                    );
+                                  }
+                                }(),
                               ),
+                              Expanded(
+                                child: Text(
+                                  'Chapter ${chapterNumber}. ${chapter.title}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: () {
+                                      final percentage =
+                                          _getChapterCompletionPercentage(
+                                              chapter, index);
+                                      if (percentage >= 100)
+                                        return Colors.green.shade700;
+                                      if (percentage > 0) return primaryColor;
+                                      return textPrimary;
+                                    }(),
+                                  ),
+                                ),
+                              ),
+                              // Regenerate Outlines Button
+                              if (!chapter.title
+                                  .toLowerCase()
+                                  .contains('references'))
+                                IconButton(
+                                  icon: loadingStates[chapter.title] == true
+                                      ? SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    primaryColor),
+                                          ),
+                                        )
+                                      : Icon(Icons.refresh,
+                                          color: primaryColor),
+                                  onPressed: () => _handleRegenerateOutlines(
+                                    context,
+                                    chapter.title,
+                                    index,
+                                    thesis.topic,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          // Chapter Progress Indicator
+                          Container(
+                            margin: EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final percentage =
+                                            _getChapterCompletionPercentage(
+                                                chapter, index);
+                                        return Container(
+                                          width: constraints.maxWidth *
+                                              (percentage / 100),
+                                          decoration: BoxDecoration(
+                                            color: percentage >= 100
+                                                ? Colors.green
+                                                : percentage > 0
+                                                    ? primaryColor
+                                                    : Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  '${_getChapterCompletionPercentage(chapter, index).toStringAsFixed(0)}%',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: _getChapterCompletionPercentage(
+                                                chapter, index) >=
+                                            100
+                                        ? Colors.green
+                                        : _getChapterCompletionPercentage(
+                                                    chapter, index) >
+                                                0
+                                            ? primaryColor
+                                            : textMuted,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          if (!chapter.title.toLowerCase().contains('references'))
-                            IconButton(
-                              icon: loadingStates[chapter.title] == true
-                                  ? SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                                ),
-                              )
-                                  : Icon(Icons.refresh, color: primaryColor),
-                              onPressed: () => _handleRegenerateOutlines(
-                                context,
-                                chapter.title,
-                                index,
-                                thesis.topic,
-                              ),
-                            ),
                         ],
                       ),
                       collapsedIconColor: primaryColor,
@@ -1168,7 +1349,8 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(primaryColor),
                           ),
                           const SizedBox(height: 20),
                           Text(
@@ -1199,47 +1381,21 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
               },
             ),
           ),
-          if (generationSteps.isNotEmpty)
+          if (generationState.generationSteps.isNotEmpty)
             Positioned(
               bottom: 20,
               left: 0,
               right: 0,
               child: _buildGenerationSteps(),
             ),
-          if (currentlyGenerating.isNotEmpty)
+          if (generationState.currentlyGenerating.isNotEmpty)
             Positioned(
-              bottom: generationSteps.isNotEmpty ? 200 : 20,
+              bottom: generationState.generationSteps.isNotEmpty ? 200 : 20,
               left: 0,
               right: 0,
               child: _buildGenerationStatus(),
             ),
         ],
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: buttonGradient,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: FloatingActionButton.extended(
-          onPressed: () => _handleExport(context),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          icon: Icon(Icons.download, color: Colors.white),
-          label: Text(
-            'Export',
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -1247,9 +1403,7 @@ class _OutlineViewerScreenState extends ConsumerState<OutlineViewerScreen> {
   @override
   void dispose() {
     _countdownTimer?.cancel();
-    _generateAllCountdownTimer?.cancel();
     messageTimer?.cancel();
     super.dispose();
   }
 }
-

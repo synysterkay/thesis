@@ -6,6 +6,10 @@ import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import 'dart:html' as html;
 
+// Feature flag for free trial section
+// Set to "ON" for testing, "OFF" for production
+const String FREE_TRIAL_FEATURE = "ON";
+
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
 
@@ -66,7 +70,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
           _hasNavigated = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              Navigator.of(context).pushReplacementNamed('/thesis-form');
+              Navigator.of(context).pushReplacementNamed('/main-navigation');
             }
           });
         }
@@ -85,6 +89,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     html.window.location.href = 'https://thesisgenerator.tech';
   }
 
+  void _tryAppForFree() {
+    // Navigate directly to a free trial route that bypasses subscription
+    Navigator.of(context).pushReplacementNamed('/main-navigation-trial');
+  }
+
   Future<void> _subscribeToPlan(String plan) async {
     if (_isLoading) return;
 
@@ -98,22 +107,18 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
       if (user == null) {
         if (mounted) {
           AppErrorHandler.showErrorSnackBar(
-            context,
-            'Please sign in first to subscribe to AI Essay Writer'
-          );
+              context, 'Please sign in first to subscribe to AI Essay Writer');
           Navigator.of(context).pushReplacementNamed('/signin');
         }
         return;
       }
 
       final subscriptionActions = ref.read(subscriptionActionsProvider);
-      
-      // Use the correct method based on plan type
+
+      // Use the pro plan for all subscription requests
       String checkoutUrl;
-      if (plan == 'weekly') {
-        checkoutUrl = await subscriptionActions.createWeeklySubscription();
-      } else if (plan == 'monthly') {
-        checkoutUrl = await subscriptionActions.createMonthlySubscription();
+      if (plan == 'pro' || plan == 'weekly' || plan == 'monthly') {
+        checkoutUrl = await subscriptionActions.createProSubscription();
       } else {
         throw Exception('Invalid plan type: $plan');
       }
@@ -122,14 +127,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
         // Redirect to Stripe checkout
         html.window.location.href = checkoutUrl;
       } else {
-        throw Exception('Failed to create checkout session for AI Essay Writer');
+        throw Exception(
+            'Failed to create checkout session for AI Essay Writer');
       }
     } catch (e) {
       if (mounted) {
-        AppErrorHandler.showErrorSnackBar(
-          context,
-          'Failed to start AI Essay Writer subscription: ${e.toString()}'
-        );
+        AppErrorHandler.showErrorSnackBar(context,
+            'Failed to start AI Essay Writer subscription: ${e.toString()}');
       }
     } finally {
       if (mounted) {
@@ -150,31 +154,27 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
       // Force refresh subscription status using the actions provider
       final subscriptionActions = ref.read(subscriptionActionsProvider);
       await subscriptionActions.refreshSubscriptionStatus();
-      
+
       // Invalidate the provider to force refresh
       ref.invalidate(subscriptionStatusProvider);
-      
+
       // Wait a moment for the provider to refresh
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       final subscriptionStatus = ref.read(subscriptionStatusProvider);
       await subscriptionStatus.when(
         data: (status) async {
           if (status.isActive) {
             setState(() => _hasNavigated = true);
             if (mounted) {
-              AppErrorHandler.showSuccessSnackBar(
-                context, 
-                'Welcome to AI Essay Writer! Your subscription is now active.'
-              );
-              Navigator.of(context).pushReplacementNamed('/thesis-form');
+              AppErrorHandler.showSuccessSnackBar(context,
+                  'Welcome to AI Essay Writer! Your subscription is now active.');
+              Navigator.of(context).pushReplacementNamed('/main-navigation');
             }
           } else {
             if (mounted) {
-              AppErrorHandler.showErrorSnackBar(
-                context,
-                'Subscription not found. Please complete payment or contact support.'
-              );
+              AppErrorHandler.showErrorSnackBar(context,
+                  'Subscription not found. Please complete payment or contact support.');
             }
           }
         },
@@ -182,27 +182,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
           // Wait longer for loading
           await Future.delayed(const Duration(seconds: 2));
           if (mounted) {
-            AppErrorHandler.showErrorSnackBar(
-              context,
-              'Still checking subscription status. Please try again in a moment.'
-            );
+            AppErrorHandler.showErrorSnackBar(context,
+                'Still checking subscription status. Please try again in a moment.');
           }
         },
         error: (error, stack) async {
           if (mounted) {
             AppErrorHandler.showErrorSnackBar(
-              context,
-              'Error checking subscription: ${error.toString()}'
-            );
+                context, 'Error checking subscription: ${error.toString()}');
           }
         },
       );
     } catch (e) {
       if (mounted) {
         AppErrorHandler.showErrorSnackBar(
-          context,
-          'Failed to check subscription: ${e.toString()}'
-        );
+            context, 'Failed to check subscription: ${e.toString()}');
       }
     } finally {
       if (mounted) {
@@ -255,7 +249,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                               IconButton(
                                 onPressed: _handleBackButton,
                                 icon: Icon(
-                                  PhosphorIcons.arrowLeft(PhosphorIconsStyle.regular),
+                                  PhosphorIcons.arrowLeft(
+                                      PhosphorIconsStyle.regular),
                                   size: 24,
                                   color: const Color(0xFF6B7280),
                                 ),
@@ -263,30 +258,36 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                                   backgroundColor: const Color(0xFFF8FAFC),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    side: const BorderSide(color: Color(0xFFE2E8F0)),
+                                    side: const BorderSide(
+                                        color: Color(0xFFE2E8F0)),
                                   ),
                                 ),
                               ),
                               const Spacer(),
                               if (user != null) ...[
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFEFF6FF),
                                     borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: const Color(0xFFDBEAFE)),
+                                    border: Border.all(
+                                        color: const Color(0xFFDBEAFE)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        PhosphorIcons.user(PhosphorIconsStyle.regular),
+                                        PhosphorIcons.user(
+                                            PhosphorIconsStyle.regular),
                                         size: 16,
                                         color: const Color(0xFF2563EB),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        user.displayName ?? user.email?.split('@')[0] ?? 'User',
+                                        user.displayName ??
+                                            user.email?.split('@')[0] ??
+                                            'User',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
@@ -311,17 +312,20 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                               children: [
                                 // Hero Badge
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFEFF6FF),
                                     borderRadius: BorderRadius.circular(50),
-                                    border: Border.all(color: const Color(0xFFDBEAFE)),
+                                    border: Border.all(
+                                        color: const Color(0xFFDBEAFE)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        PhosphorIcons.robot(PhosphorIconsStyle.regular),
+                                        PhosphorIcons.robot(
+                                            PhosphorIconsStyle.regular),
                                         size: 16,
                                         color: const Color(0xFF2563EB),
                                       ),
@@ -397,10 +401,22 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                                   runSpacing: 16,
                                   alignment: WrapAlignment.center,
                                   children: [
-                                    _buildFeaturePreview(PhosphorIcons.robot(PhosphorIconsStyle.regular), 'AI Essay Generator'),
-                                    _buildFeaturePreview(PhosphorIcons.book(PhosphorIconsStyle.regular), 'Thesis Statement Generator'),
-                                    _buildFeaturePreview(PhosphorIcons.pencil(PhosphorIconsStyle.regular), 'Paper Writer AI'),
-                                    _buildFeaturePreview(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'AI Write Essay Instantly'),
+                                    _buildFeaturePreview(
+                                        PhosphorIcons.robot(
+                                            PhosphorIconsStyle.regular),
+                                        'AI Essay Generator'),
+                                    _buildFeaturePreview(
+                                        PhosphorIcons.book(
+                                            PhosphorIconsStyle.regular),
+                                        'Thesis Statement Generator'),
+                                    _buildFeaturePreview(
+                                        PhosphorIcons.pencil(
+                                            PhosphorIconsStyle.regular),
+                                        'Paper Writer AI'),
+                                    _buildFeaturePreview(
+                                        PhosphorIcons.lightning(
+                                            PhosphorIconsStyle.regular),
+                                        'AI Write Essay Instantly'),
                                   ],
                                 ),
                               ],
@@ -438,27 +454,94 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                                 const SizedBox(height: 48),
 
                                 // Pricing cards
-                                isDesktop
-                                    ? Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(child: _buildWeeklyPlan()),
-                                          const SizedBox(width: 32),
-                                          Expanded(child: _buildMonthlyPlan()),
-                                        ],
-                                      )
-                                    : Column(
-                                        children: [
-                                          _buildMonthlyPlan(),
-                                          const SizedBox(height: 24),
-                                          _buildWeeklyPlan(),
-                                        ],
-                                      ),
+                                // Single Pro Plan
+                                Center(
+                                  child: Container(
+                                    constraints:
+                                        const BoxConstraints(maxWidth: 500),
+                                    child: _buildProPlan(),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
 
                           const SizedBox(height: 48),
+
+                          // Free trial section - controlled by feature flag
+                          if (FREE_TRIAL_FEATURE == "ON") ...[
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth: isDesktop ? 500 : double.infinity,
+                              ),
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF0FDF4),
+                                borderRadius: BorderRadius.circular(16),
+                                border:
+                                    Border.all(color: const Color(0xFFBBF7D0)),
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    PhosphorIcons.gift(
+                                        PhosphorIconsStyle.regular),
+                                    size: 32,
+                                    color: const Color(0xFF10B981),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Try Before You Subscribe',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF065F46),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Test our AI essay writer and thesis generator with limited features. Experience the quality before committing to a subscription.',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: const Color(0xFF047857),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 20),
+
+                                  // Try Free button
+                                  SizedBox(
+                                    height: 56,
+                                    width: double.infinity,
+                                    child: ElevatedButton.icon(
+                                      onPressed: _tryAppForFree,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF10B981),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                      ),
+                                      icon: Icon(PhosphorIcons.play(
+                                          PhosphorIconsStyle.regular)),
+                                      label: const Text(
+                                        'Try AI Essay Writer for Free',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                          ],
 
                           // Check subscription button
                           Container(
@@ -469,27 +552,31 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                               height: 56,
                               width: double.infinity,
                               child: OutlinedButton.icon(
-                                onPressed: (_isLoading || subscriptionStatus.isLoading) 
-                                    ? null 
-                                    : _checkSubscriptionComplete,
+                                onPressed:
+                                    (_isLoading || subscriptionStatus.isLoading)
+                                        ? null
+                                        : _checkSubscriptionComplete,
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: const Color(0xFF2563EB),
-                                  side: const BorderSide(color: Color(0xFF2563EB)),
+                                  side: const BorderSide(
+                                      color: Color(0xFF2563EB)),
                                   backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                icon: (_isLoading || subscriptionStatus.isLoading)
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Color(0xFF2563EB),
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Icon(PhosphorIcons.arrowClockwise(PhosphorIconsStyle.regular)),
+                                icon:
+                                    (_isLoading || subscriptionStatus.isLoading)
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Color(0xFF2563EB),
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Icon(PhosphorIcons.arrowClockwise(
+                                            PhosphorIconsStyle.regular)),
                                 label: Text(
                                   (_isLoading || subscriptionStatus.isLoading)
                                       ? 'Checking AI Essay Writer Status...'
@@ -538,7 +625,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                             decoration: BoxDecoration(
                               color: const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border:
+                                  Border.all(color: const Color(0xFFE2E8F0)),
                             ),
                             child: Column(
                               children: [
@@ -557,10 +645,22 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                                   runSpacing: 16,
                                   alignment: WrapAlignment.center,
                                   children: [
-                                    _buildTrustItem(PhosphorIcons.shield(PhosphorIconsStyle.regular), 'Secure AI Essay Writer'),
-                                    _buildTrustItem(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'Instant AI Written Essays'),
-                                    _buildTrustItem(PhosphorIcons.graduationCap(PhosphorIconsStyle.regular), 'Academic Quality Thesis Generator'),
-                                    _buildTrustItem(PhosphorIcons.arrowCounterClockwise(PhosphorIconsStyle.regular), '7-Day Guarantee'),
+                                    _buildTrustItem(
+                                        PhosphorIcons.shield(
+                                            PhosphorIconsStyle.regular),
+                                        'Secure AI Essay Writer'),
+                                    _buildTrustItem(
+                                        PhosphorIcons.lightning(
+                                            PhosphorIconsStyle.regular),
+                                        'Instant AI Written Essays'),
+                                    _buildTrustItem(
+                                        PhosphorIcons.graduationCap(
+                                            PhosphorIconsStyle.regular),
+                                        'Academic Quality Thesis Generator'),
+                                    _buildTrustItem(
+                                        PhosphorIcons.arrowCounterClockwise(
+                                            PhosphorIconsStyle.regular),
+                                        '7-Day Guarantee'),
                                   ],
                                 ),
                                 const SizedBox(height: 24),
@@ -587,11 +687,23 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                                     const SizedBox(width: 8),
                                     Row(
                                       children: [
-                                        Icon(PhosphorIcons.creditCard(PhosphorIconsStyle.regular), size: 20, color: const Color(0xFF9CA3AF)),
+                                        Icon(
+                                            PhosphorIcons.creditCard(
+                                                PhosphorIconsStyle.regular),
+                                            size: 20,
+                                            color: const Color(0xFF9CA3AF)),
                                         const SizedBox(width: 8),
-                                        Icon(PhosphorIcons.bank(PhosphorIconsStyle.regular), size: 20, color: const Color(0xFF9CA3AF)),
+                                        Icon(
+                                            PhosphorIcons.bank(
+                                                PhosphorIconsStyle.regular),
+                                            size: 20,
+                                            color: const Color(0xFF9CA3AF)),
                                         const SizedBox(width: 8),
-                                        Icon(PhosphorIcons.deviceMobile(PhosphorIconsStyle.regular), size: 20, color: const Color(0xFF9CA3AF)),
+                                        Icon(
+                                            PhosphorIcons.deviceMobile(
+                                                PhosphorIconsStyle.regular),
+                                            size: 20,
+                                            color: const Color(0xFF9CA3AF)),
                                       ],
                                     ),
                                   ],
@@ -645,8 +757,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     );
   }
 
-  Widget _buildWeeklyPlan() {
-    final isSelected = _selectedPlan == 'weekly';
+  Widget _buildProPlan() {
+    final isSelected = _selectedPlan == 'pro';
     final isLoading = _isLoading && isSelected;
 
     return Container(
@@ -654,28 +766,56 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: const Color(0xFF2196F3), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Best Value Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2196F3),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'Best Value',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // Plan header
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Weekly AI Essay Writer',
+                'AI Thesis Generator Pro',
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A1A),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '+ Humanize Feature Included',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF2196F3),
+                  letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 16),
@@ -683,7 +823,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '\$6',
+                    '\$19.99',
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w700,
@@ -694,7 +834,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      '/week',
+                      '/month',
                       style: TextStyle(
                         fontSize: 16,
                         color: const Color(0xFF64748B),
@@ -705,10 +845,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                'Perfect for short-term projects with our thesis generator and AI essay writer',
+                'All-in-one access to our Full Thesis Generator and Humanize Thesis tools — everything you need for a professional, human-quality thesis.',
                 style: TextStyle(
                   fontSize: 14,
                   color: const Color(0xFF4A5568),
+                  height: 1.5,
                 ),
               ),
             ],
@@ -720,12 +861,20 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Unlimited thesis generator access'),
-              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Advanced AI essay writer models'),
-              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'All citation formats for AI written essays'),
-              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Priority AI essay generator processing'),
-              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Email support for thesis statement generator'),
-              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Export AI essay writer content to PDF & Word'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular),
+                  'Generate unlimited full-length theses'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular),
+                  'Humanize any AI or self-written thesis'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular),
+                  'Grammar, tone, and readability enhancements'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular),
+                  'Automatic citations (APA, MLA, Harvard, etc.)'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular),
+                  'Plagiarism-safe rewriting'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular),
+                  'Export to PDF & Word'),
+              _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular),
+                  'Priority email & chat support'),
             ],
           ),
 
@@ -736,7 +885,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
-              onPressed: isLoading ? null : () => _subscribeToPlan('weekly'),
+              onPressed: isLoading ? null : () => _subscribeToPlan('pro'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
                 foregroundColor: Colors.white,
@@ -747,193 +896,40 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
               ),
               child: isLoading
                   ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
                   : const Text(
-                'Choose Weekly AI Essay Writer',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                      'Choose Plan',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Guarantee text
+          Center(
+            child: Text(
+              '7-day money-back guarantee • Cancel anytime • Secure payments',
+              style: TextStyle(
+                fontSize: 12,
+                color: const Color(0xFF64748B),
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
       ),
     );
   }
-
-  Widget _buildMonthlyPlan() {
-  final isSelected = _selectedPlan == 'monthly';
-  final isLoading = _isLoading && isSelected;
-
-  return Container(
-    // Add margin to provide space for the label
-    margin: const EdgeInsets.only(top: 16),
-    child: Stack(
-      clipBehavior: Clip.none, // Allow overflow outside the stack bounds
-      children: [
-        // Main card container
-        Container(
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF2563EB), width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF2563EB).withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16), // Space for the label
-              
-              // Plan header
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Monthly Thesis Generator',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A1A),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '\$11',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A1A),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          '/month',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Best value for ongoing thesis work with our AI essay generator and paper writer AI',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: const Color(0xFF4A5568),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Features
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Unlimited thesis generator access'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Advanced AI essay writer models'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'All citation formats for AI written essays'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Priority AI essay generator processing'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Email support for thesis statement generator'),
-                  _buildFeatureItem(PhosphorIcons.check(PhosphorIconsStyle.regular), 'Export AI essay writer content to PDF & Word'),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // CTA Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : () => _subscribeToPlan('monthly'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: isLoading
-                      ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : const Text(
-                    'Choose Monthly Thesis Generator',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Popular badge - positioned above the card
-        Positioned(
-          top: -8, // Position above the card
-          left: 0,
-          right: 0,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Text(
-                'Most Popular AI Essay Writer',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 
   Widget _buildFeatureItem(IconData icon, String text) {
     return Padding(
@@ -969,16 +965,31 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             ? Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildFeatureRow(PhosphorIcons.target(PhosphorIconsStyle.regular), 'Smart Thesis Statement Generator', 'Our AI essay writer automatically generates logical thesis statements and chapter outlines based on your topic using advanced artificial intelligence write essay technology.')),
+                  Expanded(
+                      child: _buildFeatureRow(
+                          PhosphorIcons.target(PhosphorIconsStyle.regular),
+                          'Smart Thesis Statement Generator',
+                          'Our AI essay writer automatically generates logical thesis statements and chapter outlines based on your topic using advanced artificial intelligence write essay technology.')),
                   const SizedBox(width: 32),
-                  Expanded(child: _buildFeatureRow(PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular), 'AI Essay Writer Styles', 'Choose from Academic, Technical, or Analytical writing styles with our thesis sentence generator to match your requirements perfectly.')),
+                  Expanded(
+                      child: _buildFeatureRow(
+                          PhosphorIcons.pencilSimple(
+                              PhosphorIconsStyle.regular),
+                          'AI Essay Writer Styles',
+                          'Choose from Academic, Technical, or Analytical writing styles with our thesis sentence generator to match your requirements perfectly.')),
                 ],
               )
             : Column(
                 children: [
-                  _buildFeatureRow(PhosphorIcons.target(PhosphorIconsStyle.regular), 'Smart Thesis Statement Generator', 'Our AI essay writer automatically generates logical thesis statements and chapter outlines based on your topic using advanced artificial intelligence write essay technology.'),
+                  _buildFeatureRow(
+                      PhosphorIcons.target(PhosphorIconsStyle.regular),
+                      'Smart Thesis Statement Generator',
+                      'Our AI essay writer automatically generates logical thesis statements and chapter outlines based on your topic using advanced artificial intelligence write essay technology.'),
                   const SizedBox(height: 24),
-                  _buildFeatureRow(PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular), 'AI Essay Writer Styles', 'Choose from Academic, Technical, or Analytical writing styles with our thesis sentence generator to match your requirements perfectly.'),
+                  _buildFeatureRow(
+                      PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular),
+                      'AI Essay Writer Styles',
+                      'Choose from Academic, Technical, or Analytical writing styles with our thesis sentence generator to match your requirements perfectly.'),
                 ],
               ),
         const SizedBox(height: 24),
@@ -986,16 +997,30 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             ? Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildFeatureRow(PhosphorIcons.quotes(PhosphorIconsStyle.regular), 'Citation Formats for AI Written Essays', 'Our paper writer AI supports APA, MLA, and Chicago citation styles for proper academic formatting in all AI essay generator content.')),
+                  Expanded(
+                      child: _buildFeatureRow(
+                          PhosphorIcons.quotes(PhosphorIconsStyle.regular),
+                          'Citation Formats for AI Written Essays',
+                          'Our paper writer AI supports APA, MLA, and Chicago citation styles for proper academic formatting in all AI essay generator content.')),
                   const SizedBox(width: 32),
-                  Expanded(child: _buildFeatureRow(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'Instant AI Essay Generation', 'Generate complete thesis chapters and AI written essays in minutes with our advanced artificial intelligence writes essay technology.')),
+                  Expanded(
+                      child: _buildFeatureRow(
+                          PhosphorIcons.lightning(PhosphorIconsStyle.regular),
+                          'Instant AI Essay Generation',
+                          'Generate complete thesis chapters and AI written essays in minutes with our advanced artificial intelligence writes essay technology.')),
                 ],
               )
             : Column(
                 children: [
-                  _buildFeatureRow(PhosphorIcons.quotes(PhosphorIconsStyle.regular), 'Citation Formats for AI Written Essays', 'Our paper writer AI supports APA, MLA, and Chicago citation styles for proper academic formatting in all AI essay generator content.'),
+                  _buildFeatureRow(
+                      PhosphorIcons.quotes(PhosphorIconsStyle.regular),
+                      'Citation Formats for AI Written Essays',
+                      'Our paper writer AI supports APA, MLA, and Chicago citation styles for proper academic formatting in all AI essay generator content.'),
                   const SizedBox(height: 24),
-                  _buildFeatureRow(PhosphorIcons.lightning(PhosphorIconsStyle.regular), 'Instant AI Essay Generation', 'Generate complete thesis chapters and AI written essays in minutes with our advanced artificial intelligence writes essay technology.'),
+                  _buildFeatureRow(
+                      PhosphorIcons.lightning(PhosphorIconsStyle.regular),
+                      'Instant AI Essay Generation',
+                      'Generate complete thesis chapters and AI written essays in minutes with our advanced artificial intelligence writes essay technology.'),
                 ],
               ),
         const SizedBox(height: 24),
@@ -1003,16 +1028,30 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             ? Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildFeatureRow(PhosphorIcons.shield(PhosphorIconsStyle.regular), 'Privacy Focused AI Essay Writer', 'Your thesis generator and AI essay content is processed securely and never stored or shared with third parties.')),
+                  Expanded(
+                      child: _buildFeatureRow(
+                          PhosphorIcons.shield(PhosphorIconsStyle.regular),
+                          'Privacy Focused AI Essay Writer',
+                          'Your thesis generator and AI essay content is processed securely and never stored or shared with third parties.')),
                   const SizedBox(width: 32),
-                  Expanded(child: _buildFeatureRow(PhosphorIcons.download(PhosphorIconsStyle.regular), 'Export AI Written Essays', 'Download your thesis statement generator results and AI essay writer content in multiple formats including PDF, Word, and plain text.')),
+                  Expanded(
+                      child: _buildFeatureRow(
+                          PhosphorIcons.download(PhosphorIconsStyle.regular),
+                          'Export AI Written Essays',
+                          'Download your thesis statement generator results and AI essay writer content in multiple formats including PDF, Word, and plain text.')),
                 ],
               )
             : Column(
                 children: [
-                  _buildFeatureRow(PhosphorIcons.shield(PhosphorIconsStyle.regular), 'Privacy Focused AI Essay Writer', 'Your thesis generator and AI essay content is processed securely and never stored or shared with third parties.'),
+                  _buildFeatureRow(
+                      PhosphorIcons.shield(PhosphorIconsStyle.regular),
+                      'Privacy Focused AI Essay Writer',
+                      'Your thesis generator and AI essay content is processed securely and never stored or shared with third parties.'),
                   const SizedBox(height: 24),
-                  _buildFeatureRow(PhosphorIcons.download(PhosphorIconsStyle.regular), 'Export AI Written Essays', 'Download your thesis statement generator results and AI essay writer content in multiple formats including PDF, Word, and plain text.'),
+                  _buildFeatureRow(
+                      PhosphorIcons.download(PhosphorIconsStyle.regular),
+                      'Export AI Written Essays',
+                      'Download your thesis statement generator results and AI essay writer content in multiple formats including PDF, Word, and plain text.'),
                 ],
               ),
       ],
@@ -1105,4 +1144,3 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     );
   }
 }
-

@@ -28,7 +28,8 @@ class ReviewService {
           appStoreId: '6739264844',
         );
       } else {
-        await inAppReview.openStoreListing();  // Android uses package name automatically
+        await inAppReview
+            .openStoreListing(); // Android uses package name automatically
       }
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('has_reviewed', true);

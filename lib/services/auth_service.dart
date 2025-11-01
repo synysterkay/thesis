@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId: kIsWeb ? '1098826060423-c72smknm805s927ieg4tm5m8d9k0i1j1.apps.googleusercontent.com' : null,
+    clientId: kIsWeb
+        ? '1098826060423-c72smknm805s927ieg4tm5m8d9k0i1j1.apps.googleusercontent.com'
+        : null,
   );
 
   // Get current user
@@ -55,10 +57,13 @@ class AuthService {
       if (kIsWeb) {
         // Web-specific Google Sign In
         GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        googleProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
-        googleProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+        googleProvider
+            .addScope('https://www.googleapis.com/auth/userinfo.email');
+        googleProvider
+            .addScope('https://www.googleapis.com/auth/userinfo.profile');
 
-        final UserCredential result = await _auth.signInWithPopup(googleProvider);
+        final UserCredential result =
+            await _auth.signInWithPopup(googleProvider);
         return result.user;
       } else {
         // Mobile Google Sign In
@@ -67,13 +72,15 @@ class AuthService {
           throw Exception('Google sign in was cancelled');
         }
 
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
 
-        final UserCredential result = await _auth.signInWithCredential(credential);
+        final UserCredential result =
+            await _auth.signInWithCredential(credential);
         return result.user;
       }
     } on FirebaseAuthException catch (e) {
@@ -108,7 +115,9 @@ class AuthService {
       'photoURL': user.photoURL ?? '',
       'createdAt': user.metadata.creationTime?.toIso8601String() ?? '',
       'lastSignIn': user.metadata.lastSignInTime?.toIso8601String() ?? '',
-      'provider': user.providerData.isNotEmpty ? user.providerData.first.providerId : 'unknown',
+      'provider': user.providerData.isNotEmpty
+          ? user.providerData.first.providerId
+          : 'unknown',
       'isAnonymous': user.isAnonymous,
     };
   }
@@ -125,7 +134,8 @@ class AuthService {
   }
 
   // Update user profile
-  Future<void> updateUserProfile({String? displayName, String? photoURL}) async {
+  Future<void> updateUserProfile(
+      {String? displayName, String? photoURL}) async {
     try {
       final user = _auth.currentUser;
       if (user == null) throw Exception('No user signed in');
@@ -176,7 +186,8 @@ class AuthService {
       case 'invalid-credential':
         return Exception('Invalid credentials provided');
       case 'account-exists-with-different-credential':
-        return Exception('An account already exists with a different sign-in method');
+        return Exception(
+            'An account already exists with a different sign-in method');
       case 'requires-recent-login':
         return Exception('Please sign in again to perform this action');
       default:

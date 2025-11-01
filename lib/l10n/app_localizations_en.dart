@@ -12,16 +12,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcome => 'Academic Writing Assistant';
 
   @override
-  String get onboardDescription1 => 'Learn to develop professional academic thesis structure';
+  String get onboardDescription1 =>
+      'Learn to develop professional academic thesis structure';
 
   @override
   String get smartContent => 'Smart Learning Framework';
 
   @override
-  String get onboardDescription2 => 'Practice organizing chapters and content effectively';
+  String get onboardDescription2 =>
+      'Practice organizing chapters and content effectively';
 
   @override
-  String get onboardDescription3 => 'Export your learning materials in professional PDF format';
+  String get onboardDescription3 =>
+      'Export your learning materials in professional PDF format';
 
   @override
   String get easyExport => 'Easy Export In PDF';
@@ -51,7 +54,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
-  String get reportContentIssue => 'Please describe the issue with this content:';
+  String get reportContentIssue =>
+      'Please describe the issue with this content:';
 
   @override
   String get enterConcern => 'Enter your concern...';
@@ -81,7 +85,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportAsPdf => 'Export as PDF';
 
   @override
-  String get exportDescription => 'Your academic work will be exported as a PDF file and saved to your Downloads folder.';
+  String get exportDescription =>
+      'Your academic work will be exported as a PDF file and saved to your Downloads folder.';
 
   @override
   String pdfSavedToDownloads(String path) {
@@ -103,10 +108,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generateAll => 'Generate All';
 
   @override
-  String get pleaseCompleteAllSections => 'Please complete all sections before exporting';
+  String get pleaseCompleteAllSections =>
+      'Please complete all sections before exporting';
 
   @override
-  String get generatedSuccessfully => 'Structure created successfully! Click On PDF to export';
+  String get generatedSuccessfully =>
+      'Structure created successfully! Click On PDF to export';
 
   @override
   String errorGeneratingContent(Object error) {
@@ -172,7 +179,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generateThesis => 'Create Structure';
 
   @override
-  String get pleaseEnterThesisTopicFirst => 'Please enter a research topic first';
+  String get pleaseEnterThesisTopicFirst =>
+      'Please enter a research topic first';
 
   @override
   String failedToGenerateChapters(Object error) {
@@ -191,7 +199,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseCompleteAllChapters => 'Please complete all section titles';
 
   @override
-  String get requiredChaptersMissing => 'Introduction and Conclusion sections are required';
+  String get requiredChaptersMissing =>
+      'Introduction and Conclusion sections are required';
 
   @override
   String get openFile => 'Open File';

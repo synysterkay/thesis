@@ -1,7 +1,7 @@
 name: thesis_generator
 description: "thesis generator"
 publish_to: 'none'
-version: 12.0.0+12
+version: 12.0.0+13
 
 environment:
   sdk: '>=3.5.4 <4.0.0'

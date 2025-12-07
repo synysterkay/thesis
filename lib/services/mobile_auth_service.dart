@@ -243,22 +243,18 @@ class MobileAuthService {
             '3. The app is properly signed with a valid provisioning profile');
       } else if (errorStr.contains('failed')) {
         throw Exception('Apple Sign-In failed. Please try again');
+      }
+    } catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
   // Sign out
   Future<void> signOut() async {
     try {
       // Clear OneSignal user first
       await OneSignalService().clearUser();
 
-      // Sign out from both Firebase and Google
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
-    } catch (e) {
-      throw Exception('Sign out failed: ${e.toString()}');
-    }
-  }uture<void> signOut() async {
-    try {
       // Sign out from both Firebase and Google
       await Future.wait([
         _auth.signOut(),

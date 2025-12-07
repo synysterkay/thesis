@@ -244,8 +244,6 @@ class MobileAuthService {
       } else if (errorStr.contains('failed')) {
         throw Exception('Apple Sign-In failed. Please try again');
       }
-    } catch (e) {
-      throw _handleAuthException(e);
     }
   }
 
@@ -256,7 +254,7 @@ class MobileAuthService {
       await OneSignalService().clearUser();
 
       // Sign out from both Firebase and Google
-      await Future.wait([
+      await Future.wait<void>([
         _auth.signOut(),
         _googleSignIn.signOut(),
       ]);

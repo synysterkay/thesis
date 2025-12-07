@@ -119,17 +119,21 @@ workflows:
         script: |
           echo "🧹 Cleaning iOS build artifacts..."
           cd ios
-          rm -rf Pods Podfile.lock .symlinks
+          rm -rf Pods Podfile.lock .symlinks Pod
           cd ..
           flutter clean
+          flutter pub cache repair
           
       - name: Install CocoaPods dependencies
         script: |
           echo "📲 Installing CocoaPods dependencies..."
           cd ios
           pod --version
+          # Clean pods cache
+          rm -rf Pods Podfile.lock
+          pod cache clean --all
+          # Update repo and install
           pod repo update
-          # Install all pods
           pod install --repo-update --verbose
           cd ..
           

@@ -43,6 +43,7 @@
         "intl",
         "js",
         "media_store_plus",
+        "onesignal_flutter",
         "open_file",
         "path_provider",
         "pdf",
@@ -2308,6 +2309,13 @@
       "name": "synchronized",
       "version": "3.4.0",
       "dependencies": []
+    },
+    {
+      "name": "onesignal_flutter",
+      "version": "5.3.4",
+      "dependencies": [
+        "flutter"
+      ]
     }
   ],
   "configVersion": 1

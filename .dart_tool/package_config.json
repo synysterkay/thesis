@@ -764,6 +764,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "onesignal_flutter",
+      "rootUri": "file:///Users/macbookair/.pub-cache/hosted/pub.dev/onesignal_flutter-5.3.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "open_file",
       "rootUri": "file:///Users/macbookair/.pub-cache/hosted/pub.dev/open_file-3.5.10",
       "packageUri": "lib/",
@@ -1461,8 +1467,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.10.0",
+  "generatorVersion": "3.11.0-93.1.beta",
   "flutterRoot": "file:///Users/macbookair/flutter",
-  "flutterVersion": "3.38.1",
+  "flutterVersion": "3.39.0-0.1.pre",
   "pubCache": "file:///Users/macbookair/.pub-cache"
 }

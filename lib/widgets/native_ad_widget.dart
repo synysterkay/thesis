@@ -88,7 +88,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget>
                   end: Alignment.centerRight,
                   colors: [
                     Colors.transparent,
-                    Colors.white.withOpacity(0.2),
+                    Colors.grey.withOpacity(0.2),
                     Colors.transparent,
                   ],
                   stops: [
@@ -100,7 +100,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget>
               },
               blendMode: BlendMode.srcATop,
               child: Container(
-                color: const Color(0xFF171717),
+                color: const Color(0xFFFFFFFF),
               ),
             );
           },

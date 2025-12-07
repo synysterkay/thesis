@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/thesis_provider.dart';
 import '../models/thesis.dart';
 import '../widgets/auto_save_indicator.dart';
+import '../screens/main_navigation_screen.dart';
 import 'dart:math' as math;
 
 class ThesisDashboardScreen extends ConsumerStatefulWidget {
@@ -707,10 +708,23 @@ class _ThesisDashboardScreenState extends ConsumerState<ThesisDashboardScreen> {
   void _navigateToOutlineViewer() {
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final isTrialMode = currentRoute?.contains('trial') ?? false;
+    final thesisState = ref.read(thesisStateProvider);
 
-    Navigator.pushNamed(
+    if (!thesisState.hasValue || thesisState.value == null) {
+      return;
+    }
+
+    // Navigate to main navigation with outline workflow
+    Navigator.pushReplacement(
       context,
-      isTrialMode ? '/outline-trial' : '/outline',
+      MaterialPageRoute(
+        builder: (context) => MainNavigationScreen(
+          isTrialMode: isTrialMode,
+          initialIndex: 1,
+          workflowScreen: 'outline',
+          thesisId: thesisState.value!.id,
+        ),
+      ),
     );
   }
 
@@ -728,10 +742,23 @@ class _ThesisDashboardScreenState extends ConsumerState<ThesisDashboardScreen> {
   void _navigateToExport() {
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final isTrialMode = currentRoute?.contains('trial') ?? false;
+    final thesisState = ref.read(thesisStateProvider);
 
-    Navigator.pushNamed(
+    if (!thesisState.hasValue || thesisState.value == null) {
+      return;
+    }
+
+    // Navigate to main navigation with export workflow
+    Navigator.pushReplacement(
       context,
-      isTrialMode ? '/export-trial' : '/export',
+      MaterialPageRoute(
+        builder: (context) => MainNavigationScreen(
+          isTrialMode: isTrialMode,
+          initialIndex: 1,
+          workflowScreen: 'export',
+          thesisId: thesisState.value!.id,
+        ),
+      ),
     );
   }
 

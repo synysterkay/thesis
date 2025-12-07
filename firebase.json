@@ -1,32 +1,12 @@
 {
   "hosting": {
-    "public": "web",
+    "public": "build/web",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/api/check-subscription",
-        "function": "checkSubscription"
-      },
-      {
-        "source": "/api/create-checkout-session",
-        "function": "createCheckoutSession"
-      },
-      {
-        "source": "/webhooks/stripe",
-        "function": "stripeWebhook"
-      },
-      {
-        "source": "/webhooks/revenuecat",
-        "function": "revenuecatWebhook"
-      },
-      {
-        "source": "/api/health",
-        "function": "healthCheck"
-      },
       {
         "source": "**",
         "destination": "/index.html"
@@ -35,7 +15,7 @@
   },
   "functions": {
     "source": "functions",
-    "runtime": "nodejs18"
+    "runtime": "nodejs20"
   },
   "firestore": {
     "rules": "firestore.rules",

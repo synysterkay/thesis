@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/auth_service.dart';
+import '../services/mobile_auth_service.dart';
 
-// Auth service provider
-final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService();
+// Auth service provider - now using mobile auth service
+final authServiceProvider = Provider<MobileAuthService>((ref) {
+  return MobileAuthService();
 });
 
 // Auth state provider

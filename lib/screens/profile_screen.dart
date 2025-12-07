@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -253,18 +254,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Center(
                         child: Column(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Icon(
-                                PhosphorIcons.user(PhosphorIconsStyle.fill),
-                                size: 64,
-                                color: primaryColor,
-                              ),
-                            ),
+                            _buildProfilePicture(user),
                             const SizedBox(height: 16),
                             Text(
                               user?.email ?? 'No email',
@@ -550,6 +540,117 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         contentPadding: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfilePicture(User? user) {
+    // Generate a consistent color based on user email
+    Color getAvatarColor() {
+      if (user?.email != null) {
+        final hash = user!.email!.hashCode.abs();
+        final colors = [
+          const Color(0xFF2563EB), // Blue
+          const Color(0xFF7C3AED), // Purple
+          const Color(0xFFDB2777), // Pink
+          const Color(0xFFDC2626), // Red
+          const Color(0xFFEA580C), // Orange
+          const Color(0xFFD97706), // Amber
+          const Color(0xFF65A30D), // Lime
+          const Color(0xFF059669), // Emerald
+          const Color(0xFF0891B2), // Cyan
+          const Color(0xFF7C2D12), // Brown
+        ];
+        return colors[hash % colors.length];
+      }
+      return primaryColor;
+    }
+
+    // Get initials from display name or email
+    String getInitials() {
+      if (user?.displayName != null && user!.displayName!.isNotEmpty) {
+        final names = user.displayName!.split(' ');
+        if (names.length >= 2) {
+          return '${names[0][0]}${names[1][0]}'.toUpperCase();
+        } else {
+          return names[0].length >= 2
+              ? names[0].substring(0, 2).toUpperCase()
+              : names[0][0].toUpperCase();
+        }
+      } else if (user?.email != null && user!.email!.isNotEmpty) {
+        final emailPrefix = user.email!.split('@')[0];
+        return emailPrefix.length >= 2
+            ? emailPrefix.substring(0, 2).toUpperCase()
+            : emailPrefix[0].toUpperCase();
+      }
+      return 'U';
+    }
+
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(60),
+        border: Border.all(
+          color: borderColor,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(58),
+        child: user?.photoURL != null
+            ? CachedNetworkImage(
+                imageUrl: user!.photoURL!,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: getAvatarColor(),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) =>
+                    _buildInitialsAvatar(getInitials(), getAvatarColor()),
+              )
+            : _buildInitialsAvatar(getInitials(), getAvatarColor()),
+      ),
+    );
+  }
+
+  Widget _buildInitialsAvatar(String initials, Color color) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color,
+            color.withOpacity(0.7),
+            color.withOpacity(0.9),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: GoogleFonts.inter(
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            letterSpacing: 1.2,
+          ),
         ),
       ),
     );

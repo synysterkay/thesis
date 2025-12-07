@@ -1,312 +1,257 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'thesis_preview_screen.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'subject_selection_screen.dart';
 
 class OnboardingScreen3 extends StatelessWidget {
   const OnboardingScreen3({Key? key}) : super(key: key);
 
-  // Modern conversion-focused color scheme
+  // Updated color scheme to match app design
   static const primaryColor = Color(0xFF2563EB);
   static const backgroundColor = Color(0xFFFFFFFF);
   static const surfaceColor = Color(0xFFF8FAFC);
   static const borderColor = Color(0xFFE2E8F0);
   static const textPrimary = Color(0xFF1A1A1A);
-  static const textSecondary = Color(0xFF64748B);
-  static const accentColor = Color(0xFF10B981);
-  static const warningColor = Color(0xFFEF4444);
+  static const textSecondary = Color(0xFF4A5568);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
 
-              // Progress indicator
-              Row(
-                children: [
-                  _buildProgressDot(true),
-                  _buildProgressLine(true),
-                  _buildProgressDot(true),
-                  _buildProgressLine(true),
-                  _buildProgressDot(true),
-                ],
-              ),
-              
-              const SizedBox(height: 40),
-
-              // Final compelling headline
-              Text(
-                "Your Academic Success\nStarts Here",
-                style: GoogleFonts.inter(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: textPrimary,
-                  height: 1.2,
-                ),
-              ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
-
-              const SizedBox(height: 16),
-
-              // Urgency message
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [warningColor.withOpacity(0.1), primaryColor.withOpacity(0.1)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: warningColor.withOpacity(0.3)),
-                ),
-                child: Column(
-                  children: [
-                    Row(
+                // Header badge with Phosphor icon
+                Center(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(color: const Color(0xFFDBEAFE)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.access_time, color: warningColor, size: 20),
+                        Icon(
+                          PhosphorIcons.filePdf(PhosphorIconsStyle.regular),
+                          size: 16,
+                          color: primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Text(
-                          "Limited Time Offer",
+                          'Professional PDF Export',
                           style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: warningColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: primaryColor,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Join thousands of students who've already transformed their academic performance",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: textSecondary,
-                        height: 1.4,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
-
-              const SizedBox(height: 32),
-
-              // Final value proposition
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _buildFinalBenefit(
-                        icon: Icons.verified_user,
-                        title: "Undetectable AI Technology",
-                        description: "Our advanced humanization ensures your thesis passes all AI detection tools",
-                        guarantee: "100% Guarantee",
-                        color: accentColor,
-                        delay: 600,
-                      ),
-                      
-                      _buildFinalBenefit(
-                        icon: Icons.insert_chart_outlined,
-                        title: "Professional Visual Elements",
-                        description: "Automatic generation of charts, graphs, and data tables that impress professors",
-                        guarantee: "Stand Out Visually",
-                        color: primaryColor,
-                        delay: 800,
-                      ),
-                      
-                      _buildFinalBenefit(
-                        icon: Icons.schedule,
-                        title: "Instant Academic Results",
-                        description: "Generate a complete, publication-ready thesis in minutes, not months",
-                        guarantee: "Save 200+ Hours",
-                        color: Color(0xFF8B5CF6),
-                        delay: 1000,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Testimonial/Social proof
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: surfaceColor,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: borderColor),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: List.generate(5, (index) => 
-                                Icon(Icons.star, color: Colors.amber, size: 20),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              '"This app saved my entire semester. The thesis looked so professional with all the charts and data - my professor was amazed!"',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontStyle: FontStyle.italic,
-                                color: textPrimary,
-                                height: 1.4,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              "- Sarah M., Harvard Student",
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ).animate().fadeIn(delay: const Duration(milliseconds: 1200)),
-                    ],
                   ),
-                ),
-              ),
+                ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
+                const SizedBox(height: 32),
 
-              // Final CTA with maximum urgency
-              Container(
-                margin: const EdgeInsets.only(bottom: 32),
-                child: Column(
-                  children: [
-                    Text(
-                      "Ready to Transform Your Academic Life?",
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: textPrimary,
+                // Logo icon
+                Center(
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      textAlign: TextAlign.center,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Join 50,000+ successful students worldwide",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: textSecondary,
+                    child: Icon(
+                      PhosphorIcons.fileText(PhosphorIconsStyle.regular),
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  )
+                      .animate()
+                      .fadeIn(delay: const Duration(milliseconds: 300))
+                      .scale(
+                        begin: const Offset(0.8, 0.8),
+                        end: const Offset(1.0, 1.0),
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOutQuad,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
+                ),
+                const SizedBox(height: 32),
+
+                const SizedBox(height: 32),
+
+                // Title
+                Text(
+                  "Professional PDF Export",
+                  style: GoogleFonts.inter(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
+                    height: 1.2,
+                    letterSpacing: -0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+                    .animate()
+                    .fadeIn(delay: const Duration(milliseconds: 400))
+                    .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
+                const SizedBox(height: 16),
+
+                // Subtitle
+                Text(
+                  "Export your complete thesis with charts & tables in professional PDF format, ready for submission.",
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ).animate().fadeIn(delay: const Duration(milliseconds: 500)),
+                const SizedBox(height: 40),
+
+                // Feature cards
+                _buildFeatureCard(
+                  icon: PhosphorIcons.filePdf(PhosphorIconsStyle.regular),
+                  title: 'PDF Export',
+                  description:
+                      'Download your thesis in professional PDF format',
+                  delay: 600,
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  icon: PhosphorIcons.textAa(PhosphorIconsStyle.regular),
+                  title: 'Perfect Formatting',
+                  description: 'Academic formatting with proper citations',
+                  delay: 700,
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  icon: PhosphorIcons.fileDoc(PhosphorIconsStyle.regular),
+                  title: 'Ready to Submit',
+                  description: 'Complete thesis ready for your professor',
+                  delay: 800,
+                ),
+                const SizedBox(height: 40),
+
+                // Page indicators
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(3, (index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: 8,
+                      width: index == 2 ? 24 : 8,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28),
-                        gradient: LinearGradient(
-                          colors: [primaryColor, Color(0xFF1D4ED8)],
+                        borderRadius: BorderRadius.circular(4),
+                        color: index == 2 ? primaryColor : borderColor,
+                      ),
+                    ).animate().fadeIn(
+                          delay: Duration(milliseconds: 900 + (index * 100)),
+                        );
+                  }),
+                ),
+                const SizedBox(height: 32),
+
+                // Get Started button
+                SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SubjectSelectionScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ThesisPreviewScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
-                          shadowColor: Colors.transparent,
-                          minimumSize: const Size(double.infinity, 60),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                        ),
+                      child: Container(
+                        alignment: Alignment.center,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Start My Humanized Thesis Now",
+                              "Get Started",
                               style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(Icons.rocket_launch, size: 24),
+                            Icon(
+                              PhosphorIcons.arrowRight(
+                                  PhosphorIconsStyle.regular),
+                              size: 20,
+                              color: Colors.white,
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "🔒 Secure • ⚡ Instant • ✅ Guaranteed",
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ).animate().fadeIn(delay: const Duration(milliseconds: 1600)),
-            ],
+                  ),
+                ).animate().fadeIn(delay: const Duration(milliseconds: 1000)),
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildProgressDot(bool isActive) {
-    return Container(
-      width: 12,
-      height: 12,
-      decoration: BoxDecoration(
-        color: isActive ? primaryColor : borderColor,
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _buildProgressLine(bool isActive) {
-    return Expanded(
-      child: Container(
-        height: 2,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        color: isActive ? primaryColor : borderColor,
-      ),
-    );
-  }
-
-  Widget _buildFinalBenefit({
+  Widget _buildFeatureCard({
     required IconData icon,
     required String title,
     required String description,
-    required String guarantee,
-    required Color color,
     required int delay,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
@@ -314,17 +259,17 @@ class OnboardingScreen3 extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [color.withOpacity(0.2), color.withOpacity(0.1)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
+              color: const Color(0xFFEFF6FF),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 28),
+            child: Icon(
+              icon,
+              color: primaryColor,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -335,33 +280,17 @@ class OnboardingScreen3 extends StatelessWidget {
                   title,
                   style: GoogleFonts.inter(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: textPrimary,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   description,
                   style: GoogleFonts.inter(
                     fontSize: 14,
+                    fontWeight: FontWeight.w400,
                     color: textSecondary,
-                    height: 1.3,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    guarantee,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
                   ),
                 ),
               ],
@@ -370,11 +299,10 @@ class OnboardingScreen3 extends StatelessWidget {
         ],
       ),
     ).animate().fadeIn(delay: Duration(milliseconds: delay)).slideX(
-      begin: 0.3,
-      end: 0,
-      delay: Duration(milliseconds: delay),
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutQuad,
-    );
+          begin: 0.2,
+          end: 0,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutQuad,
+        );
   }
 }

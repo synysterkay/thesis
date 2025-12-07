@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' show Platform;
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,35 +25,37 @@ class _SplashScreenState extends State<SplashScreen> {
       // Add a small delay for splash effect
       await Future.delayed(const Duration(seconds: 1));
 
-      // Check if first time user (web-safe)
+      if (!mounted) return;
+
+      if (kIsWeb) {
+        // Web: skip onboarding and go directly to thesis form
+        Navigator.pushReplacementNamed(context, '/thesis-form');
+        return;
+      }
+
+      // Check if user has completed onboarding
       final prefs = await SharedPreferences.getInstance();
-      final isFirstTime = prefs.getBool('first_time') ?? true;
+      final hasCompletedOnboarding =
+          prefs.getBool('hasCompletedOnboarding') ?? false;
 
-      if (mounted) {
-        if (isFirstTime) {
-          // For web, skip onboarding and go directly to thesis form
-          if (kIsWeb) {
-            Navigator.pushReplacementNamed(context, '/thesis-form');
+      if (Platform.isIOS) {
+        if (hasCompletedOnboarding) {
+          // Second time user - check authentication
+          final user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            // User is signed in - go to start screen
+            Navigator.pushReplacementNamed(context, '/start');
           } else {
-            // For mobile, check platform safely
-            bool isIOS = false;
-            try {
-              isIOS = Platform.isIOS;
-            } catch (e) {
-              // Fallback for unsupported platforms
-              isIOS = false;
-            }
-
-            if (isIOS) {
-              Navigator.pushReplacementNamed(context, '/onboarding1');
-            } else {
-              Navigator.pushReplacementNamed(context, '/thesis-form');
-            }
+            // User not signed in - go to sign in screen
+            Navigator.pushReplacementNamed(context, '/mobile-signin');
           }
-          await prefs.setBool('first_time', false);
         } else {
-          Navigator.pushReplacementNamed(context, '/thesis-form');
+          // First time user - show onboarding
+          Navigator.pushReplacementNamed(context, '/onboarding1');
         }
+      } else {
+        // Android: Go to old onboarding screen
+        Navigator.pushReplacementNamed(context, '/onboard');
       }
     } catch (e) {
       print('Splash screen error: $e');
@@ -65,64 +69,80 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // App Logo
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF9D4EDD), Color(0xFFFF48B0)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(25),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF9D4EDD).withOpacity(0.3),
-                    blurRadius: 20,
-                    spreadRadius: 2,
+      backgroundColor: Colors.white,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.grey[100]!],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // App Logo
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2563EB).withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  PhosphorIcons.graduationCap(PhosphorIconsStyle.regular),
+                  size: 40,
+                  color: Colors.white,
+                ),
               ),
-              child: const Icon(
-                Icons.school,
-                size: 50,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
-            // App Title
-            const Text(
-              'Thesis Generator',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+              // App Title
+              const Text(
+                'Thesis Generator & AI Essay Writer',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A),
+                  letterSpacing: -0.5,
+                  height: 1.1,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
-            // Subtitle
-            const Text(
-              'AI-Powered Academic Writing',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
+              // Subtitle
+              const Text(
+                'AI-Powered Academic Writing',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF4A5568),
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 48),
+              const SizedBox(height: 48),
 
-            // Loading Indicator
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9D4EDD)),
-            ),
-          ],
+              // Loading Indicator
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                strokeWidth: 3,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,29 +1,75 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/stripe_service.dart';
-import '../providers/auth_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import '../services/superwall_service.dart';
+import '../services/subscription_sync_service.dart';
 
-// Stripe service provider
-final stripeServiceProvider = Provider<StripeService>((ref) {
-  return StripeService();
-});
+// Simple subscription status for Superwall integration
+class SubscriptionStatus {
+  final bool isActive;
+  final String? userId;
+  final String? planType;
+  final DateTime? currentPeriodEnd;
+  final String status;
 
-// Subscription status provider with better error handling
-final subscriptionStatusProvider = StreamProvider<SubscriptionStatus>((ref) {
-  final stripeService = ref.watch(stripeServiceProvider);
-  final user = ref.watch(currentUserProvider);
+  const SubscriptionStatus({
+    required this.isActive,
+    this.userId,
+    this.planType,
+    this.currentPeriodEnd,
+    required this.status,
+  });
 
-  if (user == null) {
-    return Stream.value(SubscriptionStatus(
+  factory SubscriptionStatus.active(String userId) {
+    return SubscriptionStatus(
+      isActive: true,
+      userId: userId,
+      planType: 'superwall_managed',
+      currentPeriodEnd:
+          DateTime.now().add(const Duration(days: 365)), // Placeholder
+      status: 'active',
+    );
+  }
+
+  factory SubscriptionStatus.inactive() {
+    return const SubscriptionStatus(
       isActive: false,
       userId: null,
       planType: null,
       currentPeriodEnd: null,
-      status: 'not_authenticated',
-    ));
+      status: 'inactive',
+    );
   }
+}
 
-  return stripeService.subscriptionStatusStream();
+// Simplified subscription status provider for Superwall
+// Superwall handles subscription management for all platforms including web
+final subscriptionStatusProvider =
+    StreamProvider<SubscriptionStatus>((ref) async* {
+  await for (final user in FirebaseAuth.instance.authStateChanges()) {
+    if (user == null) {
+      yield SubscriptionStatus.inactive();
+    } else {
+      // On web, ALWAYS check Stripe for the authenticated user's subscription
+      // This ensures we catch subscriptions even on page reload after payment
+      try {
+        print('📧 Checking subscription for authenticated user: ${user.email}');
+        final hasActiveSubscription =
+            await SubscriptionSyncService.checkUnifiedSubscriptionStatus();
+
+        if (hasActiveSubscription) {
+          print('✅ Subscription ACTIVE for ${user.email}');
+          yield SubscriptionStatus.active(user.uid);
+        } else {
+          print('❌ No active subscription for ${user.email}');
+          yield SubscriptionStatus.inactive();
+        }
+      } catch (e) {
+        print('Error checking subscription status: $e');
+        yield SubscriptionStatus.inactive();
+      }
+    }
+  }
 });
 
 // Convenience providers
@@ -36,160 +82,34 @@ final isSubscribedProvider = Provider<bool>((ref) {
   );
 });
 
-final subscriptionPlanProvider = Provider<String?>((ref) {
-  final subscriptionStatus = ref.watch(subscriptionStatusProvider);
-  return subscriptionStatus.when(
-    data: (status) => status.planType,
-    loading: () => null,
-    error: (_, __) => null,
-  );
-});
-
-final subscriptionEndDateProvider = Provider<DateTime?>((ref) {
-  final subscriptionStatus = ref.watch(subscriptionStatusProvider);
-  return subscriptionStatus.when(
-    data: (status) => status.currentPeriodEnd,
-    loading: () => null,
-    error: (_, __) => null,
-  );
-});
-
-// Subscription service provider (for compatibility)
-final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
-  final stripeService = ref.watch(stripeServiceProvider);
-  return SubscriptionService(stripeService);
-});
-
-// Subscription actions provider
+// Subscription actions provider (simplified for Superwall)
 final subscriptionActionsProvider = Provider<SubscriptionActions>((ref) {
-  final stripeService = ref.watch(stripeServiceProvider);
-  return SubscriptionActions(stripeService);
+  return SubscriptionActions();
 });
 
-/// Subscription Service (for compatibility with existing code)
-class SubscriptionService {
-  final StripeService _stripeService;
-
-  SubscriptionService(this._stripeService);
-
-  Future<void> handleSignIn(User user) async {
-    try {
-      print('🔐 Handling sign in for user: ${user.uid}');
-      await _stripeService.ensureCustomerExists();
-      print('✅ Sign in handled successfully');
-    } catch (e) {
-      print('❌ Error handling sign in: $e');
-      // Don't throw here, as this is not critical for sign in
-    }
-  }
-
-  Future<void> handleSignOut() async {
-    try {
-      print('🔐 Handling sign out');
-      // Clean up any local data if needed
-      print('✅ Sign out handled successfully');
-    } catch (e) {
-      print('❌ Error handling sign out: $e');
-      // Don't throw here, as this is not critical for sign out
-    }
-  }
-
-  Future<void> refreshSubscriptionStatus() async {
-    await _stripeService.refreshSubscriptionStatus();
-  }
-
-  String getSubscriptionUrl() {
-    return _stripeService.getPaymentLink('pro');
-  }
-}
-
-/// Subscription Actions
 class SubscriptionActions {
-  final StripeService _stripeService;
-
-  SubscriptionActions(this._stripeService);
+  // Since Superwall handles all subscription logic,
+  // these methods are simplified stubs
 
   Future<void> refreshSubscriptionStatus() async {
-    await _stripeService.refreshSubscriptionStatus();
-  }
-
-  /// Get pro payment link
-  String getProPaymentLink() {
-    return _stripeService.getPaymentLinkWithTracking('pro');
-  }
-
-  /// Get monthly payment link (alias for pro)
-  String getMonthlyPaymentLink() {
-    return _stripeService.getPaymentLinkWithTracking('pro');
-  }
-
-  /// Get weekly payment link (alias for pro)
-  String getWeeklyPaymentLink() {
-    return _stripeService.getPaymentLinkWithTracking('pro');
+    // No-op: Superwall handles subscription status
   }
 
   Future<String> createProSubscription() async {
-    try {
-      // Option 1: Use checkout session (requires Stripe Extension setup)
-      return await _stripeService.createCheckoutSession(
-        priceId: StripeService.proPriceId,
-        successUrl:
-            '${Uri.base.origin}/thesis-form?session_id={CHECKOUT_SESSION_ID}',
-        cancelUrl: '${Uri.base.origin}/paywall',
-      );
-    } catch (e) {
-      print('❌ Checkout session failed, falling back to payment link: $e');
-      // Option 2: Fallback to payment link
-      return getProPaymentLink();
-    }
+    // Should not be called with Superwall integration
+    throw UnimplementedError('Use Superwall for subscriptions');
   }
 
-  Future<String> createMonthlySubscription() async {
-    try {
-      // Option 1: Use checkout session (requires Stripe Extension setup)
-      return await _stripeService.createCheckoutSession(
-        priceId: StripeService.proPriceId,
-        successUrl:
-            '${Uri.base.origin}/thesis-form?session_id={CHECKOUT_SESSION_ID}',
-        cancelUrl: '${Uri.base.origin}/paywall',
-      );
-    } catch (e) {
-      print('❌ Checkout session failed, falling back to payment link: $e');
-      // Option 2: Fallback to payment link
-      return getProPaymentLink();
-    }
-  }
-
-  Future<String> getCustomerPortalUrl() async {
-    return await _stripeService
-        .getCustomerPortalUrl('${Uri.base.origin}/paywall');
+  Future<void> cancelSubscription() async {
+    // Superwall handles cancellations
+    throw UnimplementedError('Use Superwall dashboard for cancellations');
   }
 
   Future<void> handleSignOut() async {
-    // Clean up any local subscription data if needed
-    print('🔐 Cleaning up subscription data on sign out');
-  }
+    // Clear Superwall user identity before signing out
+    await SuperwallService.clearUserIdentity();
 
-  Future<void> handleSignIn(User user) async {
-    await _stripeService.ensureCustomerExists();
-  }
-
-  String getSubscriptionUrl() {
-    return _stripeService.getPaymentLink('pro');
-  }
-
-  /// Debug method to check subscription setup
-  Future<Map<String, dynamic>> debugSubscriptionSetup() async {
-    return await _stripeService.debugFirestoreStructure();
-  }
-
-  /// Cancel subscription
-  Future<void> cancelSubscription(String subscriptionId) async {
-    await _stripeService.cancelSubscription(subscriptionId);
-  }
-
-  /// Get subscription analytics
-  Future<Map<String, dynamic>> getSubscriptionAnalytics() async {
-    return await _stripeService.getSubscriptionAnalytics();
+    // Handle sign out - just sign out from Firebase
+    await FirebaseAuth.instance.signOut();
   }
 }

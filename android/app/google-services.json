@@ -14,6 +14,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "1098826060423-gebhmevueen3c7dtrkksqogsip528qej.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thesis.generator.ai",
+            "certificate_hash": "352e1a409ceb66a099ae8ca3fea2cece7a0c2188"
+          }
+        },
+        {
+          "client_id": "1098826060423-m440ovg2iirkqqohrd6t43o9mf16v6gm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thesis.generator.ai",
+            "certificate_hash": "e15b8a1960b8b660fe640392f38bc5cfdcc6a774"
+          }
+        },
+        {
+          "client_id": "1098826060423-mheu95b0hk93n62ee4vqs3p8la6a26np.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thesis.generator.ai",
+            "certificate_hash": "ba72b84808c7532922a4ae3ebfd7e2e965241310"
+          }
+        },
+        {
           "client_id": "1098826060423-qlvk7rig262lg8gd1e6h9g812v0lfl17.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -27,7 +51,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1098826060423-qlvk7rig262lg8gd1e6h9g812v0lfl17.apps.googleusercontent.com",
+              "client_id": "1098826060423-c72smknm805s927ieg4tm5m8d9k0i1j1.apps.googleusercontent.com",
               "client_type": 3
             },
             {

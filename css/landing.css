@@ -487,6 +487,119 @@ p {
     line-height: 1.6;
 }
 
+/* Feature Demo Styles */
+.feature-demo {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Demo Table Styles */
+.demo-table {
+    width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 0.85rem;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table-row:last-child {
+    border-bottom: none;
+}
+
+.table-cell {
+    padding: 0.5rem;
+    text-align: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.table-header .table-cell:last-child,
+.table-row .table-cell:last-child {
+    border-right: none;
+}
+
+.table-row .table-cell:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+.table-row .table-cell:last-child {
+    color: #059669;
+    font-weight: 600;
+}
+
+/* Demo Chart Styles */
+.demo-chart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-container {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 80px;
+    margin-bottom: 2rem;
+}
+
+.bar {
+    width: 20px;
+    background: linear-gradient(to top, #2563eb, #3b82f6);
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.bar:hover {
+    background: linear-gradient(to top, #1d4ed8, #2563eb);
+    transform: scaleY(1.05);
+}
+
+.bar-label {
+    position: absolute;
+    bottom: -25px;
+    font-size: 0.7rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.bar-value {
+    position: absolute;
+    top: -18px;
+    font-size: 0.7rem;
+    color: #1a1a1a;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 /* How It Works Section */
 .how-it-works {
     padding: 100px 0;
@@ -1695,115 +1808,6 @@ footer {
     }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #0f172a;
-        color: #e2e8f0;
-    }
-
-    .navbar {
-        background: rgba(15, 23, 42, 0.95);
-        border-bottom-color: #334155;
-    }
-
-    .navbar.scrolled {
-        background: rgba(15, 23, 42, 0.98);
-    }
-
-    .brand-link {
-        color: #e2e8f0;
-    }
-
-    .nav-link {
-        color: #cbd5e1;
-    }
-
-    .nav-link:hover {
-        color: #60a5fa;
-    }
-
-    .hero {
-        background: #0f172a;
-    }
-
-    .hero h1 {
-        color: #e2e8f0;
-    }
-
-    .benefits {
-        background: #1e293b;
-    }
-
-    .benefit-card {
-        background: #334155;
-        border-color: #475569;
-    }
-
-    .benefit-card h3 {
-        color: #e2e8f0;
-    }
-
-    .how-it-works {
-        background: #0f172a;
-    }
-
-    .step-content h3 {
-        color: #e2e8f0;
-    }
-
-    .pricing {
-        background: #1e293b;
-    }
-
-    .pricing-card {
-        background: #334155;
-        border-color: #475569;
-    }
-
-    .features-showcase {
-        background: #0f172a;
-    }
-
-    .feature-row {
-        background: #1e293b;
-        border-color: #475569;
-    }
-
-    .feature-info h3 {
-        color: #e2e8f0;
-    }
-
-    .testimonials {
-        background: #1e293b;
-    }
-
-    .testimonial-card {
-        background: #334155;
-        border-color: #475569;
-    }
-
-    .faq {
-        background: #0f172a;
-    }
-
-    .faq-question {
-        color: #e2e8f0;
-    }
-
-    .faq-question:hover {
-        color: #60a5fa;
-    }
-
-    .final-cta {
-        background: #1e293b;
-    }
-
-    .final-cta h2 {
-        color: #e2e8f0;
-    }
-}
-
 /* Print styles */
 @media print {
     .navbar,
@@ -2632,21 +2636,6 @@ button:disabled {
     
     .gif-container.loading::after {
         animation: none;
-    }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .gif-tutorial {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    }
-    
-    .gif-container {
-        background: #334155;
-    }
-    
-    .gif-overlay {
-        background: rgba(0, 0, 0, 0.8);
     }
 }
 

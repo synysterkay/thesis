@@ -79,8 +79,8 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="$PROJECT_DIR$/../../../appicon.png" />
-                                                <entry key="scalingPercent" value="57" />
+                                                <entry key="imagePath" value="$PROJECT_DIR$/../../../thesisgeneraotricon.png" />
+                                                <entry key="scalingPercent" value="68" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -113,7 +113,7 @@
                                   <option name="values">
                                     <map>
                                       <entry key="backgroundAssetType" value="COLOR" />
-                                      <entry key="backgroundColor" value="030303" />
+                                      <entry key="backgroundColor" value="022044" />
                                     </map>
                                   </option>
                                 </PersistentState>

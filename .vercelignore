@@ -1,0 +1,35 @@
+# Flutter source files (keep only build output)
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+lib/
+test/
+
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+
+# Misc
+*.log
+.DS_Store
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
+# Email system temp files
+temp-private-key.txt
+generate-service-account.js
+deploy-email-system.sh
+verify-email-system.js
+vercel-email-only.json
+
+# Keep these for deployment
+!api/
+!build/

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'page_count_screen.dart';
 
 class AcademicLevelScreen extends StatefulWidget {
@@ -16,34 +17,31 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
   // Updated color scheme to match app design
   static const primaryColor = Color(0xFF2563EB);
   static const backgroundColor = Color(0xFFFFFFFF);
-  static const surfaceColor = Color(0xFFF8FAFC);
-  static const borderColor = Color(0xFFE2E8F0);
   static const textPrimary = Color(0xFF1A1A1A);
   static const textSecondary = Color(0xFF4A5568);
-  static const accentColor = Color(0xFF10B981);
 
   final List<AcademicOption> academicOptions = [
     AcademicOption(
       title: "Undergraduate",
-      icon: Icons.school_outlined,
+      icon: PhosphorIcons.graduationCap(PhosphorIconsStyle.regular),
       color: Color(0xFF2563EB),
       description: "Bachelor's level with humanized AI content & visuals",
     ),
     AcademicOption(
       title: "Master's",
-      icon: Icons.school,
+      icon: PhosphorIcons.medal(PhosphorIconsStyle.regular),
       color: Color(0xFFEC4899),
       description: "Advanced research with charts, tables & data analysis",
     ),
     AcademicOption(
       title: "Doctoral",
-      icon: Icons.psychology,
+      icon: PhosphorIcons.crown(PhosphorIconsStyle.regular),
       color: Color(0xFF10B981),
       description: "PhD level with comprehensive visuals & undetectable AI",
     ),
     AcademicOption(
       title: "Research Paper",
-      icon: Icons.article,
+      icon: PhosphorIcons.notepad(PhosphorIconsStyle.regular),
       color: Color(0xFFF59E0B),
       description: "Academic paper with professional formatting & graphs",
     ),
@@ -61,28 +59,64 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
             children: [
               const SizedBox(height: 40),
 
-              // Headline
+              // Header badge with Phosphor icon
+              Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(color: const Color(0xFFDBEAFE)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        PhosphorIcons.student(PhosphorIconsStyle.regular),
+                        size: 16,
+                        color: primaryColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Academic Level',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
+              const SizedBox(height: 32),
+
+              // Title
               Text(
                 "What's your academic level?",
-                style: GoogleFonts.lato(
+                style: GoogleFonts.inter(
                   fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                  letterSpacing: -0.5,
                 ),
-                textAlign: TextAlign.left,
-              ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
+                textAlign: TextAlign.center,
+              ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
 
               const SizedBox(height: 16),
 
               // Subtitle
               Text(
                 "We'll tailor the thesis complexity to match your academic requirements.",
-                style: GoogleFonts.lato(
+                style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w400,
+                  color: textSecondary,
+                  height: 1.5,
                 ),
-                textAlign: TextAlign.left,
-              ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
+                textAlign: TextAlign.center,
+              ).animate().fadeIn(delay: const Duration(milliseconds: 400)),
 
               const SizedBox(height: 40),
 
@@ -98,27 +132,9 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
 
               const SizedBox(height: 24),
 
-              // CTA Button
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  gradient: LinearGradient(
-                    colors: selectedLevel != null
-                        ? [primaryColor, Color(0xFF1D4ED8)]
-                        : [Colors.grey[700]!, Colors.grey[800]!],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: selectedLevel != null
-                      ? [
-                          BoxShadow(
-                            color: primaryColor.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : [],
-                ),
+              // Continue button
+              SizedBox(
+                height: 56,
                 child: ElevatedButton(
                   onPressed: selectedLevel != null
                       ? () {
@@ -128,23 +144,56 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
                             ),
                           );
                         }
-                      : null, // Button disabled if no option selected
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
-                    foregroundColor: Colors.white,
                     shadowColor: Colors.transparent,
-                    disabledBackgroundColor: Colors.transparent,
-                    disabledForegroundColor: Colors.grey[600],
-                    minimumSize: const Size(double.infinity, 56),
+                    disabledBackgroundColor: const Color(0xFFF3F4F6),
+                    padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    "Continue",
-                    style: GoogleFonts.lato(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      gradient: selectedLevel != null
+                          ? const LinearGradient(
+                              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: selectedLevel == null
+                          ? const Color(0xFFF3F4F6)
+                          : null,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Continue",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: selectedLevel != null
+                                  ? Colors.white
+                                  : const Color(0xFF9CA3AF),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            PhosphorIcons.arrowRight(
+                                PhosphorIconsStyle.regular),
+                            size: 20,
+                            color: selectedLevel != null
+                                ? Colors.white
+                                : const Color(0xFF9CA3AF),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -169,55 +218,47 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: option.color.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                    spreadRadius: 1,
-                  )
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  )
-                ],
-        ),
         child: AnimatedContainer(
           duration: Duration(milliseconds: 300),
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color:
-                isSelected ? option.color.withOpacity(0.2) : Colors.grey[900],
+            color: isSelected
+                ? option.color.withOpacity(0.08)
+                : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? option.color : Colors.grey[800]!,
+              color: isSelected ? option.color : const Color(0xFFE2E8F0),
               width: isSelected ? 2 : 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? option.color.withOpacity(0.15)
+                    : Colors.black.withOpacity(0.04),
+                blurRadius: isSelected ? 12 : 4,
+                offset: Offset(0, isSelected ? 4 : 2),
+              ),
+            ],
           ),
           child: Row(
             children: [
               // Icon container
               Container(
-                width: 60,
-                height: 60,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  color: option.color.withOpacity(isSelected ? 1.0 : 0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color:
+                      isSelected ? option.color : option.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   option.icon,
                   color: isSelected ? Colors.white : option.color,
-                  size: 30,
+                  size: 28,
                 ),
               ),
 
-              SizedBox(width: 20),
+              SizedBox(width: 16),
 
               // Text content
               Expanded(
@@ -226,18 +267,19 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
                   children: [
                     Text(
                       option.title,
-                      style: GoogleFonts.lato(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? option.color : Colors.white,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: textPrimary,
                       ),
                     ),
                     SizedBox(height: 4),
                     Text(
                       option.description,
-                      style: GoogleFonts.lato(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey[400],
+                        fontWeight: FontWeight.w400,
+                        color: textSecondary,
                       ),
                     ),
                   ],
@@ -252,15 +294,15 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
                   shape: BoxShape.circle,
                   color: isSelected ? option.color : Colors.transparent,
                   border: Border.all(
-                    color: isSelected ? option.color : Colors.grey[600]!,
+                    color: isSelected ? option.color : const Color(0xFFD1D5DB),
                     width: 2,
                   ),
                 ),
                 child: isSelected
                     ? Icon(
-                        Icons.check,
+                        PhosphorIcons.check(PhosphorIconsStyle.bold),
                         color: Colors.white,
-                        size: 16,
+                        size: 14,
                       )
                     : null,
               ),
@@ -270,13 +312,13 @@ class _AcademicLevelScreenState extends State<AcademicLevelScreen> {
       )
           .animate()
           .fadeIn(
-            delay: Duration(milliseconds: 400 + (index * 100)),
+            delay: Duration(milliseconds: 500 + (index * 100)),
             duration: Duration(milliseconds: 400),
           )
           .slideY(
             begin: 0.2,
             end: 0,
-            delay: Duration(milliseconds: 400 + (index * 100)),
+            delay: Duration(milliseconds: 500 + (index * 100)),
             duration: Duration(milliseconds: 400),
             curve: Curves.easeOutQuad,
           ),

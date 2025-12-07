@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chapter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:math' show pow;
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'dart:convert';
 
 class ContentValidator {
@@ -273,66 +272,10 @@ Write this outline as a knowledgeable researcher would naturally structure it, s
   }
 
   Future<void> initializeRemoteConfig() async {
-    try {
-      final remoteConfig = FirebaseRemoteConfig.instance;
-      await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: const Duration(hours: 1),
-      ));
-
-      await remoteConfig.setDefaults({
-        'deepseek_api_keys': jsonEncode(_apiKeys),
-      });
-
-      await remoteConfig.fetchAndActivate();
-
-      final keysString = remoteConfig.getString('deepseek_api_keys');
-      if (keysString.isNotEmpty) {
-        try {
-          final List<dynamic> keys = jsonDecode(keysString);
-          if (keys.isNotEmpty) {
-            _apiKeys.clear();
-            _apiKeys.addAll(keys.cast<String>());
-            print(
-                '✅ Loaded ${_apiKeys.length} API keys from Firebase Remote Config');
-            return;
-          }
-        } catch (e) {
-          print('❌ Error parsing API keys from Remote Config: $e');
-        }
-      } else {
-        print('⚠️ No API keys found in Remote Config, using defaults');
-      }
-
-      print('🔄 Retrying Remote Config fetch with zero minimum interval...');
-      await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 2),
-        minimumFetchInterval: Duration.zero,
-      ));
-
-      await remoteConfig.fetchAndActivate();
-      final retryKeysString = remoteConfig.getString('deepseek_api_keys');
-
-      if (retryKeysString.isNotEmpty) {
-        try {
-          final List<dynamic> keys = jsonDecode(retryKeysString);
-          if (keys.isNotEmpty) {
-            _apiKeys.clear();
-            _apiKeys.addAll(keys.cast<String>());
-            print(
-                '✅ Loaded ${_apiKeys.length} API keys from Firebase Remote Config on retry');
-            return;
-          }
-        } catch (e) {
-          print('❌ Error parsing API keys from Remote Config on retry: $e');
-        }
-      }
-
-      print(
-          '⚠️ Failed to load API keys from Remote Config after retry, using hardcoded defaults');
-    } catch (e) {
-      print('❌ Failed to initialize Remote Config: $e');
-    }
+    // Simple initialization - using default API keys
+    // Remote config removed for build simplification
+    print('✅ Using default API key configuration');
+    print('📝 API keys initialized: ${_apiKeys.length} keys available');
   }
 
   Future<List<String>> suggestChapters(String topic) async {
@@ -607,10 +550,11 @@ Return ONLY valid JSON with this exact structure:
     ["DataPoint1", "Value1", "Metric1", "Status1"],
     ["DataPoint2", "Value2", "Metric2", "Status2"],
     ["DataPoint3", "Value3", "Metric3", "Status3"]
-  ]
+  ],
+  "source": "Academic source or study name that this data represents"
 }
 
-Make the data realistic and academically appropriate. Do not include any explanatory text, just the JSON.''';
+Make the data realistic and academically appropriate. Include a credible academic source name. Do not include any explanatory text, just the JSON.''';
 
       final response = await _executeWithRetry((apiKey) async {
         final dio = Dio();
@@ -654,8 +598,10 @@ Make the data realistic and academically appropriate. Do not include any explana
       if (tableData is Map<String, dynamic> &&
           tableData.containsKey('columns') &&
           tableData.containsKey('rows') &&
+          tableData.containsKey('source') &&
           tableData['columns'] is List &&
-          tableData['rows'] is List) {
+          tableData['rows'] is List &&
+          tableData['source'] is String) {
         print('DEBUG: Table data validation successful');
         return tableData;
       }
@@ -720,7 +666,8 @@ Return ONLY valid JSON with this exact structure:
   "labels": ["Short1", "Short2", "Short3", "Short4"],
   "data": [23.5, 45.2, 67.8, 34.1],
   "xlabel": "Short X-axis",
-  "ylabel": "Short Y-axis"
+  "ylabel": "Short Y-axis",
+  "source": "Author's analysis" or appropriate data source
 }
 
 Choose the most appropriate chart type based on the chapter content and data being visualized. Make the data realistic and academically appropriate. Do not include any explanatory text, just the JSON.''';
@@ -763,12 +710,19 @@ Choose the most appropriate chart type based on the chapter content and data bei
       print(
           'DEBUG: Parsed graph data successfully: ${graphData.keys.toList()}');
 
-      // Validate the structure
+      // Validate the structure and add default source if missing
       if (graphData is Map<String, dynamic> &&
           graphData.containsKey('labels') &&
           graphData.containsKey('data') &&
           graphData['labels'] is List &&
           graphData['data'] is List) {
+        // Ensure source field exists
+        if (!graphData.containsKey('source') ||
+            graphData['source'] == null ||
+            graphData['source'].toString().trim().isEmpty) {
+          graphData['source'] = 'Author\'s data analysis';
+        }
+
         print('DEBUG: Graph data validation successful');
         return graphData;
       }

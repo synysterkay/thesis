@@ -12,19 +12,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get welcome => 'Tesis Académica Profesional';
 
   @override
-  String get onboardDescription1 =>
-      'Crea tesis académicas profesionales con asistencia de IA';
+  String get onboardDescription1 => 'Crea tesis académicas profesionales con asistencia de IA';
 
   @override
   String get smartContent => 'Generación Inteligente de Contenido';
 
   @override
-  String get onboardDescription2 =>
-      'Genera capítulos y contenido bien estructurados automáticamente';
+  String get onboardDescription2 => 'Genera capítulos y contenido bien estructurados automáticamente';
 
   @override
-  String get onboardDescription3 =>
-      'Exporta tu tesis en formato PDF profesional';
+  String get onboardDescription3 => 'Exporta tu tesis en formato PDF profesional';
 
   @override
   String get easyExport => 'Exportación Fácil en PDF';
@@ -54,8 +51,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get save => 'Guardar';
 
   @override
-  String get reportContentIssue =>
-      'Por favor describe el problema con este contenido:';
+  String get reportContentIssue => 'Por favor describe el problema con este contenido:';
 
   @override
   String get enterConcern => 'Ingresa tu preocupación...';
@@ -85,8 +81,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exportAsPdf => 'Exportar como PDF';
 
   @override
-  String get exportDescription =>
-      'Tu tesis será exportada como archivo PDF y guardada en tu carpeta de Descargas.';
+  String get exportDescription => 'Tu tesis será exportada como archivo PDF y guardada en tu carpeta de Descargas.';
 
   @override
   String pdfSavedToDownloads(String path) {
@@ -108,12 +103,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get generateAll => 'Generar Todo';
 
   @override
-  String get pleaseCompleteAllSections =>
-      'Por favor completa todas las secciones antes de exportar';
+  String get pleaseCompleteAllSections => 'Por favor completa todas las secciones antes de exportar';
 
   @override
-  String get generatedSuccessfully =>
-      '¡Generado exitosamente! Haz clic en PDF para exportar';
+  String get generatedSuccessfully => '¡Generado exitosamente! Haz clic en PDF para exportar';
 
   @override
   String errorGeneratingContent(Object error) {
@@ -126,8 +119,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get loadingMessage1 =>
-      'Estamos generando la estructura de tu tesis...';
+  String get loadingMessage1 => 'Estamos generando la estructura de tu tesis...';
 
   @override
   String get loadingMessage2 => 'Este proceso toma entre 4-7 minutos...';
@@ -168,8 +160,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get pleaseEnterChapterTitle =>
-      'Por favor ingresa el título del capítulo';
+  String get pleaseEnterChapterTitle => 'Por favor ingresa el título del capítulo';
 
   @override
   String get writingStyle => 'Estilo de Escritura';
@@ -181,8 +172,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get generateThesis => 'Generar Tesis';
 
   @override
-  String get pleaseEnterThesisTopicFirst =>
-      'Por favor ingresa primero el tema de la tesis';
+  String get pleaseEnterThesisTopicFirst => 'Por favor ingresa primero el tema de la tesis';
 
   @override
   String failedToGenerateChapters(Object error) {
@@ -198,12 +188,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get generatingContent => 'Generando contenido...';
 
   @override
-  String get pleaseCompleteAllChapters =>
-      'Por favor completa todos los títulos de los capítulos';
+  String get pleaseCompleteAllChapters => 'Por favor completa todos los títulos de los capítulos';
 
   @override
-  String get requiredChaptersMissing =>
-      'Los capítulos de Introducción y Conclusión son requeridos';
+  String get requiredChaptersMissing => 'Los capítulos de Introducción y Conclusión son requeridos';
 
   @override
   String get openFile => 'Abrir Archivo';

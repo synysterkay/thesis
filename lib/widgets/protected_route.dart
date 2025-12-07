@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../providers/auth_provider.dart';
+import '../providers/mobile_auth_provider.dart';
 import '../providers/subscription_provider.dart';
-import '../screens/signin_screen.dart';
-import '../screens/paywall_screen.dart';
-import '../app.dart';
 
 class ProtectedRoute extends ConsumerStatefulWidget {
   final Widget child;
@@ -61,19 +57,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && context.mounted) {
-        Navigator.of(context).pushReplacementNamed('/signin');
-      }
-    });
-  }
-
-  void _navigateToPaywall() {
-    if (_hasNavigated || !mounted) return;
-
-    setState(() => _hasNavigated = true);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && context.mounted) {
-        Navigator.of(context).pushReplacementNamed('/paywall');
+        // Route to mobile signin screen
+        Navigator.of(context).pushReplacementNamed('/mobile-signin');
       }
     });
   }
@@ -204,115 +189,6 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
     );
   }
 
-  Widget _buildAccountSyncError(User user, String subscriptionUserId) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.warning,
-                size: 64,
-                color: Colors.orange,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Account Sync Issue',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1a1a1a),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'There\'s a mismatch between your account and subscription data. Please sign out and sign back in to resolve this issue.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE9ECEF)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Debug Info:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Auth User ID: ${user.uid}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    Text(
-                      'Subscription User ID: $subscriptionUserId',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  try {
-                    final authService = ref.read(authServiceProvider);
-                    final subscriptionActions =
-                        ref.read(subscriptionActionsProvider);
-
-                    await subscriptionActions.handleSignOut();
-                    await authService.signOut();
-
-                    if (mounted && context.mounted) {
-                      Navigator.of(context).pushReplacementNamed('/signin');
-                    }
-                  } catch (e) {
-                    if (mounted && context.mounted) {
-                      AppErrorHandler.showErrorSnackBar(
-                          context, 'Sign out failed: ${e.toString()}');
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF667eea),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                icon: const Icon(Icons.logout),
-                label: const Text('Sign Out & Retry'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // If still checking initial auth state, show loading
@@ -320,8 +196,8 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
       return _buildLoadingScreen(message: 'Initializing...');
     }
 
-    final authState = ref.watch(authStateProvider);
-    final subscriptionState = ref.watch(subscriptionStatusProvider);
+    // Use mobile auth provider (Superwall handles subscription)
+    final authState = ref.watch(mobileAuthStateProvider);
 
     return authState.when(
       loading: () {
@@ -343,55 +219,7 @@ class _ProtectedRouteState extends ConsumerState<ProtectedRoute> {
           return _buildLoadingScreen(message: 'Redirecting to sign in...');
         }
 
-        // User is signed in, check subscription if required
-        if (widget.requiresSubscription) {
-          return subscriptionState.when(
-            loading: () {
-              return _buildLoadingScreen(
-                message: 'Checking subscription status...',
-                userInfo: 'User: ${user.email ?? user.uid}',
-              );
-            },
-            error: (error, stack) {
-              return _buildErrorScreen(
-                title: 'Subscription Error',
-                message: 'Failed to verify subscription: ${error.toString()}',
-                onRetry: () async {
-                  try {
-                    final subscriptionActions =
-                        ref.read(subscriptionActionsProvider);
-                    await subscriptionActions.refreshSubscriptionStatus();
-                  } catch (e) {
-                    if (mounted && context.mounted) {
-                      AppErrorHandler.showErrorSnackBar(
-                          context, 'Refresh failed: ${e.toString()}');
-                    }
-                  }
-                },
-                iconColor: Colors.orange,
-                icon: Icons.subscriptions,
-              );
-            },
-            data: (status) {
-              // Check for user ID mismatch (security check)
-              if (status.userId != null && status.userId != user.uid) {
-                return _buildAccountSyncError(user, status.userId!);
-              }
-
-              // User doesn't have active subscription
-              if (!status.isActive) {
-                _navigateToPaywall();
-                return _buildLoadingScreen(
-                    message: 'Redirecting to subscription...');
-              }
-
-              // All checks passed - show protected content
-              return widget.child;
-            },
-          );
-        }
-
-        // No subscription required - show content
+        // User is signed in, subscription handled by Superwall - show content
         return widget.child;
       },
     );
@@ -434,9 +262,9 @@ mixin RouteGuardMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     if (!mounted) return;
 
     if (requiresAuth) {
-      final user = ref.read(currentUserProvider);
+      final user = ref.read(mobileCurrentUserProvider);
       if (user == null) {
-        Navigator.of(context).pushReplacementNamed('/signin');
+        Navigator.of(context).pushReplacementNamed('/mobile-signin');
         return;
       }
     }
@@ -454,7 +282,7 @@ mixin RouteGuardMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
 // Utility class for route protection
 class RouteProtection {
   static bool isUserAuthenticated(WidgetRef ref) {
-    final user = ref.read(currentUserProvider);
+    final user = ref.read(mobileCurrentUserProvider);
     return user != null;
   }
 
@@ -468,9 +296,9 @@ class RouteProtection {
 
   static void navigateToAppropriateScreen(BuildContext context, WidgetRef ref) {
     if (!isUserAuthenticated(ref)) {
-      Navigator.of(context).pushReplacementNamed('/signin');
+      Navigator.of(context).pushReplacementNamed('/mobile-signin');
     } else if (!isUserSubscribed(ref)) {
-      Navigator.of(context).pushReplacementNamed('/paywall');
+      // Superwall handles subscription
     } else {
       Navigator.of(context).pushReplacementNamed('/thesis-form');
     }

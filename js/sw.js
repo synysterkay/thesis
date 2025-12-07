@@ -4,7 +4,6 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/css/landing.css',
-  '/js/revenuecat-web.js',
   '/js/landing.js',
   '/favicon.png'
 ];

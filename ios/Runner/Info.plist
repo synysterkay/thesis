@@ -41,7 +41,7 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
    <key>CFBundleShortVersionString</key>
-   <string>16.0.0</string>
+   <string>21.0.0</string>
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleVersion</key>
@@ -56,6 +56,45 @@
     <string>This app needs access to documents for saving generated files</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app needs access to photo library for saving generated files</string>
+    <key>NSCameraUsageDescription</key>
+    <string>This app needs camera access to capture images for your thesis</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs microphone access for video recording features</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs location access to provide location-based services</string>
+    <key>NSFileProviderDomainUsageDescription</key>
+    <string>This app needs access to manage and organize your thesis files</string>
+    <key>NSAppleMusicUsageDescription</key>
+    <string>This app needs access to your music library for media integration</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>https</string>
+        <string>http</string>
+        <string>mailto</string>
+        <string>itms-apps</string>
+        <string>tel</string>
+    </array>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLName</key>
+            <string>com.thesis.generator.ai</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.thesis.generator.ai</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.1098826060423-73kddmjuao2m1rsnocpb2goicionifol</string>
+            </array>
+        </dict>
+    </array>
     <key>SKAdNetworkItems</key>
     <array>
         <dict>

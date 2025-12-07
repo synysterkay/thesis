@@ -13,7 +13,13 @@ import 'package:media_store_plus/media_store_plus.dart';
 
 class ExportService {
   String cleanText(String text) {
-    return text.replaceAll(RegExp(r'[#*]+'), '').trim();
+    // Remove markdown characters and normalize spacing
+    return text
+        .replaceAll(RegExp(r'[#*]+'), '') // Remove markdown symbols
+        .replaceAll(
+            RegExp(r'\s+'), ' ') // Normalize multiple spaces to single space
+        .replaceAll(RegExp(r'\n\s*\n'), '\n\n') // Preserve paragraph breaks
+        .trim();
   }
 
   /// Split long text into manageable chunks for PDF generation
@@ -332,6 +338,7 @@ class ExportService {
   pw.Widget _buildTable(Map<String, dynamic> tableData, String? caption,
       ThesisTemplate template) {
     final columns = List<String>.from(tableData['columns'] ?? []);
+    final dataSource = tableData['source'] ?? 'Author\'s data analysis';
 
     // Handle both old format (List<List>) and new Firebase-compatible format (Map<String, List>)
     List<List<dynamic>> rows = [];
@@ -374,7 +381,7 @@ class ExportService {
             ),
           ),
           if (caption != null && caption.isNotEmpty) ...[
-            pw.SizedBox(height: 8),
+            pw.SizedBox(height: 12),
             pw.Text(
               caption,
               style: template.bodyStyle.copyWith(
@@ -385,6 +392,16 @@ class ExportService {
               textAlign: pw.TextAlign.center,
             ),
           ],
+          // Data source
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Source: $dataSource',
+            style: template.bodyStyle.copyWith(
+              color: PdfColors.grey600,
+              fontSize: 8,
+            ),
+            textAlign: pw.TextAlign.left,
+          ),
           pw.SizedBox(height: 20),
         ],
       );
@@ -393,8 +410,8 @@ class ExportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.SizedBox(height: 20),
-        // Table
+        pw.SizedBox(height: 24), // Increased top spacing
+        // Table with proper spacing
         pw.Table.fromTextArray(
           border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
           headerDecoration: pw.BoxDecoration(
@@ -416,20 +433,36 @@ class ExportService {
           cellPadding: const pw.EdgeInsets.all(8),
           cellAlignment: pw.Alignment.centerLeft,
         ),
-        // Caption
+        // Caption with improved spacing
         if (caption != null && caption.isNotEmpty) ...[
-          pw.SizedBox(height: 8),
-          pw.Text(
-            caption,
-            style: template.bodyStyle.copyWith(
-              color: PdfColors.black,
-              fontSize: 9,
-              fontStyle: pw.FontStyle.italic,
+          pw.SizedBox(height: 16),
+          pw.Container(
+            width: double.infinity,
+            child: pw.Text(
+              caption,
+              style: template.bodyStyle.copyWith(
+                color: PdfColors.black,
+                fontSize: 10,
+                fontStyle: pw.FontStyle.italic,
+              ),
+              textAlign: pw.TextAlign.center,
             ),
-            textAlign: pw.TextAlign.center,
           ),
         ],
-        pw.SizedBox(height: 20),
+        // Data source attribution
+        pw.SizedBox(height: 12),
+        pw.Container(
+          width: double.infinity,
+          child: pw.Text(
+            'Source: $dataSource',
+            style: template.bodyStyle.copyWith(
+              color: PdfColors.grey600,
+              fontSize: 8,
+            ),
+            textAlign: pw.TextAlign.left,
+          ),
+        ),
+        pw.SizedBox(height: 24), // Bottom spacing
       ],
     );
   }
@@ -438,10 +471,23 @@ class ExportService {
   pw.Widget _buildChart(Map<String, dynamic> graphData, String? caption,
       ThesisTemplate template) {
     final labels = List<String>.from(graphData['labels'] ?? []);
-    final data = List<num>.from(graphData['data'] ?? []);
+
+    // Convert data back to numbers, handling both numeric and string values
+    final rawData = graphData['data'] ?? [];
+    final data = (rawData as List).map((item) {
+      if (item is num) {
+        return item;
+      } else if (item is String) {
+        return double.tryParse(item) ?? 0.0;
+      } else {
+        return 0.0;
+      }
+    }).toList();
+
     final chartType = graphData['type'] ?? 'bar';
     final xLabel = graphData['xlabel'] ?? '';
     final yLabel = graphData['ylabel'] ?? '';
+    final dataSource = graphData['source'] ?? 'Author\'s data analysis';
 
     // Safety check for empty data
     if (labels.isEmpty || data.isEmpty) {
@@ -467,7 +513,7 @@ class ExportService {
             ),
           ),
           if (caption != null && caption.isNotEmpty) ...[
-            pw.SizedBox(height: 8),
+            pw.SizedBox(height: 12),
             pw.Text(
               caption,
               style: template.bodyStyle.copyWith(
@@ -478,6 +524,16 @@ class ExportService {
               textAlign: pw.TextAlign.center,
             ),
           ],
+          // Data source
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Source: $dataSource',
+            style: template.bodyStyle.copyWith(
+              color: PdfColors.grey600,
+              fontSize: 8,
+            ),
+            textAlign: pw.TextAlign.left,
+          ),
           pw.SizedBox(height: 20),
         ],
       );
@@ -494,62 +550,78 @@ class ExportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.SizedBox(height: 20),
-        // Chart container with border
+        pw.SizedBox(height: 24), // Increased top spacing
+        // Y-axis label with horizontal orientation
+        if (yLabel.isNotEmpty) ...[
+          pw.Container(
+            alignment: pw.Alignment.centerLeft,
+            margin: const pw.EdgeInsets.only(left: 10, bottom: 16),
+            child: pw.Text(
+              yLabel,
+              style: template.bodyStyle.copyWith(
+                color: PdfColors.black,
+                fontSize: 9, // Slightly smaller to prevent overlap
+              ),
+            ),
+          ),
+        ],
+        // Chart container with improved layout and generous spacing
         pw.Container(
           width: double.infinity,
-          height: 250, // Increased height for better spacing
+          height: 320, // Further increased height for better spacing
           decoration: pw.BoxDecoration(
             border: pw.Border.all(color: PdfColors.grey400),
             color: PdfColors.white,
           ),
-          padding: const pw.EdgeInsets.all(20), // Increased padding
+          padding: const pw.EdgeInsets.fromLTRB(
+              60, 30, 30, 60), // Increased padding for axis labels
           child: _buildChartContent(
               chartType, labels, data, yMin.toDouble(), step.toDouble()),
         ),
-        // Axis labels
-        if (xLabel.isNotEmpty || yLabel.isNotEmpty) ...[
-          pw.SizedBox(height: 8),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              if (yLabel.isNotEmpty)
-                pw.Transform.rotate(
-                  angle: -1.5708, // -90 degrees in radians
-                  child: pw.Text(
-                    yLabel,
-                    style: template.bodyStyle.copyWith(
-                      color: PdfColors.black,
-                      fontSize: 8,
-                    ),
-                  ),
-                ),
-              pw.Spacer(),
-              if (xLabel.isNotEmpty)
-                pw.Text(
-                  xLabel,
-                  style: template.bodyStyle.copyWith(
-                    color: PdfColors.black,
-                    fontSize: 8,
-                  ),
-                ),
-            ],
-          ),
-        ],
-        // Caption
-        if (caption != null && caption.isNotEmpty) ...[
-          pw.SizedBox(height: 8),
-          pw.Text(
-            caption,
-            style: template.bodyStyle.copyWith(
-              color: PdfColors.black,
-              fontSize: 9,
-              fontStyle: pw.FontStyle.italic,
+        // X-axis label with improved spacing to prevent overlap
+        if (xLabel.isNotEmpty) ...[
+          pw.SizedBox(height: 18), // Increased spacing
+          pw.Container(
+            alignment: pw.Alignment.center,
+            child: pw.Text(
+              xLabel,
+              style: template.bodyStyle.copyWith(
+                color: PdfColors.black,
+                fontSize: 9, // Slightly smaller to prevent overlap
+              ),
             ),
-            textAlign: pw.TextAlign.center,
           ),
         ],
-        pw.SizedBox(height: 20),
+        // Caption with improved spacing to prevent overlap
+        if (caption != null && caption.isNotEmpty) ...[
+          pw.SizedBox(height: 20), // Increased spacing from axis labels
+          pw.Container(
+            width: double.infinity,
+            child: pw.Text(
+              caption,
+              style: template.bodyStyle.copyWith(
+                color: PdfColors.black,
+                fontSize: 9, // Slightly smaller font
+                fontStyle: pw.FontStyle.italic,
+              ),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+        ],
+        // Data source attribution
+        pw.SizedBox(height: 12),
+        pw.Container(
+          width: double.infinity,
+          child: pw.Text(
+            'Source: $dataSource',
+            style: template.bodyStyle.copyWith(
+              color: PdfColors.grey600,
+              fontSize: 8,
+            ),
+            textAlign: pw.TextAlign.left,
+          ),
+        ),
+        pw.SizedBox(height: 24), // Bottom spacing
       ],
     );
   }

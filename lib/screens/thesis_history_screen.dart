@@ -6,6 +6,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../models/thesis_metadata.dart';
 import '../services/firebase_user_service.dart';
 import '../services/background_generation_service.dart';
+import '../screens/main_navigation_screen.dart';
 
 class ThesisHistoryScreen extends ConsumerStatefulWidget {
   const ThesisHistoryScreen({super.key});
@@ -1258,11 +1259,17 @@ class _ThesisHistoryScreenState extends ConsumerState<ThesisHistoryScreen> {
   }
 
   void _continueGeneration(ThesisMetadata thesis) {
-    // Navigate to outline viewer in trial mode to continue generation
-    Navigator.pushNamed(
+    // Navigate to main navigation with outline workflow
+    Navigator.pushReplacement(
       context,
-      '/outline-trial',
-      arguments: {'thesisId': thesis.id},
+      MaterialPageRoute(
+        builder: (context) => MainNavigationScreen(
+          isTrialMode: true,
+          initialIndex: 1,
+          workflowScreen: 'outline',
+          thesisId: thesis.id,
+        ),
+      ),
     );
   }
 
@@ -1272,42 +1279,46 @@ class _ThesisHistoryScreenState extends ConsumerState<ThesisHistoryScreen> {
         'DEBUG: Opening thesis ${thesis.id} - status: "${thesis.status}", progress: ${thesis.progressPercentage}%');
 
     if (thesis.status == 'completed' || thesis.progressPercentage >= 100) {
-      // Navigate to export screen with debug info
+      // Navigate to main navigation with export workflow
       print('DEBUG: Navigating to export screen for thesis: ${thesis.id}');
-      Navigator.pushNamed(
+      Navigator.pushReplacement(
         context,
-        '/export-trial',
-        arguments: {'thesisId': thesis.id},
-      ).then((_) {
-        print('DEBUG: Returned from export screen');
-      }).catchError((error) {
-        print('DEBUG: Error navigating to export screen: $error');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error opening thesis for export. Please try again.',
-              style: GoogleFonts.inter(),
-            ),
-            backgroundColor: Colors.red,
+        MaterialPageRoute(
+          builder: (context) => MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            workflowScreen: 'export',
+            thesisId: thesis.id,
           ),
-        );
-      });
+        ),
+      );
     } else if (thesis.status == 'in_progress' ||
         thesis.progressPercentage > 0) {
-      // Navigate to outline viewer to continue work
+      // Navigate to main navigation with outline workflow
       print(
           'DEBUG: Navigating to outline viewer for in-progress thesis: ${thesis.id}');
-      Navigator.pushNamed(
+      Navigator.pushReplacement(
         context,
-        '/outline-trial',
-        arguments: {'thesisId': thesis.id},
+        MaterialPageRoute(
+          builder: (context) => MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            workflowScreen: 'outline',
+            thesisId: thesis.id,
+          ),
+        ),
       );
     } else {
-      // Navigate to thesis form to edit or start
-      Navigator.pushNamed(
+      // Navigate to main navigation with thesis form
+      Navigator.pushReplacement(
         context,
-        '/thesis-form-trial',
-        arguments: {'thesisId': thesis.id},
+        MaterialPageRoute(
+          builder: (context) => MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            thesisId: thesis.id,
+          ),
+        ),
       );
     }
   }

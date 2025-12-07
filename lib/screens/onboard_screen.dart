@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'thesis_form_screen.dart';
 import '../widgets/native_ad_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:thesis_generator/screens/onboarding/subject_selection_screen.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class OnBoardScreen extends ConsumerStatefulWidget {
   const OnBoardScreen({super.key});
@@ -19,13 +19,6 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Updated color scheme to match app design
-  static const primaryColor = Color(0xFF2563EB);
-  static const backgroundColor = Color(0xFFFFFFFF);
-  static const surfaceColor = Color(0xFFF8FAFC);
-  static const textPrimary = Color(0xFF1A1A1A);
-  static const textSecondary = Color(0xFF4A5568);
-  static const accentColor = Color(0xFF10B981);
   late List<Map<String, String>> pages;
 
   final Gradient buttonGradient = const LinearGradient(
@@ -35,26 +28,51 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    _checkIfShouldSkipOnboarding();
+  }
+
+  /// Check if user has already completed onboarding and should skip to appropriate screen
+  Future<void> _checkIfShouldSkipOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isFirstTimeUser = prefs.getBool('first_time_user') ?? true;
+
+    if (mounted) {
+      if (isFirstTimeUser) {
+        // First time users: Continue with onboarding flow
+        // Will go to subject selection screen after completing onboarding
+        return;
+      } else {
+        // Returning users: Check authentication status
+        final user = FirebaseAuth.instance.currentUser;
+
+        if (user != null) {
+          // User is already signed in: go directly to start screen
+          Navigator.pushReplacementNamed(context, '/start');
+        } else {
+          // User is not signed in: go to mobile sign-in
+          Navigator.pushReplacementNamed(context, '/mobile-signin');
+        }
+      }
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     pages = [
       {
-        'title': 'Humanized AI Academic Writing',
-        'description':
-            'Create undetectable AI-powered thesis with professional charts and tables',
-        'image': 'assets/onboard1.jpg',
+        'title': 'Create Professional Academic Thesis With AI Assistance',
+        'icon': 'graduationCap',
       },
       {
-        'title': 'Visual Data Excellence',
-        'description':
-            'Generate well-structured content with comprehensive charts, graphs, and visual data',
-        'image': 'assets/onboard2.jpg',
+        'title': 'Generate Well-Structured Chapters And Content Automatically',
+        'icon': 'article',
       },
       {
-        'title': 'Professional PDF Export',
-        'description':
-            'Export your humanized thesis with charts & tables in professional PDF format',
-        'image': 'assets/onboard3.jpg',
+        'title': 'Export Your Thesis In Professional PDF Format',
+        'icon': 'filePdf',
       },
     ];
   }
@@ -67,9 +85,12 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
 
   void _finishOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_complete', true);
+
+    // Mark user as no longer first time (completed onboarding)
+    await prefs.setBool('first_time_user', false);
 
     if (mounted) {
+      // First time completing onboarding: continue to subject selection
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const SubjectSelectionScreen()),
@@ -80,7 +101,7 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: PageView.builder(
           controller: _pageController,
@@ -95,121 +116,114 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
   }
 
   Widget _buildPage(Map<String, String> page) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
+
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-              Text(
-                page['title']!,
-                style: GoogleFonts.inter(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ).animate().fadeIn(),
-              const SizedBox(height: 16),
-              Text(
-                page['description']!,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: textSecondary,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ).animate().fadeIn(delay: 100.ms),
-              const SizedBox(height: 32),
-              Container(
-                width: 320,
-                height: 240,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: surfaceColor,
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(page['image']!, fit: BoxFit.cover),
-                ),
-              ).animate().fadeIn().scale(),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: isSmallScreen ? 16 : 24,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  SizedBox(height: isSmallScreen ? 20 : 40),
+                  Text(
+                    page['title']!,
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 16 : 18,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1A1A1A),
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ).animate().fadeIn(),
+                  SizedBox(height: isSmallScreen ? 20 : 32),
+                  Container(
+                    width: isSmallScreen ? 80 : 100,
+                    height: isSmallScreen ? 80 : 100,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2563EB).withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      _getIconForPage(page['icon']!),
+                      size: isSmallScreen ? 40 : 50,
+                      color: Colors.white,
+                    ),
+                  ).animate().fadeIn().scale(),
+                  SizedBox(height: isSmallScreen ? 20 : 32),
                   Row(
-                    children: List.generate(
-                      pages.length,
-                      (index) => Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        height: 8,
-                        width: _currentPage == index ? 24 : 8,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          gradient: _currentPage == index
-                              ? buttonGradient
-                              : LinearGradient(
-                                  colors: [
-                                    const Color(0xFFCBD5E1),
-                                    const Color(0xFFCBD5E1)
-                                  ],
-                                ),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: List.generate(
+                          pages.length,
+                          (index) => Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            height: 8,
+                            width: _currentPage == index ? 24 : 8,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: _currentPage == index
+                                  ? const Color(0xFF2563EB)
+                                  : Colors.grey[300],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      TextButton(
+                          onPressed: _currentPage == pages.length - 1
+                              ? _finishOnboarding
+                              : () {
+                                  _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                          style: TextButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            _currentPage == pages.length - 1
+                                ? 'Get Started'
+                                : 'Next',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: _currentPage == pages.length - 1
-                        ? _finishOnboarding
-                        : () {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: buttonGradient,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
-                      child: Text(
-                        _currentPage == pages.length - 1
-                            ? 'Start Creating'
-                            : 'Next',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
+                  SizedBox(height: isSmallScreen ? 20 : 40),
                 ],
               ),
-            ],
+            ),
           ),
         ),
-        const Spacer(),
         // Only show native ad on Android devices
         if (!Platform.isIOS) ...[
-          const SizedBox(height: 24), // Add extra spacing before the ad
           const SizedBox(
             width: double.infinity,
             child: NativeAdWidget(),
@@ -217,5 +231,18 @@ class _OnBoardScreenState extends ConsumerState<OnBoardScreen> {
         ]
       ],
     );
+  }
+
+  IconData _getIconForPage(String iconName) {
+    switch (iconName) {
+      case 'graduationCap':
+        return PhosphorIcons.graduationCap(PhosphorIconsStyle.regular);
+      case 'article':
+        return PhosphorIcons.article(PhosphorIconsStyle.regular);
+      case 'filePdf':
+        return PhosphorIcons.filePdf(PhosphorIconsStyle.regular);
+      default:
+        return PhosphorIcons.graduationCap(PhosphorIconsStyle.regular);
+    }
   }
 }

@@ -13,7 +13,6 @@ import '../services/platform_language_service.dart';
 import 'onboard_screen.dart';
 import '../providers/locale_provider.dart';
 import 'thesis_form_screen.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:thesis_generator/screens/onboarding/onboarding_screen1.dart';
 
 class LanguageSelectionScreen extends ConsumerStatefulWidget {

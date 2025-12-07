@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'processing_screen.dart';
 
 class PageCountScreen extends StatefulWidget {
@@ -16,14 +17,11 @@ class _PageCountScreenState extends State<PageCountScreen> {
   final FocusNode _pageFocusNode = FocusNode();
   bool _isInputValid = false;
 
-  // Updated color scheme to match app design
+  // Color scheme to match app design
   static const primaryColor = Color(0xFF2563EB);
   static const backgroundColor = Color(0xFFFFFFFF);
-  static const surfaceColor = Color(0xFFF8FAFC);
-  static const borderColor = Color(0xFFE2E8F0);
   static const textPrimary = Color(0xFF1A1A1A);
   static const textSecondary = Color(0xFF4A5568);
-  static const accentColor = Color(0xFF10B981);
 
   // Predefined page count options
   final List<int> _quickPageOptions = [10, 20, 30, 50, 100];
@@ -71,7 +69,7 @@ class _PageCountScreenState extends State<PageCountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -89,33 +87,72 @@ class _PageCountScreenState extends State<PageCountScreen> {
                 children: [
                   // Top content section
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
+
+                      // Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          border: Border.all(
+                            color: const Color(0xFFDBEAFE),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              PhosphorIcons.notebook(
+                                  PhosphorIconsStyle.regular),
+                              color: primaryColor,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Length",
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: primaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                          .animate()
+                          .fadeIn(delay: const Duration(milliseconds: 100)),
+
+                      const SizedBox(height: 24),
 
                       // Headline
                       Text(
                         "How many pages do you need?",
-                        style: GoogleFonts.lato(
+                        style: GoogleFonts.inter(
                           fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          color: textPrimary,
                         ),
-                        textAlign: TextAlign.left,
+                        textAlign: TextAlign.center,
                       )
                           .animate()
                           .fadeIn(delay: const Duration(milliseconds: 200)),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
                       // Subtitle
                       Text(
                         "We'll generate content that fits your required length.",
-                        style: GoogleFonts.lato(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
-                          color: Colors.grey[400],
+                          fontWeight: FontWeight.w400,
+                          color: textSecondary,
                         ),
-                        textAlign: TextAlign.left,
+                        textAlign: TextAlign.center,
                       )
                           .animate()
                           .fadeIn(delay: const Duration(milliseconds: 300)),
@@ -128,9 +165,9 @@ class _PageCountScreenState extends State<PageCountScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -139,10 +176,10 @@ class _PageCountScreenState extends State<PageCountScreen> {
                           children: [
                             Text(
                               "Enter page count",
-                              style: GoogleFonts.lato(
+                              style: GoogleFonts.inter(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                color: textPrimary,
                               ),
                             ).animate().fadeIn(
                                 delay: const Duration(milliseconds: 400)),
@@ -154,19 +191,20 @@ class _PageCountScreenState extends State<PageCountScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 5),
                               decoration: BoxDecoration(
-                                color: Colors.grey[900],
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: _pageFocusNode.hasFocus
                                       ? primaryColor
-                                      : Colors.grey[800]!,
+                                      : const Color(0xFFE2E8F0),
                                   width: 2,
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   Icon(
-                                    Icons.description,
+                                    PhosphorIcons.article(
+                                        PhosphorIconsStyle.regular),
                                     size: 32,
                                     color: primaryColor,
                                   ),
@@ -179,28 +217,32 @@ class _PageCountScreenState extends State<PageCountScreen> {
                                       inputFormatters: [
                                         FilteringTextInputFormatter.digitsOnly,
                                       ],
-                                      style: GoogleFonts.lato(
+                                      style: GoogleFonts.inter(
                                         fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        color: textPrimary,
+                                        backgroundColor: Colors.white,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: "0",
-                                        hintStyle: GoogleFonts.lato(
+                                        hintStyle: GoogleFonts.inter(
                                           fontSize: 32,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey[700],
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xFFD1D5DB),
                                         ),
                                         border: InputBorder.none,
                                         contentPadding: EdgeInsets.zero,
+                                        filled: true,
+                                        fillColor: Colors.white,
                                       ),
                                     ),
                                   ),
                                   Text(
                                     "pages",
-                                    style: GoogleFonts.lato(
+                                    style: GoogleFonts.inter(
                                       fontSize: 18,
-                                      color: Colors.grey[500],
+                                      fontWeight: FontWeight.w500,
+                                      color: textSecondary,
                                     ),
                                   ),
                                 ],
@@ -213,12 +255,13 @@ class _PageCountScreenState extends State<PageCountScreen> {
 
                       const SizedBox(height: 30),
 
-                      // Note moved up from bottom
+                      // Note
                       Text(
                         "Standard academic format: double-spaced, 12pt font",
-                        style: GoogleFonts.lato(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w400,
+                          color: textSecondary,
                           fontStyle: FontStyle.italic,
                         ),
                         textAlign: TextAlign.center,
@@ -234,26 +277,9 @@ class _PageCountScreenState extends State<PageCountScreen> {
                   Column(
                     children: [
                       // CTA Button
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          gradient: LinearGradient(
-                            colors: _isInputValid
-                                ? [primaryColor, Color(0xFF1D4ED8)]
-                                : [Colors.grey[700]!, Colors.grey[800]!],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: _isInputValid
-                              ? [
-                                  BoxShadow(
-                                    color: primaryColor.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : [],
-                        ),
+                      SizedBox(
+                        height: 56,
+                        width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _isInputValid
                               ? () {
@@ -270,17 +296,56 @@ class _PageCountScreenState extends State<PageCountScreen> {
                             foregroundColor: Colors.white,
                             shadowColor: Colors.transparent,
                             disabledBackgroundColor: Colors.transparent,
-                            disabledForegroundColor: Colors.grey[600],
-                            minimumSize: const Size(double.infinity, 56),
+                            padding: EdgeInsets.zero,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child: Text(
-                            "Continue",
-                            style: GoogleFonts.lato(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: _isInputValid
+                                  ? const LinearGradient(
+                                      colors: [
+                                        Color(0xFF2563EB),
+                                        Color(0xFF1D4ED8)
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    )
+                                  : const LinearGradient(
+                                      colors: [
+                                        Color(0xFFF3F4F6),
+                                        Color(0xFFF3F4F6)
+                                      ],
+                                    ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Continue",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: _isInputValid
+                                          ? Colors.white
+                                          : const Color(0xFF9CA3AF),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    PhosphorIcons.arrowRight(
+                                        PhosphorIconsStyle.regular),
+                                    size: 20,
+                                    color: _isInputValid
+                                        ? Colors.white
+                                        : const Color(0xFF9CA3AF),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../models/thesis_metadata.dart';
 import '../services/firebase_user_service.dart';
+import '../screens/main_navigation_screen.dart';
 
 // Define a callback type for navigation
 typedef NavigationCallback = void Function(int index);
@@ -636,26 +637,43 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
   void _navigateToThesis(ThesisMetadata thesis) {
     // Navigate to the appropriate screen based on thesis status
     if (thesis.status == 'completed' || thesis.progressPercentage >= 100) {
-      // Navigate to export screen
-      Navigator.pushNamed(
+      // Navigate to main navigation with export workflow
+      Navigator.pushReplacement(
         context,
-        '/export-trial',
-        arguments: {'thesisId': thesis.id},
+        MaterialPageRoute(
+          builder: (context) => MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            workflowScreen: 'export',
+            thesisId: thesis.id,
+          ),
+        ),
       );
     } else if (thesis.status == 'in_progress' ||
         thesis.progressPercentage > 0) {
-      // Navigate to outline viewer to continue work
-      Navigator.pushNamed(
+      // Navigate to main navigation with outline workflow
+      Navigator.pushReplacement(
         context,
-        '/outline-trial',
-        arguments: {'thesisId': thesis.id},
+        MaterialPageRoute(
+          builder: (context) => MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            workflowScreen: 'outline',
+            thesisId: thesis.id,
+          ),
+        ),
       );
     } else {
-      // Navigate to thesis form to edit or start
-      Navigator.pushNamed(
+      // Navigate to main navigation with thesis form
+      Navigator.pushReplacement(
         context,
-        '/thesis-form-trial',
-        arguments: {'thesisId': thesis.id},
+        MaterialPageRoute(
+          builder: (context) => MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1,
+            thesisId: thesis.id,
+          ),
+        ),
       );
     }
   }

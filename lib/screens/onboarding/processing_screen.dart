@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'dart:math' as math;
 import 'thesis_preview_screen.dart';
 
@@ -16,9 +17,11 @@ class _ProcessingScreenState extends State<ProcessingScreen>
   bool _showButton = false;
   bool _showResults = false;
 
-  // Streamlined color scheme - removing unused variables
+  // Color scheme
   static const primaryColor = Color(0xFF2563EB);
   static const accentColor = Color(0xFF10B981);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF4A5568);
 
   // Random time saved between 10 and 20 hours
   final int _timeSavedHours = 10 + math.Random().nextInt(11);
@@ -140,8 +143,8 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     "Creating Your Humanized AI Thesis",
                     style: GoogleFonts.inter(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      fontWeight: FontWeight.w700,
+                      color: textPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
@@ -153,7 +156,8 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     "Complete with professional charts, tables, and undetectable AI content",
                     style: GoogleFonts.inter(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w400,
+                      color: textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
@@ -170,8 +174,8 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                             "Time Saved",
                             style: GoogleFonts.inter(
                               fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              color: textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -181,17 +185,17 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                             children: [
                               Text(
                                 "${_timeAnimation.value}",
-                                style: GoogleFonts.lato(
+                                style: GoogleFonts.inter(
                                   fontSize: 60,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
                                   color: primaryColor,
                                 ),
                               ),
                               Text(
                                 "hrs",
-                                style: GoogleFonts.lato(
+                                style: GoogleFonts.inter(
                                   fontSize: 28,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
                                   color: primaryColor,
                                 ),
                               ),
@@ -200,9 +204,10 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                           const SizedBox(height: 4),
                           Text(
                             "of research & writing",
-                            style: GoogleFonts.lato(
+                            style: GoogleFonts.inter(
                               fontSize: 16,
-                              color: Colors.grey[400],
+                              fontWeight: FontWeight.w400,
+                              color: textSecondary,
                             ),
                           ),
                         ],
@@ -220,10 +225,10 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                         children: [
                           Text(
                             "Academic Quality",
-                            style: GoogleFonts.lato(
+                            style: GoogleFonts.inter(
                               fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              color: textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -234,7 +239,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                                 "${_qualityAnimation.value}",
                                 style: GoogleFonts.inter(
                                   fontSize: 60,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
                                   color: accentColor,
                                 ),
                               ),
@@ -242,7 +247,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                                 "%",
                                 style: GoogleFonts.inter(
                                   fontSize: 28,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
                                   color: accentColor,
                                 ),
                               ),
@@ -261,10 +266,10 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     child: Text(
                       _processingStages[_currentStageIndex],
                       key: ValueKey<int>(_currentStageIndex),
-                      style: GoogleFonts.lato(
-                        fontSize: 18,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                        color: textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -277,7 +282,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     width: 200,
                     height: 6,
                     decoration: BoxDecoration(
-                      color: Colors.grey[800],
+                      color: const Color(0xFFE2E8F0),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Stack(
@@ -318,12 +323,20 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                         runSpacing: 10,
                         alignment: WrapAlignment.center,
                         children: [
-                          _buildFeatureChip("Citations", Icons.format_quote),
-                          _buildFeatureChip("Bibliography", Icons.menu_book),
-                          _buildFeatureChip("Structured", Icons.view_agenda),
-                          _buildFeatureChip("Research-Based", Icons.search),
+                          _buildFeatureChip("Citations",
+                              PhosphorIcons.quotes(PhosphorIconsStyle.regular)),
+                          _buildFeatureChip("Bibliography",
+                              PhosphorIcons.books(PhosphorIconsStyle.regular)),
+                          _buildFeatureChip("Structured",
+                              PhosphorIcons.list(PhosphorIconsStyle.regular)),
                           _buildFeatureChip(
-                              "Plagiarism-Free", Icons.verified_user),
+                              "Research-Based",
+                              PhosphorIcons.magnifyingGlass(
+                                  PhosphorIconsStyle.regular)),
+                          _buildFeatureChip(
+                              "Plagiarism-Free",
+                              PhosphorIcons.shieldCheck(
+                                  PhosphorIconsStyle.regular)),
                         ],
                       ),
                     ).animate().fadeIn(
@@ -335,22 +348,9 @@ class _ProcessingScreenState extends State<ProcessingScreen>
 
                   // Continue button
                   if (_showButton)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28),
-                        gradient: LinearGradient(
-                          colors: [primaryColor, Color(0xFF1D4ED8)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryColor.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
+                    SizedBox(
+                      height: 56,
+                      width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).push(
@@ -363,16 +363,42 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                           backgroundColor: Colors.transparent,
                           foregroundColor: Colors.white,
                           shadowColor: Colors.transparent,
-                          minimumSize: const Size(double.infinity, 56),
+                          padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text(
-                          "Start Your Thesis",
-                          style: GoogleFonts.lato(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Start Your Thesis",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  PhosphorIcons.arrowRight(
+                                      PhosphorIconsStyle.regular),
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -394,10 +420,10 @@ class _ProcessingScreenState extends State<ProcessingScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: primaryColor.withOpacity(0.3),
+          color: const Color(0xFFE2E8F0),
           width: 1,
         ),
       ),
@@ -412,10 +438,10 @@ class _ProcessingScreenState extends State<ProcessingScreen>
           const SizedBox(width: 6),
           Text(
             text,
-            style: GoogleFonts.lato(
+            style: GoogleFonts.inter(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              color: textPrimary,
             ),
           ),
         ],

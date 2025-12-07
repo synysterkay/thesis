@@ -21,14 +21,12 @@ const APP_DOMAIN = 'https://thesis-generator-web.web.app';
 
 // Stripe Payment Links (from your provided links)
 const PAYMENT_LINKS = {
-  weekly: 'https://buy.stripe.com/8x214n4zH5lr4kTaOHfrW01',
-  monthly: 'https://buy.stripe.com/cNiaEXgip017eZxg91frW02'
+  pro: 'https://buy.stripe.com/28EbJ12rz8xD3gPaOHfrW06'
 };
 
 // Price IDs (you'll need to get these from your Stripe dashboard)
 const PRICE_IDS = {
-  weekly: 'price_1RbhGMEHyyRHgrPiSXQFnnrT',
-  monthly: 'price_1RbhH1EHyyRHgrPiijEs1rTB'
+  pro: 'price_1SPWU1EHyyRHgrPieMZNbjTL' // Replace with actual price ID from Stripe
 };
 
 // Helper function to verify Firebase Auth token
@@ -143,16 +141,10 @@ exports.getPaymentLinks = functions.https.onRequest((req, res) => {
         domain: DOMAIN,
         appDomain: APP_DOMAIN,
         plans: {
-          weekly: {
-            priceId: PRICE_IDS.weekly,
-            paymentLink: PAYMENT_LINKS.weekly,
-            price: '$9.99',
-            interval: 'week'
-          },
-          monthly: {
-            priceId: PRICE_IDS.monthly,
-            paymentLink: PAYMENT_LINKS.monthly,
-            price: '$26.99',
+          pro: {
+            priceId: PRICE_IDS.pro,
+            paymentLink: PAYMENT_LINKS.pro,
+            price: '$19.99',
             interval: 'month'
           }
         }
@@ -166,6 +158,146 @@ exports.getPaymentLinks = functions.https.onRequest((req, res) => {
       return res.status(500).json({
         error: 'Failed to get payment links',
         details: error.message
+      });
+    }
+  });
+});
+
+// 🛒 API Endpoint: Create Stripe Checkout Session
+exports.createCheckoutSession = functions.https.onRequest((req, res) => {
+  return cors(req, res, async () => {
+    try {
+      console.log('🛒 Creating Stripe checkout session...');
+      console.log('Request method:', req.method);
+      console.log('Request body:', req.body);
+
+      // Only allow POST requests
+      if (req.method !== 'POST') {
+        console.error('❌ Invalid method:', req.method);
+        return res.status(405).json({ error: 'Method not allowed' });
+      }
+
+      const { email, firebase_uid } = req.body;
+
+      if (!email) {
+        console.error('❌ Email missing from request');
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      console.log('📧 Processing checkout for email:', email);
+
+      // Initialize Stripe with better error handling
+      let stripeSecretKey;
+      try {
+        stripeSecretKey = functions.config().stripe?.secret_key || process.env.STRIPE_SECRET_KEY;
+        if (!stripeSecretKey) {
+          throw new Error('Stripe secret key not configured');
+        }
+      } catch (configError) {
+        console.error('❌ Stripe configuration error:', configError);
+        return res.status(500).json({ 
+          error: 'Stripe configuration error',
+          details: 'Please ensure Stripe keys are properly configured'
+        });
+      }
+
+      const stripe = require('stripe')(stripeSecretKey);
+      
+      // Create or retrieve customer
+      let customer;
+      try {
+        const existingCustomers = await stripe.customers.list({
+          email: email,
+          limit: 1
+        });
+
+        if (existingCustomers.data.length > 0) {
+          customer = existingCustomers.data[0];
+          console.log('✅ Found existing customer:', customer.id);
+        } else {
+          customer = await stripe.customers.create({
+            email: email,
+            metadata: {
+              firebase_uid: firebase_uid || '',
+              created_via: 'thesis_generator_web'
+            }
+          });
+          console.log('✅ Created new customer:', customer.id);
+        }
+      } catch (customerError) {
+        console.error('❌ Customer creation error:', customerError);
+        return res.status(500).json({ 
+          error: 'Failed to create/retrieve customer',
+          details: customerError.message 
+        });
+      }
+
+      // Get price ID from environment or use fallback
+      const defaultPriceId = functions.config().stripe?.price_id || 
+                            process.env.STRIPE_PRICE_ID || 
+                            'price_1SPWU1EHyyRHgrPieMZNbjTL';
+      console.log(`💰 Using price ID: ${defaultPriceId}`);
+
+      // Determine base URL with better fallback
+      const baseUrl = req.headers.origin || 
+                     req.headers.referer?.replace(/\/$/, '') || 
+                     'https://thesis-k2nn5oh9k-kaynelapps-projects.vercel.app';
+      console.log('🌐 Base URL:', baseUrl);
+
+      // Create checkout session with better error handling
+      try {
+        const session = await stripe.checkout.sessions.create({
+          customer: customer.id,
+          payment_method_types: ['card'],
+          mode: 'subscription',
+          line_items: [
+            {
+              price: defaultPriceId,
+              quantity: 1,
+            },
+          ],
+          success_url: `${baseUrl}/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${baseUrl}/?payment=cancelled`,
+          metadata: {
+            firebase_email: email,
+            firebase_uid: firebase_uid || '',
+            created_via: 'thesis_generator_web'
+          },
+          subscription_data: {
+            metadata: {
+              firebase_email: email,
+              firebase_uid: firebase_uid || '',
+              created_via: 'thesis_generator_web'
+            }
+          },
+          allow_promotion_codes: true,
+          billing_address_collection: 'auto',
+        });
+
+        console.log('✅ Checkout session created:', session.id);
+        console.log('🔗 Checkout URL:', session.url);
+        
+        return res.status(200).json({ 
+          sessionId: session.id,
+          url: session.url,
+          customerId: customer.id,
+          success: true
+        });
+      } catch (sessionError) {
+        console.error('❌ Session creation error:', sessionError);
+        return res.status(500).json({ 
+          error: 'Failed to create checkout session',
+          details: sessionError.message,
+          type: sessionError.type || 'unknown'
+        });
+      }
+
+    } catch (error) {
+      console.error('❌ Unexpected error:', error);
+      return res.status(500).json({ 
+        error: 'Internal server error',
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   });
@@ -618,8 +750,7 @@ exports.getSubscriptionAnalytics = functions.https.onCall(async (data, context) 
     
     let totalCustomers = customersSnapshot.size;
     let activeSubscriptions = 0;
-    let weeklySubscriptions = 0;
-    let monthlySubscriptions = 0;
+    let proSubscriptions = 0;
     let recentSignups = 0;
     let totalRevenue = 0;
     
@@ -646,13 +777,9 @@ exports.getSubscriptionAnalytics = functions.https.onCall(async (data, context) 
           const priceId = subscription.items[0].price.id;
           const planType = getPlanTypeFromPriceId(priceId);
           
-          if (planType === 'weekly') {
-            weeklySubscriptions++;
-            totalRevenue += 9.99; // Weekly price
-          } else if (planType === 'monthly') {
-            monthlySubscriptions++;
-            totalRevenue += 26.99; // Monthly price
-          }
+          // All plans are now "pro" at $19.99/month
+          proSubscriptions++;
+          totalRevenue += 19.99; // Pro plan price
         }
       }
     }
@@ -660,8 +787,7 @@ exports.getSubscriptionAnalytics = functions.https.onCall(async (data, context) 
     const analytics = {
       totalCustomers,
       activeSubscriptions,
-      weeklySubscriptions,
-      monthlySubscriptions,
+      proSubscriptions,
       recentSignups,
       totalRevenue: Math.round(totalRevenue * 100) / 100, // Round to 2 decimal places
       conversionRate: totalCustomers > 0 ? Math.round((activeSubscriptions / totalCustomers * 100) * 100) / 100 : 0,
@@ -769,16 +895,14 @@ exports.stripeWebhook = functions.https.onRequest((req, res) => {
 // 🛠️ Utility Functions
 
 function getPlanTypeFromPriceId(priceId) {
-  if (!priceId) return 'unknown';
+  if (!priceId) return 'pro';
   
   switch (priceId) {
-    case PRICE_IDS.weekly:
-      return 'weekly';
-    case PRICE_IDS.monthly:
-      return 'monthly';
+    case PRICE_IDS.pro:
+      return 'pro';
     default:
-      console.log(`⚠️ Unknown price ID: ${priceId}`);
-      return 'unknown';
+      console.log(`⚠️ Unknown price ID: ${priceId}, defaulting to pro`);
+      return 'pro'; // Default to pro plan
   }
 }
 

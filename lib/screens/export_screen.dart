@@ -11,7 +11,6 @@ import '../models/thesis.dart';
 import 'dart:io';
 import '../templates/thesis_templates.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:typed_data';
 import 'package:universal_html/html.dart' as html;
 
 class ExportScreen extends ConsumerStatefulWidget {
@@ -66,13 +65,8 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: textPrimary),
           onPressed: () {
-            // Check if we're in trial mode by examining the current route
-            final currentRoute = ModalRoute.of(context)?.settings.name;
-            final isTrialMode = currentRoute == '/export-trial';
-
-            // Navigate to appropriate outline route based on trial mode
-            Navigator.pushReplacementNamed(
-                context, isTrialMode ? '/outline-trial' : '/outline');
+            // Just pop back to the previous screen (which should be MainNavigationScreen)
+            Navigator.pop(context);
           },
         ).animate().fadeIn(delay: 200.ms),
         title: Text(
@@ -383,7 +377,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
-          childAspectRatio: 1.2,
+          childAspectRatio: 1.3,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           children: [
@@ -401,20 +395,6 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               color: secondaryColor,
               onTap: () => _handleSharePdf(),
             ).animate().fadeIn(delay: 700.ms).scale(delay: 700.ms),
-            _buildExportCard(
-              title: 'DOC',
-              subtitle: '',
-              icon: Icons.description,
-              color: Color(0xFF2563EB),
-              onTap: () => _handleExportDoc(),
-            ).animate().fadeIn(delay: 800.ms).scale(delay: 800.ms),
-            _buildExportCard(
-              title: 'DOCX',
-              subtitle: '',
-              icon: Icons.article,
-              color: Color(0xFF0EA5E9),
-              onTap: () => _handleExportDocx(),
-            ).animate().fadeIn(delay: 900.ms).scale(delay: 900.ms),
           ],
         ),
       ],
@@ -431,7 +411,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     return GestureDetector(
       onTap: _isExporting ? null : onTap,
       child: Container(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(16),
@@ -446,49 +426,62 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                size: 32,
-                color: color,
+            Flexible(
+              child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 28,
+                  color: color,
+                ),
               ),
             ),
-            SizedBox(height: 12),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (subtitle.isNotEmpty) ...[
-              SizedBox(height: 4),
-              Text(
-                subtitle,
+            SizedBox(height: 8),
+            Flexible(
+              child: Text(
+                title,
                 style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: textSecondary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
                 ),
                 textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+            if (subtitle.isNotEmpty) ...[
+              SizedBox(height: 2),
+              Flexible(
+                child: Text(
+                  subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
             ],
             if (_isExporting && _exportingFormat == title)
-              Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
+              Flexible(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 6),
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                    ),
                   ),
                 ),
               ),
@@ -527,15 +520,19 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         anchor.click();
         html.document.body?.children.remove(anchor);
         html.Url.revokeObjectUrl(url);
+        _showSuccessMessage(
+            'PDF exported successfully! Check your Downloads folder.');
       } else {
         final directory = await getApplicationDocumentsDirectory();
         final file = File(
             '${directory.path}/thesis_${DateTime.now().millisecondsSinceEpoch}.pdf');
         await file.writeAsBytes(pdfBytes);
         await _exportService.savePdf(file);
+        _showSuccessMessage(
+            'PDF exported successfully! You can find it in your Downloads folder.');
       }
 
-      _showSuccessMessage('PDF exported successfully');
+      // Remove the duplicate success message below
     } catch (e) {
       _showErrorMessage('Error exporting PDF: $e');
     } finally {
@@ -584,106 +581,6 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         _isExporting = false;
         _exportingFormat = '';
       });
-    }
-  }
-
-  Future<void> _handleExportDoc() async {
-    setState(() {
-      _isExporting = true;
-      _exportingFormat = 'DOC';
-    });
-
-    try {
-      final thesisState = ref.read(thesisStateProvider);
-      if (!thesisState.hasValue || thesisState.value == null) {
-        throw Exception('No thesis data available');
-      }
-
-      await _exportToWordFormat(thesisState.value!, 'doc');
-      _showSuccessMessage('DOC file exported successfully');
-    } catch (e) {
-      _showErrorMessage('Error exporting DOC: $e');
-    } finally {
-      setState(() {
-        _isExporting = false;
-        _exportingFormat = '';
-      });
-    }
-  }
-
-  Future<void> _handleExportDocx() async {
-    setState(() {
-      _isExporting = true;
-      _exportingFormat = 'DOCX';
-    });
-
-    try {
-      final thesisState = ref.read(thesisStateProvider);
-      if (!thesisState.hasValue || thesisState.value == null) {
-        throw Exception('No thesis data available');
-      }
-
-      await _exportToWordFormat(thesisState.value!, 'docx');
-      _showSuccessMessage('DOCX file exported successfully');
-    } catch (e) {
-      _showErrorMessage('Error exporting DOCX: $e');
-    } finally {
-      setState(() {
-        _isExporting = false;
-        _exportingFormat = '';
-      });
-    }
-  }
-
-  Future<void> _exportToWordFormat(Thesis thesis, String format) async {
-    // Create a simple text representation
-    StringBuffer content = StringBuffer();
-
-    // Title page
-    content.writeln('${thesis.topic}\n');
-    content.writeln('Writing Style: ${thesis.writingStyle}');
-    content
-        .writeln('Generated on: ${DateTime.now().toString().split('.')[0]}\n');
-    content.writeln('${'=' * 50}\n');
-
-    // Chapters
-    for (var chapter in thesis.chapters) {
-      content.writeln('${chapter.title.toUpperCase()}\n');
-
-      if (chapter.content.isNotEmpty) {
-        content.writeln('${chapter.content}\n');
-      }
-
-      // Subheadings and their content
-      for (var subheading in chapter.subheadings) {
-        if (chapter.subheadingContents.containsKey(subheading) &&
-            chapter.subheadingContents[subheading]!.isNotEmpty) {
-          content.writeln('${subheading}\n');
-          content.writeln('${chapter.subheadingContents[subheading]!}\n');
-        }
-      }
-
-      content.writeln('${'=' * 50}\n');
-    }
-
-    final fileName = 'thesis_${DateTime.now().millisecondsSinceEpoch}.$format';
-
-    if (kIsWeb) {
-      final bytes = Uint8List.fromList(content.toString().codeUnits);
-      final blob = html.Blob([bytes], 'application/msword');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement()
-        ..href = url
-        ..style.display = 'none'
-        ..download = fileName;
-      html.document.body?.children.add(anchor);
-      anchor.click();
-      html.document.body?.children.remove(anchor);
-      html.Url.revokeObjectUrl(url);
-    } else {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/$fileName');
-      await file.writeAsString(content.toString());
     }
   }
 

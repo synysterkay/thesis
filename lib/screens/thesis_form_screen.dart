@@ -9,7 +9,7 @@ import '../services/review_service.dart';
 import 'package:flutter/services.dart';
 import '../widgets/loading_overlay.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html show window; // Only for web
+import '../utils/web_navigation.dart';
 import 'progressive_generation_screen.dart';
 
 class ThesisFormScreen extends ConsumerStatefulWidget {
@@ -217,7 +217,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
       );
       if (shouldLeave == true) {
         if (kIsWeb) {
-          html.window.location.href = '/';
+          WebNavigation.redirectToHome();
         }
       }
       return false;
@@ -283,6 +283,9 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
+
     return WillPopScope(
       onWillPop: () async {
         await _handleBackPress();
@@ -294,20 +297,39 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
           child: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: ListView(
-              padding: const EdgeInsets.all(20),
+            child: Column(
               children: [
-                _buildHeader(),
-                const SizedBox(height: 32),
-                _buildHeroSection(),
-                const SizedBox(height: 32),
-                _buildTopicField(),
-                const SizedBox(height: 24),
-                if (!_chaptersGenerated)
-                  _buildGenerateButton()
-                else
-                  ..._buildGeneratedContent(),
-              ].animate(interval: 100.ms).fadeIn().slideY(),
+                // Header (fixed at top)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: _buildHeader(),
+                ),
+
+                // Main content (scrollable)
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        // Compact hero section
+                        _buildCompactHero(isSmallScreen),
+                        const SizedBox(height: 24),
+
+                        // Topic field (prioritized)
+                        _buildTopicField(),
+                        const SizedBox(height: 24),
+
+                        if (!_chaptersGenerated)
+                          _buildGenerateButton()
+                        else
+                          ..._buildGeneratedContent(),
+
+                        const SizedBox(height: 40), // Bottom padding
+                      ].animate(interval: 100.ms).fadeIn().slideY(),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -347,9 +369,9 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
     );
   }
 
-  Widget _buildHeroSection() {
+  Widget _buildCompactHero(bool isSmallScreen) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -359,193 +381,126 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
             Colors.purple.withOpacity(0.08),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: primaryColor.withOpacity(0.1),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          // AI Shield Icon
+          // Icon
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: primaryColor.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               PhosphorIcons.shieldCheck(PhosphorIconsStyle.fill),
               color: Colors.white,
-              size: 32,
+              size: isSmallScreen ? 20 : 24,
             ),
-          ).animate().scale(delay: 200.ms),
+          ),
 
-          const SizedBox(height: 20),
+          const SizedBox(width: 16),
 
-          // Main Heading
-          Text(
-            '100% Human-Written Quality',
-            style: GoogleFonts.inter(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: textPrimary,
-              height: 1.2,
+          // Text content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '100% Human-Written Quality',
+                  style: GoogleFonts.inter(
+                    fontSize: isSmallScreen ? 16 : 18,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'AI undetectable • Academic grade • Research-based',
+                  style: GoogleFonts.inter(
+                    fontSize: isSmallScreen ? 12 : 14,
+                    color: textSecondary,
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
-          ).animate().fadeIn(delay: 300.ms).slideY(begin: 20),
-
-          const SizedBox(height: 12),
-
-          // Subtitle
-          Text(
-            'Advanced AI that writes like a human. Completely undetectable by AI detection tools.',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: textSecondary,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ).animate().fadeIn(delay: 400.ms).slideY(begin: 20),
-
-          const SizedBox(height: 24),
-
-          // Feature Pills
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            alignment: WrapAlignment.center,
-            children: [
-              _buildFeaturePill(
-                '🛡️ AI Undetectable',
-                Colors.green,
-                500,
-              ),
-              _buildFeaturePill(
-                '🎓 Academic Grade',
-                Colors.blue,
-                600,
-              ),
-              _buildFeaturePill(
-                '⚡ 10x Faster',
-                Colors.orange,
-                700,
-              ),
-              _buildFeaturePill(
-                '🔬 Research-Based',
-                Colors.purple,
-                800,
-              ),
-            ],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildFeaturePill(String text, Color color, int delay) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: color.withOpacity(0.8),
-        ),
-      ),
-    ).animate().fadeIn(delay: delay.ms).scale(begin: const Offset(0.8, 0.8));
+    ).animate().fadeIn(delay: 200.ms).slideY(begin: 10);
   }
 
   Widget _buildTopicField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Enhanced section header
+        // Simplified, more prominent header
         Container(
           padding: const EdgeInsets.only(bottom: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: buttonGradient,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      PhosphorIcons.pencil(PhosphorIconsStyle.fill),
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'What would you like to research?',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: textPrimary,
-                    ),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: buttonGradient,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  PhosphorIcons.pencil(PhosphorIconsStyle.fill),
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(left: 50),
-                child: Text(
-                  'Our AI will generate a human-quality thesis that passes all detection tools',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: textSecondary,
-                    height: 1.4,
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'What would you like to research?',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Describe your topic or research question',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
 
-        // Enhanced input field
+        // Enhanced input field with better prominence
         Container(
           decoration: BoxDecoration(
-            color: backgroundColor,
+            color: Colors.white, // Explicitly set to white
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: primaryColor.withOpacity(0.1),
-              width: 1.5,
+              color: primaryColor.withOpacity(0.2),
+              width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: primaryColor.withOpacity(0.08),
+                color: primaryColor.withOpacity(0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
@@ -553,44 +508,60 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
           ),
           child: TextFormField(
             controller: _topicController,
-            key: const Key('thesis-topic-field'),
+            maxLines: 4,
             style: GoogleFonts.inter(
-              color: textPrimary,
               fontSize: 16,
-              fontWeight: FontWeight.w500,
+              color: textPrimary,
+              height: 1.5,
             ),
-            maxLines: 3,
             decoration: InputDecoration(
               hintText:
-                  'e.g., "The impact of social media on mental health among teenagers" or "Renewable energy solutions for urban sustainability"',
+                  'e.g., "The impact of artificial intelligence on modern education systems" or "Sustainable energy solutions for urban development"',
               hintStyle: GoogleFonts.inter(
-                color: textMuted,
                 fontSize: 14,
+                color: textMuted,
                 height: 1.4,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: primaryColor,
-                  width: 2,
+              border: InputBorder.none,
+              fillColor: Colors.white, // Ensure fill color is white
+              filled: true,
+              contentPadding: const EdgeInsets.all(20),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Icon(
+                  PhosphorIcons.lightbulb(PhosphorIconsStyle.fill),
+                  color: primaryColor.withOpacity(0.5),
+                  size: 20,
                 ),
               ),
-              filled: true,
-              fillColor: backgroundColor,
-              contentPadding: const EdgeInsets.all(20),
             ),
-            validator: (value) =>
-                value?.isEmpty ?? true ? 'Please enter a research topic' : null,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your research topic';
+              }
+              if (value.trim().length < 10) {
+                return 'Please provide more details about your topic';
+              }
+              return null;
+            },
+            onChanged: (value) {
+              // Real-time character count or suggestions could go here
+            },
           ),
-        ),
+        ).animate().fadeIn(delay: 300.ms).slideY(begin: 20),
+
+        // Quick suggestion chips
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildTopicSuggestion('Technology & AI'),
+            _buildTopicSuggestion('Environmental Science'),
+            _buildTopicSuggestion('Business Management'),
+            _buildTopicSuggestion('Psychology'),
+          ],
+        ).animate().fadeIn(delay: 400.ms),
 
         // Trust indicators
         const SizedBox(height: 16),
@@ -675,7 +646,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -986,7 +957,7 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -1083,5 +1054,91 @@ class _ThesisFormScreenState extends ConsumerState<ThesisFormScreen> {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  Widget _buildTopicSuggestion(String topic) {
+    return GestureDetector(
+      onTap: () {
+        if (_topicController.text.isEmpty) {
+          // Could set a template or help user get started
+          _showTopicSuggestions(topic);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: primaryColor.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              PhosphorIcons.sparkle(PhosphorIconsStyle.fill),
+              size: 12,
+              color: primaryColor,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              topic,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: primaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTopicSuggestions(String category) {
+    // This could show a dialog with example topics for the category
+    final Map<String, List<String>> suggestions = {
+      'Technology & AI': [
+        'The impact of artificial intelligence on modern education',
+        'Machine learning applications in healthcare diagnostics',
+        'Cybersecurity challenges in the digital age',
+      ],
+      'Environmental Science': [
+        'Climate change effects on biodiversity conservation',
+        'Renewable energy solutions for sustainable development',
+        'Ocean pollution and marine ecosystem protection',
+      ],
+      'Business Management': [
+        'Digital transformation strategies in modern enterprises',
+        'Leadership styles and organizational performance',
+        'Supply chain optimization in global markets',
+      ],
+      'Psychology': [
+        'Social media impact on adolescent mental health',
+        'Cognitive behavioral therapy effectiveness studies',
+        'Workplace stress and employee wellbeing programs',
+      ],
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('$category Topics'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: suggestions[category]!
+              .map((topic) => ListTile(
+                    title: Text(topic),
+                    onTap: () {
+                      _topicController.text = topic;
+                      Navigator.pop(context);
+                    },
+                  ))
+              .toList(),
+        ),
+      ),
+    );
   }
 }

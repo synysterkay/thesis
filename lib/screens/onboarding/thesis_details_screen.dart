@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:superwallkit_flutter/superwallkit_flutter.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ThesisDetailsScreen extends StatelessWidget {
   const ThesisDetailsScreen({Key? key}) : super(key: key);
@@ -30,10 +31,10 @@ class ThesisDetailsScreen extends StatelessWidget {
 
               // Headline
               Text(
-                "Humanized AI Thesis",
+                "AI Thesis",
                 style: GoogleFonts.inter(
                   fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: textPrimary,
                 ),
                 textAlign: TextAlign.left,
@@ -46,6 +47,7 @@ class ThesisDetailsScreen extends StatelessWidget {
                 "See why our AI-powered approach with charts & tables outperforms traditional methods",
                 style: GoogleFonts.inter(
                   fontSize: 16,
+                  fontWeight: FontWeight.w400,
                   color: textSecondary,
                 ),
                 textAlign: TextAlign.left,
@@ -69,7 +71,7 @@ class ThesisDetailsScreen extends StatelessWidget {
                           "Hours formatting references and citations",
                         ],
                         isGrayscale: true,
-                        icon: Icons.schedule,
+                        icon: PhosphorIcons.clock(PhosphorIconsStyle.regular),
                       )
                           .animate()
                           .fadeIn(delay: const Duration(milliseconds: 400)),
@@ -94,7 +96,8 @@ class ThesisDetailsScreen extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                Icons.arrow_downward,
+                                PhosphorIcons.arrowDown(
+                                    PhosphorIconsStyle.regular),
                                 color: primaryColor,
                                 size: 24,
                               ),
@@ -123,7 +126,7 @@ class ThesisDetailsScreen extends StatelessWidget {
                           "Humanized content undetectable by AI scanners",
                         ],
                         isGrayscale: false,
-                        icon: Icons.psychology,
+                        icon: PhosphorIcons.sparkle(PhosphorIconsStyle.regular),
                       )
                           .animate()
                           .fadeIn(delay: const Duration(milliseconds: 800)),
@@ -133,50 +136,60 @@ class ThesisDetailsScreen extends StatelessWidget {
               ),
 
               // CTA Button
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  gradient: LinearGradient(
-                    colors: [primaryColor, Color(0xFF1D4ED8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: SizedBox(
+                  height: 56,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Navigate to mobile sign-in screen
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/mobile-signin',
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Superwall.shared.registerPlacement(
-                      'campaign_trigger',
-                      feature: () {
-                        // Navigate to MainNavigationScreen with thesis form when user has access
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/main-navigation',
-                          (route) => false,
-                        );
-                      },
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    foregroundColor: Colors.white,
-                    shadowColor: Colors.transparent,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                  ),
-                  child: Text(
-                    "Create Humanized AI Thesis",
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Create Humanized AI Thesis",
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              PhosphorIcons.arrowRight(
+                                  PhosphorIconsStyle.regular),
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -241,8 +254,8 @@ class ThesisDetailsScreen extends StatelessWidget {
                 title,
                 style: GoogleFonts.inter(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isGrayscale ? Color(0xFF64748B) : primaryColor,
+                  fontWeight: FontWeight.w700,
+                  color: isGrayscale ? const Color(0xFF64748B) : primaryColor,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -269,7 +282,10 @@ class ThesisDetailsScreen extends StatelessWidget {
                     Container(
                       margin: const EdgeInsets.only(top: 3),
                       child: Icon(
-                        isGrayscale ? Icons.close : Icons.check_circle,
+                        isGrayscale
+                            ? PhosphorIcons.x(PhosphorIconsStyle.bold)
+                            : PhosphorIcons.checkCircle(
+                                PhosphorIconsStyle.fill),
                         size: 18,
                         color: isGrayscale ? errorColor : accentColor,
                       ),
@@ -280,8 +296,11 @@ class ThesisDetailsScreen extends StatelessWidget {
                         item,
                         style: GoogleFonts.inter(
                           fontSize: 15,
+                          fontWeight: FontWeight.w400,
                           height: 1.4,
-                          color: isGrayscale ? Color(0xFF64748B) : textPrimary,
+                          color: isGrayscale
+                              ? const Color(0xFF64748B)
+                              : textPrimary,
                         ),
                       ),
                     ),

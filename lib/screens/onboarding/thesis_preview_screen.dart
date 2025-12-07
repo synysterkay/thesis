@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'thesis_details_screen.dart';
 
 class ThesisPreviewScreen extends StatelessWidget {
   const ThesisPreviewScreen({Key? key}) : super(key: key);
 
-  // Modern color scheme for conversion-focused design
+  // Color scheme matching app design
   static const primaryColor = Color(0xFF2563EB);
   static const backgroundColor = Color(0xFFFFFFFF);
   static const surfaceColor = Color(0xFFF8FAFC);
   static const borderColor = Color(0xFFE2E8F0);
   static const textPrimary = Color(0xFF1A1A1A);
-  static const textSecondary = Color(0xFF64748B);
+  static const textSecondary = Color(0xFF4A5568);
   static const accentColor = Color(0xFF10B981);
   static const warningColor = Color(0xFFEF4444);
 
@@ -33,7 +34,7 @@ class ThesisPreviewScreen extends StatelessWidget {
                 "Your AI Thesis is Ready\nto Impress Professors",
                 style: GoogleFonts.inter(
                   fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: textPrimary,
                   height: 1.2,
                 ),
@@ -58,7 +59,11 @@ class ThesisPreviewScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.verified, color: accentColor, size: 24),
+                    Icon(
+                      PhosphorIcons.sealCheck(PhosphorIconsStyle.fill),
+                      color: accentColor,
+                      size: 24,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -86,13 +91,14 @@ class ThesisPreviewScreen extends StatelessWidget {
                         "What You Get:",
                         style: GoogleFonts.inter(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                           color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 20),
                       _buildFeatureCard(
-                        icon: Icons.auto_graph,
+                        icon:
+                            PhosphorIcons.chartLine(PhosphorIconsStyle.regular),
                         title: "Professional Data Visualization",
                         description:
                             "Charts, graphs, and tables that make your research stand out",
@@ -100,7 +106,7 @@ class ThesisPreviewScreen extends StatelessWidget {
                         delay: 600,
                       ),
                       _buildFeatureCard(
-                        icon: Icons.psychology,
+                        icon: PhosphorIcons.brain(PhosphorIconsStyle.regular),
                         title: "Humanized AI Writing",
                         description:
                             "Undetectable by any AI detection software - guaranteed",
@@ -108,15 +114,17 @@ class ThesisPreviewScreen extends StatelessWidget {
                         delay: 800,
                       ),
                       _buildFeatureCard(
-                        icon: Icons.school,
+                        icon: PhosphorIcons.graduationCap(
+                            PhosphorIconsStyle.regular),
                         title: "Academic Excellence",
                         description:
                             "Perfect citations, formatting, and scholarly tone",
-                        color: Color(0xFF8B5CF6),
+                        color: const Color(0xFF8B5CF6),
                         delay: 1000,
                       ),
                       _buildFeatureCard(
-                        icon: Icons.speed,
+                        icon:
+                            PhosphorIcons.lightning(PhosphorIconsStyle.regular),
                         title: "Instant Generation",
                         description:
                             "Complete thesis ready in minutes, not months",
@@ -128,88 +136,63 @@ class ThesisPreviewScreen extends StatelessWidget {
                 ),
               ),
 
-              // Urgency + CTA
+              // CTA
               Container(
                 margin: const EdgeInsets.only(bottom: 32),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: warningColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border:
-                            Border.all(color: warningColor.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.access_time,
-                              color: warningColor, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Limited Time: Start Your Thesis Now",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: warningColor,
-                            ),
-                          ),
-                        ],
+                child: SizedBox(
+                  height: 60,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ThesisDetailsScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Container(
+                    child: Ink(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28),
-                        gradient: LinearGradient(
-                          colors: [primaryColor, Color(0xFF1D4ED8)],
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ThesisDetailsScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
-                          shadowColor: Colors.transparent,
-                          minimumSize: const Size(double.infinity, 60),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                        ),
+                      child: Container(
+                        alignment: Alignment.center,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "Create My Humanized Thesis",
                               style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(Icons.arrow_forward, size: 20),
+                            Icon(
+                              PhosphorIcons.arrowRight(
+                                  PhosphorIconsStyle.regular),
+                              size: 20,
+                              color: Colors.white,
+                            ),
                           ],
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ).animate().fadeIn(delay: const Duration(milliseconds: 1400)),
             ],
@@ -261,7 +244,7 @@ class ThesisPreviewScreen extends StatelessWidget {
                   title,
                   style: GoogleFonts.inter(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: textPrimary,
                   ),
                 ),
@@ -270,6 +253,7 @@ class ThesisPreviewScreen extends StatelessWidget {
                   description,
                   style: GoogleFonts.inter(
                     fontSize: 14,
+                    fontWeight: FontWeight.w400,
                     color: textSecondary,
                     height: 1.4,
                   ),

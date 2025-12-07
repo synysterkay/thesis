@@ -5,15 +5,11 @@ import 'screens/splash_screen.dart';
 import 'screens/initialization_screen.dart';
 import 'screens/thesis_form_screen.dart';
 import 'screens/main_navigation_screen.dart';
-import 'screens/outline_viewer_screen.dart';
-import 'screens/export_screen.dart';
-import 'screens/progressive_generation_screen.dart';
 import 'screens/thesis_dashboard_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/language_selection_screen.dart';
 import 'screens/chapter_editor_screen.dart';
 import 'screens/onboard_screen.dart';
-import 'providers/locale_provider.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'providers/analytics_provider.dart';
 // New onboarding screens
@@ -27,14 +23,10 @@ import 'screens/onboarding/processing_screen.dart';
 import 'screens/onboarding/thesis_preview_screen.dart';
 import 'screens/onboarding/thesis_details_screen.dart';
 // Auth and subscription screens
-import 'screens/signin_screen.dart';
-import 'screens/paywall_screen.dart';
-// Providers
-import 'providers/auth_provider.dart';
-import 'providers/subscription_provider.dart';
+import 'screens/mobile_signin_screen.dart';
+import 'screens/start_screen.dart';
 // Widgets
 import 'widgets/protected_route.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 // Only import html for web-specific functionality
@@ -64,7 +56,7 @@ class MyApp extends ConsumerWidget {
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: analytics),
       ],
-      initialRoute: '/initialization',
+      initialRoute: initialRoute,
       routes: _buildAppRoutes(),
       onGenerateRoute: _handleDynamicRoutes,
       onUnknownRoute: _handleUnknownRoute,
@@ -170,20 +162,28 @@ class MyApp extends ConsumerWidget {
   Map<String, WidgetBuilder> _buildAppRoutes() {
     return {
       '/': (context) => const SplashScreen(),
+      '/splash': (context) => const SplashScreen(),
       '/initialization': (context) => const InitializationScreen(),
-      '/signin': (context) => const SignInScreen(),
-      '/paywall': (context) => const PaywallScreen(),
+      '/signin': (context) => const MobileSignInScreen(),
+      '/mobile-signin': (context) => const MobileSignInScreen(),
+      '/start': (context) => const StartScreen(),
       '/language': (context) => const LanguageSelectionScreen(),
       '/onboard': (context) => const OnBoardScreen(),
       '/thesis-form': (context) => const ProtectedRoute(
-            child: ThesisFormScreen(),
+            child: MainNavigationScreen(
+              initialIndex: 1, // "New" tab
+            ),
             requiresSubscription: true,
           ),
       '/thesis-form-trial': (context) {
         final args =
             ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
         return ProtectedRoute(
-          child: ThesisFormScreen(thesisId: args?['thesisId']),
+          child: MainNavigationScreen(
+            isTrialMode: true,
+            initialIndex: 1, // "New" tab
+            thesisId: args?['thesisId'],
+          ),
           requiresSubscription: false, // Free trial access
         );
       },
@@ -227,10 +227,6 @@ class MyApp extends ConsumerWidget {
           requiresSubscription: false, // Free trial access
         );
       },
-      '/dashboard': (context) => const ProtectedRoute(
-            child: ThesisDashboardScreen(),
-            requiresSubscription: true,
-          ),
       '/dashboard-trial': (context) => const ProtectedRoute(
             child: ThesisDashboardScreen(),
             requiresSubscription: false, // Free trial access
@@ -242,6 +238,30 @@ class MyApp extends ConsumerWidget {
       '/main-navigation-trial': (context) => const ProtectedRoute(
             child: MainNavigationScreen(isTrialMode: true),
             requiresSubscription: false, // Free trial access
+          ),
+      '/profile': (context) => const ProtectedRoute(
+            child: MainNavigationScreen(
+              initialIndex: 3, // "Profile" tab
+            ),
+            requiresSubscription: true,
+          ),
+      '/settings': (context) => const ProtectedRoute(
+            child: MainNavigationScreen(
+              initialIndex: 4, // "Settings" tab
+            ),
+            requiresSubscription: true,
+          ),
+      '/dashboard': (context) => const ProtectedRoute(
+            child: MainNavigationScreen(
+              initialIndex: 0, // "Home" tab
+            ),
+            requiresSubscription: true,
+          ),
+      '/history': (context) => const ProtectedRoute(
+            child: MainNavigationScreen(
+              initialIndex: 2, // "History" tab
+            ),
+            requiresSubscription: true,
           ),
 
       // New onboarding flow routes

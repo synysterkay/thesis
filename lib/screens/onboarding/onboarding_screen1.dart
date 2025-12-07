@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'onboarding_screen2.dart';
-import 'dart:math' as math;
 
 class OnboardingScreen1 extends StatefulWidget {
   const OnboardingScreen1({Key? key}) : super(key: key);
@@ -11,10 +11,7 @@ class OnboardingScreen1 extends StatefulWidget {
   State<OnboardingScreen1> createState() => _OnboardingScreen1State();
 }
 
-class _OnboardingScreen1State extends State<OnboardingScreen1>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-
+class _OnboardingScreen1State extends State<OnboardingScreen1> {
   // Updated color scheme to match app design
   static const primaryColor = Color(0xFF2563EB);
   static const backgroundColor = Color(0xFFFFFFFF);
@@ -22,23 +19,6 @@ class _OnboardingScreen1State extends State<OnboardingScreen1>
   static const borderColor = Color(0xFFE2E8F0);
   static const textPrimary = Color(0xFF1A1A1A);
   static const textSecondary = Color(0xFF4A5568);
-  static const textMuted = Color(0xFF64748B);
-  static const accentColor = Color(0xFF10B981);
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,202 +32,140 @@ class _OnboardingScreen1State extends State<OnboardingScreen1>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border:
-                            Border.all(color: primaryColor.withOpacity(0.2)),
-                      ),
-                      child: Icon(
-                        Icons.auto_stories,
-                        color: primaryColor,
-                        size: 24,
-                      ),
+                // Header badge with Phosphor icon
+                Center(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(color: const Color(0xFFDBEAFE)),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      "AI Thesis Generator",
-                      style: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: primaryColor,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          PhosphorIcons.robot(PhosphorIconsStyle.regular),
+                          size: 16,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'AI-Powered Writing Assistant',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ).animate().fadeIn(delay: const Duration(milliseconds: 200)),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
+
+                // Logo icon
+                Center(
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      PhosphorIcons.graduationCap(PhosphorIconsStyle.regular),
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  )
+                      .animate()
+                      .fadeIn(delay: const Duration(milliseconds: 300))
+                      .scale(
+                        begin: const Offset(0.8, 0.8),
+                        end: const Offset(1.0, 1.0),
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOutQuad,
+                      ),
+                ),
+                const SizedBox(height: 32),
+                const SizedBox(height: 32),
+
+                // Title
                 Text(
                   "Humanized AI-Powered\nThesis Creation",
                   style: GoogleFonts.inter(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
                     color: textPrimary,
                     height: 1.2,
+                    letterSpacing: -0.5,
                   ),
-                )
-                    .animate()
-                    .fadeIn(delay: const Duration(milliseconds: 300))
-                    .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
-                const SizedBox(height: 16),
-                Text(
-                  "Undetectable AI Excellence",
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: accentColor,
-                    fontStyle: FontStyle.italic,
-                  ),
+                  textAlign: TextAlign.center,
                 )
                     .animate()
                     .fadeIn(delay: const Duration(milliseconds: 400))
                     .slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                // Subtitle
                 Text(
-                  "Generate professional academic theses with humanized AI content that's completely undetectable. Complete with charts, tables, and visual elements for maximum academic impact.",
+                  "Generate professional academic theses with undetectable AI content. Complete with charts, tables, and visual elements.",
                   style: GoogleFonts.inter(
                     fontSize: 16,
+                    fontWeight: FontWeight.w400,
                     color: textSecondary,
                     height: 1.5,
                   ),
+                  textAlign: TextAlign.center,
                 ).animate().fadeIn(delay: const Duration(milliseconds: 500)),
                 const SizedBox(height: 40),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.35,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ...List.generate(15, (index) {
-                        final size = 6.0 + (index % 3) * 3.0;
-                        return AnimatedBuilder(
-                          animation: _animationController,
-                          builder: (context, child) {
-                            final value =
-                                (_animationController.value + (index / 15)) %
-                                    1.0;
-                            final x = math.sin(value * math.pi * 2) * 100;
-                            final y = math.cos(value * math.pi * 2) * 100;
 
-                            return Positioned(
-                              left: MediaQuery.of(context).size.width / 2 -
-                                  24 +
-                                  x,
-                              top: 100 + y,
-                              child: Container(
-                                width: size,
-                                height: size,
-                                decoration: BoxDecoration(
-                                  color: Color.lerp(
-                                    primaryColor,
-                                    accentColor,
-                                    (index % 5) / 5,
-                                  )!
-                                      .withOpacity(0.3),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      }),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: backgroundColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: primaryColor.withOpacity(0.2),
-                                  width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primaryColor.withOpacity(0.15),
-                                  blurRadius: 20,
-                                  spreadRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.psychology,
-                              color: primaryColor,
-                              size: 40,
-                            ),
-                          )
-                              .animate()
-                              .fadeIn(delay: const Duration(milliseconds: 600))
-                              .scale(
-                                begin: const Offset(0.5, 0.5),
-                                end: const Offset(1.0, 1.0),
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.elasticOut,
-                              ),
-                          const SizedBox(height: 20),
-                          ...[
-                            "Humanized Content",
-                            "Charts & Tables",
-                            "Undetectable AI"
-                          ]
-                              .map((feature) {
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: surfaceColor,
-                                    borderRadius: BorderRadius.circular(30),
-                                    border: Border.all(color: borderColor),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: primaryColor.withOpacity(0.08),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Text(
-                                    feature,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: textPrimary,
-                                    ),
-                                  ),
-                                );
-                              })
-                              .toList()
-                              .animate(
-                                interval: 100.ms,
-                              )
-                              .fadeIn(
-                                delay: const Duration(milliseconds: 700),
-                              )
-                              .moveY(
-                                begin: 20,
-                                end: 0,
-                                delay: const Duration(milliseconds: 700),
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeOutQuad,
-                              ),
-                        ],
-                      ),
-                    ],
-                  ),
+                // Feature cards
+                _buildFeatureCard(
+                  icon: PhosphorIcons.pencilLine(PhosphorIconsStyle.regular),
+                  title: 'Humanized Content',
+                  description: 'Undetectable AI-generated writing',
+                  delay: 600,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  icon: PhosphorIcons.chartBar(PhosphorIconsStyle.regular),
+                  title: 'Charts & Tables',
+                  description: 'Professional data visualization',
+                  delay: 700,
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  icon: PhosphorIcons.shieldCheck(PhosphorIconsStyle.regular),
+                  title: 'Undetectable AI',
+                  description: 'Bypass AI detection systems',
+                  delay: 800,
+                ),
+                const SizedBox(height: 40),
+
+                // Page indicators
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(3, (index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 10,
-                      width: index == 0 ? 24 : 10,
+                      height: 8,
+                      width: index == 0 ? 24 : 8,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(4),
                         color: index == 0 ? primaryColor : borderColor,
                       ),
                     ).animate().fadeIn(
@@ -255,23 +173,11 @@ class _OnboardingScreen1State extends State<OnboardingScreen1>
                         );
                   }),
                 ),
-                const SizedBox(height: 24),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    gradient: LinearGradient(
-                      colors: [primaryColor, Color(0xFF1D4ED8)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryColor.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 32),
+
+                // Continue button
+                SizedBox(
+                  height: 56,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
@@ -282,38 +188,47 @@ class _OnboardingScreen1State extends State<OnboardingScreen1>
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
                       shadowColor: Colors.transparent,
-                      minimumSize: const Size(double.infinity, 56),
+                      padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Continue",
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.arrow_forward,
-                          size: 20,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Continue",
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              PhosphorIcons.arrowRight(
+                                  PhosphorIconsStyle.regular),
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                )
-                    .animate()
-                    .fadeIn(delay: const Duration(milliseconds: 1000))
-                    .shimmer(
-                      delay: const Duration(milliseconds: 1500),
-                      duration: const Duration(milliseconds: 1500),
-                    ),
+                ).animate().fadeIn(delay: const Duration(milliseconds: 1000)),
                 const SizedBox(height: 32),
               ],
             ),
@@ -321,5 +236,75 @@ class _OnboardingScreen1State extends State<OnboardingScreen1>
         ),
       ),
     );
+  }
+
+  Widget _buildFeatureCard({
+    required IconData icon,
+    required String title,
+    required String description,
+    required int delay,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF6FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: primaryColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: Duration(milliseconds: delay)).slideX(
+          begin: 0.2,
+          end: 0,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutQuad,
+        );
   }
 }

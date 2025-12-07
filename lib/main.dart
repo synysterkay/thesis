@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import 'screens/error_screen.dart';
 import 'screens/initialization_screen.dart'; // Add this import
 import 'dart:async';
@@ -12,9 +13,10 @@ import 'app.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'providers/locale_provider.dart';
 import 'firebase_options.dart';
-import 'package:facebook_audience_network/facebook_audience_network.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'services/notification_service.dart';
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'services/local_notification_service.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:appsflyer_sdk/appsflyer_sdk.dart';
@@ -26,6 +28,7 @@ import 'providers/auth_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'services/onesignal_service.dart';
 
 class InitializationException implements Exception {
   final String message;
@@ -121,6 +124,41 @@ Future<void> _initializeHiveBox() async {
   }
 }
 
+Future<void> initializeSuperwall() async {
+  if (kIsWeb) {
+    // For web, skip native Superwall initialization to avoid platform exceptions
+    print(
+        '🌐 Skipping native Superwall initialization for Web (using direct URLs instead)');
+    return;
+  }
+
+  try {
+    String apiKey;
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      apiKey =
+          'pk_fedee2171cfccbd5de869601a33a9c196ec9b838c6f6edec'; // iOS API key
+      print('🍎 Initializing Superwall for iOS with key: $apiKey');
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
+      apiKey =
+          'pk_73a34d6e8a5cc3d5a7244f23a39440becef5182393fe8f2c'; // Android API key
+      print('🤖 Initializing Superwall for Android with key: $apiKey');
+    } else {
+      print('⚠️ Unsupported platform for Superwall');
+      return;
+    }
+
+    // Configure Superwall - allow it to initialize asynchronously
+    // Don't block app startup if Superwall takes time
+    Superwall.configure(apiKey);
+
+    print(
+        '✅ Superwall configuration started for ${defaultTargetPlatform.name}');
+  } catch (e) {
+    print('❌ Failed to initialize Superwall (non-critical): $e');
+    // Don't throw - allow app to continue without Superwall
+  }
+}
+
 Future<void> initializeServices() async {
   try {
     if (!kIsWeb) {
@@ -136,6 +174,23 @@ Future<void> initializeServices() async {
           .setLocale(savedLanguage.split('_')[0]);
     }
 
+    // Initialize Superwall
+    await initializeSuperwall();
+
+    // Initialize OneSignal for push notifications
+    if (!kIsWeb) {
+      await OneSignalService().initialize();
+    }
+
+    // Initialize Local Notifications
+    if (!kIsWeb) {
+      tz.initializeTimeZones(); // Initialize timezone data
+    }
+    await LocalNotificationService.initialize();
+
+    // Initialize retention notification system
+    await LocalNotificationService.initializeRetentionSystem();
+
     print('✅ Core services initialized successfully');
   } catch (e) {
     throw InitializationException('Failed to initialize services', e);
@@ -147,7 +202,6 @@ Future<void> initializeAds() async {
 
   try {
     await MobileAds.instance.initialize();
-    await FacebookAudienceNetwork.init();
 
     final params = ConsentRequestParameters();
     ConsentInformation.instance.requestConsentInfoUpdate(
@@ -244,9 +298,9 @@ void main() {
     // Create provider container
     final container = ProviderContainer(overrides: overrides);
 
-    // For web, always start with initialization screen
-    // For mobile, use splash screen or initialization screen
-    final String initialRoute = '/initialization';
+    // For web, use initialization screen
+    // For mobile (iOS/Android), use splash screen
+    final String initialRoute = kIsWeb ? '/initialization' : '/splash';
 
     print('✅ App initialization completed');
     print('📱 Platform: ${kIsWeb ? 'Web' : 'Mobile'}');

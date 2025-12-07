@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../providers/auth_provider.dart';
+import '../providers/mobile_auth_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../services/subscription_sync_service.dart';
+import '../services/notification_automation_service.dart';
+// Only import html for web-specific functionality
+import 'package:universal_html/html.dart' as html show window;
 
 class InitializationScreen extends ConsumerStatefulWidget {
   const InitializationScreen({super.key});
@@ -49,7 +55,20 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
   void initState() {
     super.initState();
     _initializeAnimations();
-    _startInitialization();
+
+    // Add a longer delay for mobile web browsers
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (kIsWeb) {
+        // For mobile web, add extra delay to ensure everything is loaded
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) {
+            _startInitialization();
+          }
+        });
+      } else {
+        _startInitialization();
+      }
+    });
   }
 
   void _initializeAnimations() {
@@ -112,15 +131,24 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
 
   void _startInitialization() async {
     try {
-      // Step 1: Initial setup
-      await Future.delayed(const Duration(milliseconds: 800));
+      // CRITICAL SECURITY: Run startup cleanup immediately
+      if (kIsWeb) {
+        await SubscriptionSyncService.forceValidateSubscription();
+      }
+
+      // Step 1: Initial setup with longer delay for mobile browsers
+      await Future.delayed(const Duration(milliseconds: 1200));
       if (!mounted || _hasNavigated) return;
       _updateMessage(1);
 
       // Step 2: Check authentication
       await Future.delayed(const Duration(milliseconds: 1000));
       if (!mounted || _hasNavigated) return;
-      final authState = ref.read(authStateProvider);
+
+      // Use appropriate auth provider based on platform
+      final authState = kIsWeb
+          ? ref.read(authStateProvider)
+          : ref.read(mobileAuthStateProvider);
 
       await authState.when(
         data: (user) async {
@@ -129,50 +157,129 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
             _updateMessage(2);
             await Future.delayed(const Duration(milliseconds: 800));
 
-            // Step 3: Check subscription if user is signed in
+            // SECURITY: Force validate subscription to clean up any invalid local subscriptions
+            if (kIsWeb) {
+              print(
+                  '🛡️ Running security validation for existing subscriptions...');
+              await SubscriptionSyncService.forceValidateSubscription();
+            }
+
+            // Step 3: Check if user has active Stripe subscription
+            // This works for both new users AND after payment redirect
             _updateMessage(3);
+
+            // If coming from payment success (?payment=success),
+            // delay longer to allow Stripe webhook to process
+            final currentUrl = kIsWeb ? html.window.location.href : '';
+
+            if (currentUrl.contains('payment=success') ||
+                currentUrl.contains('payment_success=true') ||
+                currentUrl.contains('session_id=')) {
+              print(
+                  '💳 Payment success detected, waiting for Stripe webhook to process...');
+
+              // Wait longer for webhook - Stripe takes time to create the subscription
+              // Retry up to 5 times with 2-second intervals (10 seconds total)
+              for (int attempt = 1; attempt <= 5; attempt++) {
+                print('⏳ Checking subscription attempt $attempt/5...');
+
+                final hasSubscription = await SubscriptionSyncService
+                    .checkUnifiedSubscriptionStatus();
+
+                if (hasSubscription) {
+                  print(
+                      '✅ Subscription found on attempt $attempt! Payment verified.');
+                  break;
+                }
+
+                if (attempt < 5) {
+                  await Future.delayed(const Duration(seconds: 2));
+                }
+              }
+
+              // Clean URL to remove payment parameters
+              try {
+                html.window.history.replaceState(null, '', '/');
+              } catch (e) {
+                print('Note: Could not clean URL - $e');
+              }
+            }
+
             await Future.delayed(const Duration(milliseconds: 1000));
 
-            final subscriptionState = ref.read(subscriptionStatusProvider);
-            await subscriptionState.when(
-              data: (status) async {
-                _updateMessage(4);
-                await Future.delayed(const Duration(milliseconds: 800));
+            // For mobile: Initialize automated notifications and go to start screen
+            // Let Superwall handle subscription logic there
+            if (!kIsWeb) {
+              // Initialize automated notification system
+              try {
+                await NotificationAutomationService().initialize(user);
+                print('✅ Notification automation initialized for ${user.email}');
+              } catch (e) {
+                print('⚠️ Failed to initialize notification automation: $e');
+              }
 
-                if (!mounted || _hasNavigated) return;
+              _hasNavigated = true;
+              print(
+                  '📱 Mobile user authenticated → start screen (Superwall will handle subscription)');
+              await _navigateToScreen('/start');
+              return;
+            }
 
-                _hasNavigated = true;
-                if (status.isActive) {
-                  await _navigateToScreen('/thesis-form');
-                } else {
+            // For web: Check subscription status with Stripe
+            try {
+              final subscriptionState = ref.read(subscriptionStatusProvider);
+              await subscriptionState.when(
+                data: (status) async {
+                  _updateMessage(4);
+                  await Future.delayed(const Duration(milliseconds: 800));
+                  if (!mounted || _hasNavigated) return;
+
+                  _hasNavigated = true;
+                  if (status.isActive) {
+                    print(
+                        '✅ User ${user.email} has active subscription → main-navigation');
+                    await _navigateToScreen('/main-navigation');
+                  } else {
+                    print('❌ User ${user.email} has NO subscription → paywall');
+                    await _navigateToScreen('/paywall');
+                  }
+                },
+                loading: () async {
+                  // Wait a bit more for subscription to load on mobile web
+                  await Future.delayed(const Duration(milliseconds: 2000));
+
+                  if (!mounted || _hasNavigated) return;
+
+                  final isSubscribed = ref.read(isSubscribedProvider);
+                  _updateMessage(4);
+                  await Future.delayed(const Duration(milliseconds: 500));
+
+                  _hasNavigated = true;
+                  if (isSubscribed) {
+                    print(
+                        '✅ User ${user.email} subscription loaded → main-navigation');
+                    await _navigateToScreen('/main-navigation');
+                  } else {
+                    print('❌ User ${user.email} not subscribed → paywall');
+                    await _navigateToScreen('/paywall');
+                  }
+                },
+                error: (error, stack) async {
+                  print('❌ Subscription check error: $error');
+                  if (!mounted || _hasNavigated) return;
+
+                  _hasNavigated = true;
+                  // On error, go to paywall (safer choice)
+                  print('Subscription check failed, showing paywall');
                   await _navigateToScreen('/paywall');
-                }
-              },
-              loading: () async {
-                // Wait a bit more for subscription to load
-                await Future.delayed(const Duration(milliseconds: 1500));
-
-                if (!mounted || _hasNavigated) return;
-
-                final isSubscribed = ref.read(isSubscribedProvider);
-                _updateMessage(4);
-                await Future.delayed(const Duration(milliseconds: 500));
-
-                _hasNavigated = true;
-                if (isSubscribed) {
-                  await _navigateToScreen('/thesis-form');
-                } else {
-                  await _navigateToScreen('/paywall');
-                }
-              },
-              error: (error, stack) async {
-                if (!mounted || _hasNavigated) return;
-
-                _hasNavigated = true;
-                // On subscription error, go to paywall to retry
-                await _navigateToScreen('/paywall');
-              },
-            );
+                },
+              );
+            } catch (e) {
+              print('❌ Subscription provider error: $e');
+              if (!mounted || _hasNavigated) return;
+              _hasNavigated = true;
+              await _navigateToScreen('/paywall');
+            }
           } else {
             // User not signed in
             _updateMessage(2);
@@ -184,40 +291,55 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
             if (!mounted || _hasNavigated) return;
 
             _hasNavigated = true;
-            await _navigateToScreen('/signin');
+            // For mobile apps, go to onboarding flow
+            // For web, go to signin screen
+            final route = kIsWeb ? '/signin' : '/onboard';
+            print('❌ No authenticated user → $route');
+            await _navigateToScreen(route);
           }
         },
         loading: () async {
-          // Wait for auth to load
-          await Future.delayed(const Duration(milliseconds: 2000));
+          // Wait longer for auth to load on mobile browsers
+          await Future.delayed(const Duration(milliseconds: 3000));
 
           if (!mounted || _hasNavigated) return;
 
-          // If still loading after timeout, go to signin
+          // If still loading after timeout, go to signin or onboard based on platform
           _hasNavigated = true;
-          await _navigateToScreen('/signin');
+          final route = kIsWeb ? '/signin' : '/onboard';
+          print('⏱️ Auth loading timeout → $route');
+          await _navigateToScreen(route);
         },
         error: (error, stack) async {
+          print('❌ Auth error: $error');
           if (!mounted || _hasNavigated) return;
 
           _hasNavigated = true;
-          await _navigateToScreen('/signin');
+          final route = kIsWeb ? '/signin' : '/onboard';
+          print('Auth error, going to $route');
+          await _navigateToScreen(route);
         },
       );
     } catch (e) {
       print('❌ Initialization error: $e');
       if (mounted && !_hasNavigated) {
         _hasNavigated = true;
-        if (context.mounted) {
-          // Use a simpler error display
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Initialization failed. Please try again.'),
-              backgroundColor: Colors.red,
-            ),
-          );
+
+        if (kIsWeb) {
+          print('Web error detected, showing paywall');
+          await _navigateToScreen('/paywall');
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Initialization failed. Please try again.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          final route = kIsWeb ? '/signin' : '/onboard';
+          await _navigateToScreen(route);
         }
-        await _navigateToScreen('/signin');
       }
     }
   }

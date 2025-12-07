@@ -7,7 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/thesis.dart';
 import '../services/deepseek_service.dart';
 import '../services/firebase_user_service.dart';
-import '../services/notification_service.dart';
+import '../services/local_notification_service.dart';
+import '../services/onesignal_service.dart';
 
 /// Service for handling thesis generation in the background
 class BackgroundGenerationService {
@@ -293,11 +294,16 @@ class BackgroundGenerationService {
       print(
           'DEBUG: ✅ Thesis metadata updated to completed status successfully');
 
+      // Track thesis completion in OneSignal
+      try {
+        await OneSignalService().trackThesisCompleted(thesis.id);
+        print('✅ OneSignal: Thesis completion tracked');
+      } catch (e) {
+        print('⚠️ Failed to track thesis completion in OneSignal: $e');
+      }
+
       // Send completion notification
-      await NotificationService.instance.sendGenerationCompleteNotification(
-        thesis.topic,
-        thesis.id,
-      );
+      await LocalNotificationService.showThesisGenerationComplete();
     } catch (e) {
       print('Error in generation job $jobId: $e');
 
@@ -775,7 +781,9 @@ class BackgroundGenerationService {
             Map<String, List<String>> rowsMap = {};
             List<dynamic> rows = tableData['rows'] as List;
             for (int i = 0; i < rows.length; i++) {
-              rowsMap['row_$i'] = List<String>.from(rows[i]);
+              // Convert each cell value to string to avoid type errors
+              rowsMap['row_$i'] =
+                  (rows[i] as List).map((cell) => cell.toString()).toList();
             }
             firebaseTableData['rows'] = rowsMap;
           }
@@ -787,7 +795,28 @@ class BackgroundGenerationService {
         }
 
         if (graphData != null) {
-          subheadingGraphs[subheading] = graphData;
+          // Convert graph data to Firebase-compatible format (ensure all values are serializable)
+          Map<String, dynamic> firebaseGraphData = {
+            'caption': graphData['caption']?.toString() ?? '',
+            'type': graphData['type']?.toString() ?? '',
+            'xlabel': graphData['xlabel']?.toString() ?? '',
+            'ylabel': graphData['ylabel']?.toString() ?? '',
+            'source': graphData['source']?.toString() ?? '',
+          };
+
+          // Convert labels to list of strings
+          if (graphData['labels'] is List) {
+            firebaseGraphData['labels'] = List<String>.from(
+                (graphData['labels'] as List).map((e) => e.toString()));
+          }
+
+          // Convert data values to list of strings to avoid type errors
+          if (graphData['data'] is List) {
+            firebaseGraphData['data'] = List<String>.from(
+                (graphData['data'] as List).map((e) => e.toString()));
+          }
+
+          subheadingGraphs[subheading] = firebaseGraphData;
           if (graphCaption != null) {
             subheadingGraphCaptions[subheading] = graphCaption;
           }
@@ -936,7 +965,9 @@ class BackgroundGenerationService {
           Map<String, List<String>> rowsMap = {};
           List<dynamic> rows = tableData['rows'] as List;
           for (int i = 0; i < rows.length; i++) {
-            rowsMap['row_$i'] = List<String>.from(rows[i]);
+            // Convert each cell value to string to avoid type errors
+            rowsMap['row_$i'] =
+                (rows[i] as List).map((cell) => cell.toString()).toList();
           }
           firebaseTableData['rows'] = rowsMap;
         }
@@ -961,7 +992,29 @@ class BackgroundGenerationService {
         }
         final subheadingGraphs =
             chapter['subheadingGraphs'] as Map<String, dynamic>;
-        subheadingGraphs[subheading] = graphData;
+
+        // Convert graph data to local storage-compatible format (ensure all values are serializable)
+        Map<String, dynamic> localGraphData = {
+          'caption': graphData['caption']?.toString() ?? '',
+          'type': graphData['type']?.toString() ?? '',
+          'xlabel': graphData['xlabel']?.toString() ?? '',
+          'ylabel': graphData['ylabel']?.toString() ?? '',
+          'source': graphData['source']?.toString() ?? '',
+        };
+
+        // Convert labels to list of strings
+        if (graphData['labels'] is List) {
+          localGraphData['labels'] = List<String>.from(
+              (graphData['labels'] as List).map((e) => e.toString()));
+        }
+
+        // Convert data values to list of strings to avoid type errors
+        if (graphData['data'] is List) {
+          localGraphData['data'] = List<String>.from(
+              (graphData['data'] as List).map((e) => e.toString()));
+        }
+
+        subheadingGraphs[subheading] = localGraphData;
 
         if (graphCaption != null) {
           if (!chapter.containsKey('subheadingGraphCaptions') ||

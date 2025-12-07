@@ -1,0 +1,405 @@
+workflows:
+  ios-workflow:
+    name: iOS Thesis Generator Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    triggering:
+      events:
+        - push
+        - tag
+        - pull_request
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+        - pattern: 'develop'
+          include: true
+          source: true
+        - pattern: 'release/*'
+          include: true
+          source: true
+      tag_patterns:
+        - pattern: 'v*.*.*'
+          include: true
+        - pattern: 'ios-v*'
+          include: true
+      cancel_previous_builds: true
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.thesis.generator.ai
+      vars:
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        APP_STORE_ID: "6739264844"
+        # OneSignal configuration
+        ONESIGNAL_APP_ID: "4b4333e8-9e9d-4636-974b-b7950b3341d2"
+        # Add your API keys as environment variables in CodeMagic dashboard
+        # DEEPSEEK_API_KEY: (set in CodeMagic dashboard)
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Clean macOS metadata files
+        script: |
+          echo "🧹 Cleaning macOS metadata files..."
+          find . -name "._*" -type f -delete
+          find . -name ".DS_Store" -type f -delete
+          echo "✅ Cleanup complete"
+          
+      - name: Set up environment files
+        script: |
+          echo "⚙️ Setting up environment files..."
+          # Create .env file if API keys are provided
+          if [ -n "$DEEPSEEK_API_KEY" ]; then
+            echo "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY" > .env
+            echo "✅ DEEPSEEK_API_KEY configured"
+          fi
+          if [ -n "$ONESIGNAL_APP_ID" ]; then
+            echo "ONESIGNAL_APP_ID=$ONESIGNAL_APP_ID" >> .env
+            echo "✅ ONESIGNAL_APP_ID configured"
+          fi
+          
+      - name: Verify Firebase config files
+        script: |
+          echo "🔥 Verifying Firebase configuration..."
+          if [ -f "ios/Runner/GoogleService-Info.plist" ]; then
+            echo "✅ GoogleService-Info.plist found"
+            ls -la ios/Runner/GoogleService-Info.plist
+          else
+            echo "❌ Error: GoogleService-Info.plist not found"
+            echo "Please add GoogleService-Info.plist to your repository in ios/Runner/"
+            exit 1
+          fi
+          
+          if [ -f "android/app/google-services.json" ]; then
+            echo "✅ google-services.json found for Android"
+          else
+            echo "⚠️ Warning: google-services.json not found for Android"
+          fi
+          
+      - name: Set up keychain
+        script: |
+          echo "🔐 Setting up keychain..."
+          keychain initialize
+          
+      - name: Fetch signing files
+        script: |
+          echo "📝 Fetching signing files..."
+          app-store-connect fetch-signing-files "com.thesis.generator.ai" \
+            --type IOS_APP_STORE \
+            --create
+            
+      - name: Add certificates to keychain
+        script: |
+          echo "🔑 Adding certificates to keychain..."
+          keychain add-certificates
+          
+      - name: Set up code signing settings
+        script: |
+          echo "✍️ Setting up code signing..."
+          xcode-project use-profiles
+          
+      - name: Verify code signing setup
+        script: |
+          echo "🔍 Verifying code signing configuration..."
+          security find-identity -v -p codesigning
+          echo "📋 Checking provisioning profiles..."
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found in default location"
+          
+      - name: Get Flutter packages
+        script: |
+          echo "📦 Getting Flutter packages..."
+          flutter --version
+          flutter pub get
+          
+      - name: Clean iOS build artifacts
+        script: |
+          echo "🧹 Cleaning iOS build artifacts..."
+          cd ios
+          rm -rf Pods Podfile.lock .symlinks
+          cd ..
+          flutter clean
+          
+      - name: Install CocoaPods dependencies
+        script: |
+          echo "📲 Installing CocoaPods dependencies..."
+          cd ios
+          pod --version
+          pod repo update
+          # Install all pods
+          pod install --repo-update --verbose
+          cd ..
+          
+      - name: Flutter analyze
+        script: |
+          echo "🔍 Running Flutter analyze..."
+          flutter analyze --no-fatal-infos || true
+          
+      - name: Create export options
+        script: |
+          echo "📄 Creating export options..."
+          cat > $HOME/export_options.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>destination</key>
+            <string>upload</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>\$TEAM_ID</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.thesis.generator.ai</key>
+              <string>\$PROVISIONING_PROFILE_SPECIFIER</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
+          echo "✅ Export options created"
+          cat $HOME/export_options.plist
+          
+      - name: Increment build number
+        script: |
+          echo "🔢 Incrementing build number..."
+          cd ios
+          agvtool new-version -all $(($(date +%s)/100))
+          cd ..
+          
+      - name: Flutter build iOS
+        script: |
+          echo "🏗️ Building iOS app..."
+          flutter build ipa --release \
+            --export-options-plist=$HOME/export_options.plist \
+            --build-number=$BUILD_NUMBER
+            
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+      
+    publishing:
+      email:
+        recipients:
+          - anaskay.13@gmail.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - App Store Connect Users
+        submit_to_app_store: false
+
+  android-workflow:
+    name: Android Thesis Generator Workflow
+    max_build_duration: 120
+    instance_type: linux_x2
+    triggering:
+      events:
+        - push
+        - tag
+        - pull_request
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+        - pattern: 'develop'
+          include: true
+          source: true
+        - pattern: 'release/*'
+          include: true
+          source: true
+      tag_patterns:
+        - pattern: 'v*.*.*'
+          include: true
+        - pattern: 'android-v*'
+          include: true
+      cancel_previous_builds: true
+    environment:
+      android_signing:
+        - keystore_reference
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: "com.thesis.generator.ai"
+        # OneSignal configuration
+        ONESIGNAL_APP_ID: "4b4333e8-9e9d-4636-974b-b7950b3341d2"
+      flutter: stable
+      java: 17
+      
+    scripts:
+      - name: Set up environment files
+        script: |
+          echo "⚙️ Setting up environment files..."
+          # Create .env file
+          if [ -n "$DEEPSEEK_API_KEY" ]; then
+            echo "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY" > .env
+            echo "✅ DEEPSEEK_API_KEY configured"
+          fi
+          if [ -n "$ONESIGNAL_APP_ID" ]; then
+            echo "ONESIGNAL_APP_ID=$ONESIGNAL_APP_ID" >> .env
+            echo "✅ ONESIGNAL_APP_ID configured"
+          fi
+          
+      - name: Verify Firebase configuration
+        script: |
+          echo "🔥 Verifying Firebase configuration..."
+          if [ -f "android/app/google-services.json" ]; then
+            echo "✅ google-services.json found"
+            ls -la android/app/google-services.json
+          else
+            echo "❌ Error: google-services.json not found"
+            echo "Please add google-services.json to your repository in android/app/"
+            exit 1
+          fi
+          
+      - name: Set up local.properties
+        script: |
+          echo "📝 Setting up local.properties..."
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" >> "$CM_BUILD_DIR/android/local.properties"
+          cat "$CM_BUILD_DIR/android/local.properties"
+          
+      - name: Get Flutter packages
+        script: |
+          echo "📦 Getting Flutter packages..."
+          flutter --version
+          flutter pub get
+          
+      - name: Flutter analyze
+        script: |
+          echo "🔍 Running Flutter analyze..."
+          flutter analyze --no-fatal-infos || true
+          
+      - name: Run tests
+        script: |
+          echo "🧪 Running tests..."
+          flutter test || echo "⚠️ Some tests failed, continuing..."
+          
+      - name: Build Android APK
+        script: |
+          echo "🏗️ Building Android APK..."
+          flutter build apk --release \
+            --build-number=$BUILD_NUMBER
+            
+      - name: Build Android App Bundle
+        script: |
+          echo "🏗️ Building Android App Bundle (AAB)..."
+          flutter build appbundle --release \
+            --build-number=$BUILD_NUMBER
+            
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+      - flutter_drive.log
+      
+    publishing:
+      email:
+        recipients:
+          - anaskay.13@gmail.com
+        notify:
+          success: true
+          failure: true
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+        changes_not_sent_for_review: true
+        in_app_update_priority: 0
+
+  # Combined workflow for building both platforms
+  build-all:
+    name: Build iOS & Android
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v*.*.*'
+          include: true
+      cancel_previous_builds: true
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.thesis.generator.ai
+      android_signing:
+        - keystore_reference
+      groups:
+        - google_play
+      vars:
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        PACKAGE_NAME: "com.thesis.generator.ai"
+        ONESIGNAL_APP_ID: "4b4333e8-9e9d-4636-974b-b7950b3341d2"
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      java: 17
+      
+    scripts:
+      - name: Setup environment
+        script: |
+          echo "🚀 Setting up build environment..."
+          flutter --version
+          if [ -n "$DEEPSEEK_API_KEY" ]; then
+            echo "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY" > .env
+          fi
+          if [ -n "$ONESIGNAL_APP_ID" ]; then
+            echo "ONESIGNAL_APP_ID=$ONESIGNAL_APP_ID" >> .env
+          fi
+          
+      - name: Get packages
+        script: |
+          flutter pub get
+          
+      - name: Build Android
+        script: |
+          echo "🤖 Building Android..."
+          flutter build appbundle --release --build-number=$BUILD_NUMBER
+          flutter build apk --release --build-number=$BUILD_NUMBER
+          
+      - name: Build iOS
+        script: |
+          echo "🍎 Building iOS..."
+          keychain initialize
+          app-store-connect fetch-signing-files "com.thesis.generator.ai" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+          cd ios && pod install && cd ..
+          flutter build ipa --release --build-number=$BUILD_NUMBER
+          
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/*.apk
+      - build/ios/ipa/*.ipa
+      
+    publishing:
+      email:
+        recipients:
+          - anaskay.13@gmail.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true

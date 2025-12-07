@@ -1,5 +1,5 @@
 const express = require('express');
-const stripe = require('stripe')('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'); // Replace with your secret key
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Use environment variable
 const admin = require('firebase-admin');
 const app = express();
 

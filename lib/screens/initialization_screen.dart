@@ -6,7 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/mobile_auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../services/subscription_sync_service.dart';
-// import '../services/notification_automation_service.dart'; // Temporarily disabled due to syntax errors
+import '../services/notification_automation_service.dart';
 // Only import html for web-specific functionality
 import 'package:universal_html/html.dart' as html show window;
 
@@ -211,13 +211,12 @@ class _InitializationScreenState extends ConsumerState<InitializationScreen>
             // Let Superwall handle subscription logic there
             if (!kIsWeb) {
               // Initialize automated notification system
-              // Temporarily disabled due to syntax errors in notification_automation_service.dart
-              // try {
-              //   await NotificationAutomationService().initialize(user);
-              //   print('✅ Notification automation initialized for ${user.email}');
-              // } catch (e) {
-              //   print('⚠️ Failed to initialize notification automation: $e');
-              // }
+              try {
+                await NotificationAutomationService().initialize(user);
+                print('✅ Notification automation initialized for ${user.email}');
+              } catch (e) {
+                print('⚠️ Failed to initialize notification automation: $e');
+              }
 
               _hasNavigated = true;
               print(

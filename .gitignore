@@ -47,6 +47,20 @@ build/Release
 # Dependency directories
 node_modules/
 
+# macOS metadata files
+._*
+.DS_Store
+
+# Unnecessary directories
+functions/
+thesis-web-email/
+thesis-web-email-2/
+api/
+
+# Build directories
+build/
+.dart_tool/
+
 # Optional npm cache directory
 .npm
 
@@ -67,3 +81,4 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+.vercel

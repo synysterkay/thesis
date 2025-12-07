@@ -34,6 +34,44 @@ class MobileAuthService {
   // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  // Handle Firebase Auth exceptions - Defined at top to avoid forward reference errors
+  String _handleAuthException(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'No account found with this email';
+      case 'wrong-password':
+        return 'Incorrect password';
+      case 'invalid-email':
+        return 'Invalid email address';
+      case 'user-disabled':
+        return 'This account has been disabled';
+      case 'too-many-requests':
+        return 'Too many failed attempts. Please try again later';
+      case 'operation-not-allowed':
+        return 'This sign-in method is not enabled';
+      case 'email-already-in-use':
+        return 'An account already exists with this email';
+      case 'weak-password':
+        return 'Password should be at least 6 characters';
+      case 'invalid-credential':
+        return 'Invalid credentials. Please try again';
+      case 'account-exists-with-different-credential':
+        return 'An account already exists with the same email but different sign-in method';
+      case 'requires-recent-login':
+        return 'This operation requires recent authentication. Please sign in again';
+      case 'credential-already-in-use':
+        return 'This credential is already associated with a different account';
+      case 'invalid-verification-code':
+        return 'Invalid verification code';
+      case 'invalid-verification-id':
+        return 'Invalid verification ID';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection';
+      default:
+        return e.message ?? 'Authentication failed. Please try again';
+    }
+  }
+
   // Sign in with email and password
   Future<User?> signInWithEmail(String email, String password) async {
     try {
@@ -53,6 +91,11 @@ class MobileAuthService {
     } catch (e) {
       throw Exception('Sign in failed: ${e.toString()}');
     }
+  }
+
+  // Sign up with email and password
+  Future<User?> signUpWithEmail(String email, String password) async {
+    try {
       final UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -62,11 +105,6 @@ class MobileAuthService {
       if (result.user != null) {
         await OneSignalService().setUser(result.user!);
       }
-
-      return result.user;l result = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
 
       return result.user;
     } on FirebaseAuthException catch (e) {
@@ -198,6 +236,11 @@ class MobileAuthService {
       print('🍎 Apple credential received');
 
       // Create an OAuthCredential from the credential returned by Apple
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
       // Sign in to Firebase with the Apple credential
       final UserCredential result =
           await _auth.signInWithCredential(oauthCredential);
@@ -206,11 +249,6 @@ class MobileAuthService {
       if (result.user != null) {
         await OneSignalService().setUser(result.user!);
       }
-
-      // Update display name if this is a new user and we have the name from Apple
-      if (result.additionalUserInfo?.isNewUser ?? false) {
-      final UserCredential result =
-          await _auth.signInWithCredential(oauthCredential);
 
       // Update display name if this is a new user and we have the name from Apple
       if (result.additionalUserInfo?.isNewUser ?? false) {
@@ -244,6 +282,7 @@ class MobileAuthService {
       } else if (errorStr.contains('failed')) {
         throw Exception('Apple Sign-In failed. Please try again');
       }
+      throw Exception('Apple sign-in error: ${e.toString()}');
     }
   }
 
@@ -352,43 +391,5 @@ class MobileAuthService {
   // Reload current user
   Future<void> reloadUser() async {
     await _auth.currentUser?.reload();
-  }
-
-  // Handle Firebase Auth exceptions
-  String _handleAuthException(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'user-not-found':
-        return 'No account found with this email';
-      case 'wrong-password':
-        return 'Incorrect password';
-      case 'invalid-email':
-        return 'Invalid email address';
-      case 'user-disabled':
-        return 'This account has been disabled';
-      case 'too-many-requests':
-        return 'Too many failed attempts. Please try again later';
-      case 'operation-not-allowed':
-        return 'This sign-in method is not enabled';
-      case 'email-already-in-use':
-        return 'An account already exists with this email';
-      case 'weak-password':
-        return 'Password should be at least 6 characters';
-      case 'invalid-credential':
-        return 'Invalid credentials. Please try again';
-      case 'account-exists-with-different-credential':
-        return 'An account already exists with the same email but different sign-in method';
-      case 'requires-recent-login':
-        return 'This operation requires recent authentication. Please sign in again';
-      case 'credential-already-in-use':
-        return 'This credential is already associated with a different account';
-      case 'invalid-verification-code':
-        return 'Invalid verification code';
-      case 'invalid-verification-id':
-        return 'Invalid verification ID';
-      case 'network-request-failed':
-        return 'Network error. Please check your internet connection';
-      default:
-        return e.message ?? 'Authentication failed. Please try again';
-    }
   }
 }
